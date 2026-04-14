@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <style name="CustomTabLayout" parent="Widget.Material3.TabLayout">
+        <item name="tabIndicator">@drawable/tab_indicator</item>
+        <item name="tabIndicatorFullWidth">false</item>
+        <item name="tabIndicatorAnimationDuration">200</item>
+
+        <item name="tabTextColor">#80FFFFFF</item>
+        <item name="tabSelectedTextColor">@android:color/white</item>
+
+        <item name="tabRippleColor">@android:color/transparent</item>
+    </style>
+
+    <style name="CustomTabText" parent="TextAppearance.Material3.LabelLarge">
+        <item name="android:textSize">14sp</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:textAllCaps">false</item>
+    </style>
+
+    <style name="BottomNavTextActive"
+        parent="TextAppearance.Material3.LabelMedium">
+        <item name="android:textSize">10sp</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:fontFamily">@font/tiktoksans_semibold</item>
+        <item name="android:includeFontPadding">false</item>
+    </style>
+
+    <style name="BottomNavTextInactive"
+        parent="TextAppearance.Material3.LabelMedium">
+        <item name="android:textSize">10sp</item>
+        <item name="android:fontFamily">@font/tiktoksans_regular</item>
+        <item name="android:includeFontPadding">false</item>
+    </style>
+
+    <style name="MyTabText" parent="TextAppearance.Design.Tab">
+        <item name="textAllCaps">false</item>
+        <item name="android:textSize">18sp</item>
+        <item name="android:fontFamily">@font/tiktoksans_regular</item>
+    </style>
+
+    <style name="BottomSheetNoScrim" parent="Theme.Design.Light.BottomSheetDialog">
+        <item name="android:backgroundDimEnabled">false</item>
+        <!--<item name="bottomSheetStyle">@style/RoundedBottomSheetStyle</item>-->
+    </style>
+
+    <!--<style name="RoundedBottomSheetStyle" parent="Widget.Design.BottomSheet.Modal">
+        <item name="shapeAppearanceOverlay">@style/RoundedBottomSheetShape</item>
+    </style>
+
+    <style name="RoundedBottomSheetShape">
+        <item name="cornerFamily">rounded</item>
+        <item name="cornerSizeTopLeft">20dp</item>
+        <item name="cornerSizeTopRight">20dp</item>
+        <item name="cornerSizeBottomLeft">0dp</item>
+        <item name="cornerSizeBottomRight">0dp</item>
+    </style>-->
+
+
+
+</resources>

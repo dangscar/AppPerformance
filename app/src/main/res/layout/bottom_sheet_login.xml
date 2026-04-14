@@ -1,0 +1,138 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical">
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="12dp"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        android:id="@+id/csl_action">
+        <ImageView
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:src="@drawable/ic_close"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"/>
+        <ImageView
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:src="@drawable/ic_help"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent"/>
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <LinearLayout
+        android:id="@+id/ll_input"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        app:layout_constraintTop_toBottomOf="@id/csl_action"
+        app:layout_constraintStart_toStartOf="parent"
+        >
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Sign up for TikTok"
+            android:textColor="@color/black"
+            android:fontFamily="@font/tiktoksans_bold"
+            android:textAlignment="center"
+            android:textSize="24sp"
+            android:layout_margin="8dp"/>
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Create a profile, follow other accounts, make your own videos and more"
+            android:textColor="@color/black"
+            android:fontFamily="@font/tiktoksans_light"
+            android:textAlignment="center"
+            android:textSize="12sp"
+            android:layout_marginHorizontal="24dp"/>
+
+
+        <com.google.android.material.textfield.TextInputEditText
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:inputType="textEmailAddress"
+            android:textSize="13sp"
+            android:hint="Email or username"
+            android:fontFamily="@font/tiktoksans_regular"
+            android:textColorHint="#63000000"
+            android:layout_marginHorizontal="12dp"
+            android:layout_marginVertical="4dp"
+            android:id="@+id/edtEmail"
+            android:text="user@gmail.com"/>
+
+        <com.google.android.material.textfield.TextInputEditText
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:inputType="textPassword"
+            android:textSize="13sp"
+            android:hint="Password"
+            android:fontFamily="@font/tiktoksans_regular"
+            android:textColorHint="#63000000"
+            android:layout_marginHorizontal="12dp"
+            android:layout_marginVertical="4dp"
+            android:id="@+id/edtPassword"
+            android:text="12345678"/>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Forgot password?"
+            android:textColor="@color/black"
+            android:fontFamily="@font/tiktoksans_bold"
+            android:textAlignment="center"
+            android:textSize="13sp"
+            android:layout_marginHorizontal="12dp"
+            android:layout_marginVertical="4dp"/>
+
+        <Button
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_margin="12dp"
+            android:background="@drawable/bg_round_pink"
+            android:text="Log in"
+            android:textColor="@color/white"
+            android:fontFamily="@font/tiktoksans_semibold"
+            android:textAllCaps="false"
+            android:id="@+id/btnLogin"/>
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/ll_info"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:gravity="center">
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Don't have an account?"
+            android:textColor="@color/black"
+            android:fontFamily="@font/tiktoksans_semibold"
+            android:textAlignment="center"
+            android:textSize="13sp"
+            android:layout_margin="2dp"/>
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Sign up"
+            android:textColor="#ED4D4D"
+            android:fontFamily="@font/tiktoksans_semibold"
+            android:textAlignment="center"
+            android:textSize="13sp"
+            android:layout_margin="2dp"/>
+    </LinearLayout>
+
+
+</androidx.constraintlayout.widget.ConstraintLayout>

@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/nav_graph2"
+    app:startDestination="@id/SearchFragment">
+
+    <fragment
+        android:id="@+id/SearchFragment"
+        android:name="com.nlhd.appperformance.Fragment.SearchFragment"
+        android:label="@string/first_fragment_label"
+        tools:layout="@layout/fragment_search">
+        <action
+            android:id="@+id/action_SearchFragment_to_SearchSuccessFragment"
+            app:destination="@id/SearchSuccessFragment" />
+    </fragment>
+    <fragment
+        android:id="@+id/SearchSuccessFragment"
+        android:name="com.nlhd.appperformance.Fragment.SearchSuccessFragment"
+        android:label="@string/second_fragment_label"
+        tools:layout="@layout/fragment_search_success">
+        <action
+            android:id="@+id/action_SearchSuccessFragment_to_SearchFragment"
+            app:destination="@id/SearchFragment" />
+        <argument
+            android:name="keyword"
+            app:argType="string" />
+    </fragment>
+</navigation>

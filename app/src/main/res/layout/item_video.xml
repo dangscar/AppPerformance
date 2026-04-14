@@ -1,0 +1,419 @@
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <androidx.media3.ui.AspectRatioFrameLayout
+        android:id="@+id/aspectLayout"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        app:resize_mode="fit">
+        <androidx.media3.ui.PlayerView
+            app:resize_mode="fit"
+            android:id="@+id/playerView"
+            app:use_controller="false"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_gravity="center"
+            android:scaleType="centerCrop"
+            android:background="@color/black"
+            app:surface_type="texture_view"/>
+        <ImageView
+            android:id="@+id/iv_playPause"
+            android:layout_width="80dp"
+            android:layout_height="80dp"
+            android:src="@drawable/ic_play"
+            app:tint="#4CFFFFFF"
+            android:layout_gravity="center"
+            android:visibility="invisible"/>
+    </androidx.media3.ui.AspectRatioFrameLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+        <View
+            android:id="@+id/playSpeedLeft"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="0.2"/>
+        <View
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="0.6"/>
+        <View
+            android:id="@+id/playSpeedRight"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="0.2"/>
+    </LinearLayout>
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <!-- Right actions -->
+        <LinearLayout
+            android:id="@+id/actionColumn"
+            android:orientation="vertical"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="8dp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintBottom_toTopOf="@id/ll_bottomAction"
+            android:gravity="center">
+
+            <!-- Avatar -->
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="16dp">
+
+                <com.google.android.material.imageview.ShapeableImageView
+                    android:id="@+id/iv_avatar"
+                    android:layout_width="42dp"
+                    android:layout_height="42dp"
+                    android:background="@drawable/bg_circle"
+                    android:clipToOutline="true"
+                    android:scaleType="centerCrop"
+                    android:src="@drawable/asus"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:shapeAppearanceOverlay="@style/CircleImage" />
+                <FrameLayout
+                    android:id="@+id/fl_following"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    app:layout_constraintBottom_toBottomOf="@id/iv_avatar"
+                    app:layout_constraintStart_toStartOf="@id/iv_avatar"
+                    app:layout_constraintEnd_toEndOf="@id/iv_avatar"
+                    app:layout_constraintTop_toBottomOf="@id/iv_avatar"
+                    android:background="@drawable/bg_add_red_circle"
+                    android:padding="3dp">
+                    <com.google.android.material.imageview.ShapeableImageView
+                        android:layout_width="18dp"
+                        android:layout_height="18dp"
+                        android:src="@drawable/ic_add"
+                        android:tint="@color/white" />
+                </FrameLayout>
+
+            </androidx.constraintlayout.widget.ConstraintLayout>
+
+            <!-- Like -->
+            <LinearLayout
+                android:id="@+id/ll_like"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:gravity="center"
+                android:layout_marginBottom="12dp">
+
+                <ImageView
+                    android:id="@+id/btnLike"
+                    android:layout_width="35dp"
+                    android:layout_height="35dp"
+                    android:src="@drawable/ic_heart"
+                    android:scaleType="fitXY"/>
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/txtLike"
+                    android:text="12.3K"
+                    android:textColor="@android:color/white"
+                    android:textSize="12sp"
+                    android:fontFamily="@font/tiktoksans_semibold"/>
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:gravity="center"
+                android:layout_marginBottom="12dp"
+                android:id="@+id/ll_comment">
+
+                <ImageView
+                    android:layout_width="36dp"
+                    android:layout_height="32dp"
+                    android:src="@drawable/ic_chat"
+                    android:scaleType="centerCrop"/>
+
+                <TextView
+                    android:id="@+id/txtComment"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="345"
+                    android:textColor="@android:color/white"
+                    android:textSize="12sp"
+                    android:fontFamily="@font/tiktoksans_semibold"/>
+            </LinearLayout>
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:gravity="center"
+                android:layout_marginBottom="12dp">
+
+                <ImageView
+                    android:layout_width="32dp"
+                    android:layout_height="32dp"
+                    android:src="@drawable/ic_bookmark"
+                    android:scaleType="centerCrop"/>
+
+                <TextView
+                    android:id="@+id/txtFavorite"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="345"
+                    android:textColor="@android:color/white"
+                    android:textSize="12sp"
+                    android:fontFamily="@font/tiktoksans_semibold"/>
+            </LinearLayout>
+            <LinearLayout
+                android:id="@+id/ll_share"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:gravity="center"
+                android:layout_marginBottom="12dp">
+
+                <ImageView
+                    android:layout_width="32dp"
+                    android:layout_height="32dp"
+                    android:src="@drawable/ic_share"/>
+
+                <TextView
+                    android:id="@+id/txtShare"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="345"
+                    android:textColor="@android:color/white"
+                    android:textSize="12sp"
+                    android:fontFamily="@font/tiktoksans_semibold"/>
+            </LinearLayout>
+            <FrameLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="8dp">
+
+                <com.google.android.material.imageview.ShapeableImageView
+                    android:layout_width="42dp"
+                    android:layout_height="42dp"
+                    android:background="@drawable/bg_circle"
+                    android:clipToOutline="true"
+                    android:scaleType="centerCrop"
+                    android:src="@drawable/iv_music"
+                    app:shapeAppearanceOverlay="@style/CircleImage"/>
+            </FrameLayout>
+            <!-- Avatar, Like, Comment, Share -->
+        </LinearLayout>
+
+
+        <LinearLayout
+            android:id="@+id/bottomInfo"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:layout_marginStart="12dp"
+            android:layout_marginEnd="80dp"
+            android:layout_marginBottom="4dp"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintBottom_toTopOf="@id/ll_bottomAction"
+            app:layout_constraintEnd_toStartOf="@id/actionColumn">
+
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:background="@drawable/bg_border_button_ui_black"
+                android:gravity="start|center_vertical"
+                android:layout_marginBottom="4dp">
+
+                <com.google.android.material.imageview.ShapeableImageView
+                    android:id="@+id/iv_capcut"
+                    android:layout_width="70dp"
+                    android:layout_height="20dp"
+                    android:src="@drawable/capcut"
+                    android:tint="@color/white"
+                    android:layout_marginVertical="5dp"
+                    android:layout_marginStart="7dp"/>
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="•"
+                    android:textColor="@android:color/white"
+                    android:textSize="11sp"
+                    android:fontFamily="@font/tiktoksans_semibold"
+                    android:layout_marginStart="7dp"
+                    android:includeFontPadding="false"
+                    android:maxLines="1"
+                    />
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Thử mẫu này"
+                    android:textColor="@android:color/white"
+                    android:textSize="12sp"
+                    android:fontFamily="@font/tiktoksans_semibold"
+                    android:layout_marginStart="7dp"
+                    android:layout_marginEnd="7dp"
+                    android:includeFontPadding="false"
+                    android:maxLines="1"/>
+            </LinearLayout>
+
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+
+                <!-- Username -->
+                <TextView
+                    android:id="@+id/txtUsername"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:text="Dangktx2026"
+                    android:textColor="@android:color/white"
+                    android:textSize="16sp"
+                    android:textStyle="bold"
+                    android:maxLines="1"
+                    android:ellipsize="end"
+                    android:fontFamily="@font/tiktoksans_bold"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:layout_constraintBottom_toBottomOf="parent"/>
+
+                <!-- Time -->
+                <TextView
+                    android:id="@+id/txtDot"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:text=" • "
+                    android:textColor="#83FAFAFA"
+                    android:maxLines="1"
+                    app:layout_constraintStart_toEndOf="@id/txtUsername"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:layout_constraintBottom_toBottomOf="parent"/>
+                <!-- Time -->
+                <TextView
+                    android:id="@+id/txtTime"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:text="2 giờ trước"
+                    android:textColor="#83FAFAFA"
+                    android:textSize="14sp"
+                    android:maxLines="1"
+                    android:ellipsize="end"
+                    android:fontFamily="@font/tiktoksans_semibold"
+                    app:layout_constraintStart_toEndOf="@id/txtDot"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"/>
+
+            </androidx.constraintlayout.widget.ConstraintLayout>
+
+
+            <!-- Description -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/txtDescription"
+                android:text="Mô tả video ở đây..."
+                android:textColor="@color/white"
+                android:textSize="14sp"
+                android:maxLines="2"
+                android:ellipsize="end"
+                android:layout_marginTop="4dp"
+                android:fontFamily="@font/tiktoksans_regular"/>
+
+            <!-- Music -->
+            <!--<LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:layout_marginTop="6dp">
+
+                <ImageView
+                    android:layout_width="13dp"
+                    android:layout_height="13dp"
+                    android:src="@drawable/ic_music"
+                    app:tint="#E6FAFAFA" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/txtMusic"
+                    android:text="Tên bài hát - Tên nghệ sĩ"
+                    android:textColor="#E6FAFAFA"
+                    android:textSize="13sp"
+                    android:layout_marginStart="6dp"
+                    android:singleLine="true"
+                    android:ellipsize="marquee"
+                    android:marqueeRepeatLimit="marquee_forever"
+                    android:focusable="true"
+                    android:focusableInTouchMode="true"
+                    android:fontFamily="@font/tiktoksans_regular" />
+            </LinearLayout>-->
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/ll_bottomAction"
+            android:orientation="vertical"
+            android:background="@color/black"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent">
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="#1F1F1F"
+                android:padding="8dp"
+                android:gravity="center_vertical">
+                <com.google.android.material.imageview.ShapeableImageView
+                    android:id="@+id/iv_search"
+                    android:layout_width="16dp"
+                    android:layout_height="16dp"
+                    android:src="@drawable/ic_search"
+                    android:tint="@color/white" />
+                <TextView
+                    android:id="@+id/txtContent"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Tìm kiếm : Nhạc hay mỗi ngày"
+                    android:textColor="@android:color/white"
+                    android:textSize="12sp"
+                    android:fontFamily="@font/tiktoksans_semibold"
+                    android:layout_marginStart="4dp"
+                    android:maxLines="1"
+                    android:ellipsize="end"
+                    android:layout_weight="0.8"
+                    android:includeFontPadding="false"/>
+                <com.google.android.material.imageview.ShapeableImageView
+                    android:id="@+id/iv_next"
+                    android:layout_width="16dp"
+                    android:layout_height="16dp"
+                    android:src="@drawable/ic_forward"
+                    android:tint="@color/white"/>
+            </LinearLayout>
+            <androidx.media3.ui.DefaultTimeBar
+                android:layout_gravity="bottom"
+                android:id="@+id/seekBar"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:paddingHorizontal="4dp"
+                app:scrubber_enabled_size="4dp"
+                app:scrubber_dragged_size="10dp"
+                app:touch_target_height="10dp"
+                app:bar_height="1.5dp"
+                app:scrubber_color="#FFFFFF"
+                />
+        </LinearLayout>
+
+
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+
+</FrameLayout>

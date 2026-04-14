@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- res/drawable/splash_logo.xml -->
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <!-- Background -->
+    <item android:drawable="@android:color/black"/>
+
+    <!-- Logo -->
+    <item
+        android:top="80dp"> <!-- 👈 chỉnh vị trí ở đây -->
+
+        <bitmap
+            android:src="@drawable/logo"
+            android:gravity="center_horizontal"/>
+    </item>
+
+</layer-list>

@@ -1,0 +1,407 @@
+package com.nlhd.appperformance.Activity
+
+import android.annotation.SuppressLint
+import android.content.res.Configuration
+import android.os.Bundle
+import android.util.Log
+import android.view.View
+import android.widget.Button
+import android.widget.ImageView
+import android.widget.LinearLayout
+import android.widget.TextView
+import androidx.activity.OnBackPressedCallback
+import androidx.activity.enableEdgeToEdge
+import androidx.activity.viewModels
+import androidx.annotation.OptIn
+import androidx.appcompat.app.AppCompatActivity
+import androidx.cardview.widget.CardView
+import androidx.core.content.ContextCompat
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowCompat
+import androidx.core.view.WindowInsetsCompat
+import androidx.core.view.WindowInsetsControllerCompat
+import androidx.lifecycle.lifecycleScope
+import androidx.media3.common.Player
+import androidx.media3.common.util.UnstableApi
+import androidx.media3.exoplayer.ExoPlayer
+import androidx.media3.exoplayer.source.DefaultMediaSourceFactory
+import androidx.media3.ui.AspectRatioFrameLayout
+import androidx.media3.ui.PlayerView
+import androidx.paging.LoadState
+import androidx.recyclerview.widget.RecyclerView
+import androidx.viewpager2.widget.ViewPager2
+import com.airbnb.lottie.LottieAnimationView
+import com.google.android.material.appbar.MaterialToolbar
+import com.nlhd.appperformance.Adapter.LoadingAdapter
+import com.nlhd.appperformance.Adapter.VideoStorePagerAdapter
+import com.nlhd.appperformance.BottomSheet.BottomSheetInputComment
+import com.nlhd.appperformance.BottomSheet.CommentBottomSheet
+import com.nlhd.appperformance.R
+import com.nlhd.appperformance.ViewModel.CommentViewModel
+import com.nlhd.appperformance.ViewModel.VideoStoreViewModel
+import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.launch
+import javax.inject.Inject
+import kotlin.getValue
+@UnstableApi
+@AndroidEntryPoint
+class VideoStoreActivity : AppCompatActivity() {
+    private lateinit var adapter: VideoStorePagerAdapter
+    private lateinit var viewPager: ViewPager2
+    private lateinit var searchContainer: LinearLayout
+    private lateinit var ivBack: ImageView
+    private lateinit var bottomComment: CardView
+    private lateinit var toolbar: MaterialToolbar
+    private lateinit var loadingView: LottieAnimationView
+    private lateinit var errorButton: Button
+    private lateinit var playerView: PlayerView
+
+    val viewModel: VideoStoreViewModel by viewModels()
+    private val commentViewModel: CommentViewModel by viewModels()
+
+    @Inject
+    lateinit var players: MutableMap<Int, ExoPlayer>
+
+    @Inject
+    lateinit var defaultMediaSourceFactory: DefaultMediaSourceFactory
+
+    private lateinit var commentBottomSheet: CommentBottomSheet
+
+    private var isOnPageSelected = false
+    val bottomSheetInput = BottomSheetInputComment(text ="",onChangeText = {}, onDone = {})
+    @SuppressLint("MissingInflatedId")
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        enableEdgeToEdge()
+        setContentView(R.layout.activity_video_store)
+
+        val isLandscape = resources.configuration.orientation == Configuration.ORIENTATION_LANDSCAPE
+        window.statusBarColor = ContextCompat.getColor(this, R.color.black)
+        window.navigationBarColor = ContextCompat.getColor(this, R.color.black)
+        WindowCompat.setDecorFitsSystemWindows(window, false)
+        WindowCompat.getInsetsController(window, window.decorView).isAppearanceLightStatusBars = false
+        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main)) { v, insets ->
+            val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
+            val cutout = insets.getInsets(WindowInsetsCompat.Type.displayCutout())
+            v.setPadding(maxOf(systemBars.left, cutout.left), systemBars.top, systemBars.right, systemBars.bottom)
+            insets
+        }
+
+        val controller = WindowInsetsControllerCompat(window, window.decorView)
+        if (isLandscape) {
+            controller.hide(WindowInsetsCompat.Type.statusBars())
+            controller.systemBarsBehavior = WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
+        }
+
+        toolbar = findViewById(R.id.topBar)
+        viewPager = findViewById(R.id.viewPagerDetail)
+        searchContainer = findViewById(R.id.searchContainer)
+        ivBack = findViewById(R.id.ivBackDetail)
+        bottomComment = findViewById(R.id.bottomBar)
+        loadingView = findViewById(R.id.loadingView)
+        errorButton = findViewById(R.id.errorView)
+        playerView = findViewById(R.id.playerViewStore)
+
+        val btnPlay = playerView.findViewById<ImageView>(R.id.exo_play)
+        val btnPause = playerView.findViewById<ImageView>(R.id.exo_pause)
+        val btnBack = playerView.findViewById<ImageView>(R.id.exo_back)
+        val tv_titlePv = playerView.findViewById<TextView>(R.id.tv_titlePv)
+
+
+
+        bottomComment.visibility = if (isLandscape) View.GONE else View.VISIBLE
+        searchContainer.visibility = if (isLandscape) View.GONE else View.VISIBLE
+        ivBack.visibility = if (isLandscape) View.GONE else View.VISIBLE
+
+        if (viewModel.isCurrentItem.value == false) {
+            players.values.forEach { player ->
+                player.stop()
+                player.clearMediaItems()
+                player.release()
+            }
+            players.clear()
+        }
+
+        //Khi vào list video
+        viewPager.post {
+            val position = intent.getIntExtra("position", 0)
+            if (viewModel.isCurrentItem.value == false) {
+                viewPager.setCurrentItem(position, false)
+                viewModel.setCurrentItem(true)
+            }
+        }
+
+        //BottomSheet
+        commentBottomSheet = CommentBottomSheet(
+            viewModel = commentViewModel,
+            onChangeBottomSheet = { width, height, offsetY ->
+                viewPager.post {
+                    val currentPosition = viewModel.currentPosition.value ?: 0
+                    val holder = (viewPager.getChildAt(0) as RecyclerView).findViewHolderForAdapterPosition(currentPosition) as? VideoStorePagerAdapter.VideoViewHolder
+                    if (holder == null) return@post
+                    val density = holder.binding.playerView.resources.displayMetrics.density
+                    val aspectRatio = holder.binding.playerView.width.toFloat() / holder.binding.playerView.height.toFloat()
+                    val offset = offsetY   // [-1 .. 0]
+                    val maxScale = 1f
+                    val minScale = 0.12f + (aspectRatio * 0.8f)
+
+                    val screenHeight= resources.configuration.screenHeightDp
+                    val sheetHeight = height / density
+                    val sheetVisible =   (sheetHeight / screenHeight)
+                    val targetScale = (maxScale - (sheetVisible.coerceAtMost(0.6f) / 0.6f) * (maxScale - minScale))
+                    val progress = (1f + offset).coerceIn(0f, 1f)
+                    val scale = 1f - (1f - minScale) * progress
+
+                    holder.binding.playerView.apply {
+                        pivotY = width / 3f
+                        scaleX = scale
+                        scaleY = scale
+
+                        val delta = height - height * scale
+                        translationY = -delta / 2f
+                        resizeMode = AspectRatioFrameLayout.RESIZE_MODE_FIT
+                    }
+
+                    if (offset != -1f) {
+                        toolbar.alpha = 0f
+                        bottomComment.alpha = 0f
+                        holder.binding.apply {
+                            actionColumn.alpha = 0f
+                            bottomInfo.alpha = 0f
+                            llBottomAction.alpha = 0f
+                        }
+                        window.navigationBarColor =
+                            ContextCompat.getColor(this, R.color.white)
+                    }
+                }
+            },
+            onDismiss = {
+                window.navigationBarColor =
+                    ContextCompat.getColor(this, R.color.black)
+
+                val currentPosition = viewModel.currentPosition.value ?: 0
+                val holder = (viewPager.getChildAt(0) as RecyclerView).findViewHolderForAdapterPosition(currentPosition) as? VideoStorePagerAdapter.VideoViewHolder
+                toolbar.alpha = 1f
+                bottomComment.alpha = 1f
+                holder!!.binding.apply {
+                    actionColumn.alpha = 1f
+                    bottomInfo.alpha = 1f
+                    llBottomAction.alpha = 1f
+                }
+            },
+            onChangeComponent = {}
+        )
+
+        //Adapter
+        adapter = VideoStorePagerAdapter(
+            this,
+            defaultMediaSourceFactory,
+            players = players,
+            onClickComment = {
+                commentBottomSheet.show(
+                    supportFragmentManager,
+                    CommentBottomSheet::class.java.simpleName
+                )
+            }
+        )
+
+        //Lấy dữ liệu paging adapter từ viewmodel
+        observeViewModel()
+
+        //Setup viewPager2
+        if (!isLandscape) {
+            playerView.visibility = View.GONE
+            viewPager.adapter = adapter.withLoadStateFooter(
+                footer = LoadingAdapter {adapter.retry() }
+            )
+            viewPager.orientation = ViewPager2.ORIENTATION_VERTICAL
+            adapter.resetAllPlayerExceptPos(viewModel.currentPosition.value ?: 0)
+            viewPager.registerOnPageChangeCallback(object :
+                ViewPager2.OnPageChangeCallback() {
+                override fun onPageSelected(position: Int) {
+                    super.onPageSelected(position)
+                    if (position >= adapter.itemCount) return
+                    if (!players.contains(position)) adapter.createPlayer(position)
+                    val holder = (viewPager.getChildAt(0) as RecyclerView).findViewHolderForAdapterPosition(position) as? VideoStorePagerAdapter.VideoViewHolder
+                    val player = players[position]
+                    val currentPosition = viewModel.currentPosition.value ?: 0
+                    if (holder != null && player != null) {
+                        holder.binding.playerView.player = player
+                        adapter.setupTimeBar(holder, player)
+                    }
+                    if (position != currentPosition) {
+                        adapter.seekToStart(position)
+                        Log.d("AAA", "Seek $position")
+                    }
+                    isOnPageSelected = true
+                    viewModel.setCurrentPosition(position)
+                    adapter.handlePlayerState(position)
+
+                    //Lấy thông tin video
+                    val info = adapter.getViewPage(position)
+                    viewModel.setInfoVideo(info)
+
+                    adapter.updateCurrentPosition(position)
+
+                    /*val runtime = Runtime.getRuntime()
+
+                    val usedMemory = (runtime.totalMemory() - runtime.freeMemory()) / 1024 / 1024
+                    val maxMemory = runtime.maxMemory() / 1024 / 1024
+                    val totalMemory = runtime.totalMemory() / 1024 / 1024
+
+                    Log.d("AAA", "Used: ${usedMemory}MB")
+                    Log.d("AAA", "Total: ${totalMemory}MB")
+                    Log.d("AAA", "Max: ${maxMemory}MB")*/
+                }
+                override fun onPageScrollStateChanged(state: Int) {
+                    super.onPageScrollStateChanged(state)
+                    val currentPosition = viewModel.currentPosition.value ?: 0
+                    val holder = (viewPager.getChildAt(0) as RecyclerView).findViewHolderForAdapterPosition(currentPosition) as? VideoStorePagerAdapter.VideoViewHolder
+                    if (holder == null) return
+                    holder.binding.apply {
+                        if (state == ViewPager2.SCROLL_STATE_DRAGGING) {
+                            actionColumn.alpha = 0.4f
+                            bottomInfo.alpha = 0.4f
+                            llBottomAction.alpha = 0.4f
+                        } else {
+                            actionColumn.alpha = 1f
+                            bottomInfo.alpha = 1f
+                            llBottomAction.alpha = 1f
+                        }
+                    }
+                }
+            })
+
+            val recyclerView = viewPager.getChildAt(0) as RecyclerView
+            recyclerView.overScrollMode = View.OVER_SCROLL_NEVER
+            recyclerView.clipToPadding = true
+
+            recyclerView.addOnScrollListener(object : RecyclerView.OnScrollListener() {
+
+                override fun onScrolled(rv: RecyclerView, dx: Int, dy: Int) {
+                    val pageWidth = viewPager.width
+                    val currentOffset = rv.computeHorizontalScrollOffset()
+                    val currentPage = viewPager.currentItem
+
+                    val minOffset = (currentPage - 1) * pageWidth
+                    val maxOffset = (currentPage + 1) * pageWidth
+
+                    if (currentOffset < minOffset) {
+                        rv.scrollBy(minOffset - currentOffset, 0)
+                    } else if (currentOffset > maxOffset) {
+                        rv.scrollBy(maxOffset - currentOffset, 0)
+                    }
+                }
+            })
+
+            adapter.addLoadStateListener { loadStates ->
+                val isLoading = loadStates.refresh is LoadState.Loading
+                val isError = loadStates.refresh is LoadState.Error
+                loadingView.visibility = if (isLoading) View.VISIBLE else View.GONE
+                errorButton.visibility = if (isError) View.VISIBLE else View.GONE
+            }
+
+            errorButton.setOnClickListener {
+                adapter.retry()
+            }
+
+        } else {
+            val currentPosition = viewModel.currentPosition.value ?: 0
+            val player = players[currentPosition]
+            playerView.visibility = View.VISIBLE
+            playerView.controllerShowTimeoutMs = 2500
+            playerView.player = player
+            player?.addListener(object : Player.Listener {
+                override fun onIsPlayingChanged(isPlaying: Boolean) {
+                    super.onIsPlayingChanged(isPlaying)
+                    if (isPlaying) {
+                        btnPlay.visibility = View.GONE
+                        btnPause.visibility = View.VISIBLE
+                    } else {
+                        btnPlay.visibility = View.VISIBLE
+                        btnPause.visibility = View.GONE
+                    }
+                }
+            })
+
+            btnPlay.setOnClickListener {
+                player?.play()
+            }
+            btnPause.setOnClickListener {
+                player?.pause()
+            }
+            viewModel.infoVideo.observe(this) {
+                tv_titlePv.text = it
+            }
+            /*btnBack.setOnClickListener {
+                requireActivity().requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
+            }*/
+        }
+
+        //Click bottomSheetComment
+        bottomComment.setOnClickListener {
+            commentBottomSheet.show(
+                supportFragmentManager,
+                CommentBottomSheet::class.java.simpleName
+            )
+            bottomSheetInput.show(
+                supportFragmentManager,
+                BottomSheetInputComment::class.java.simpleName
+            )
+        }
+
+        //Nút back
+        ivBack.setOnClickListener {
+            if (::adapter.isInitialized) {
+                adapter.releaseAllPlayers()
+            }
+            finish()
+            overridePendingTransition(
+                R.anim.slide_in_left,
+                R.anim.slide_out_right
+            )
+        }
+
+        //Nút backPress
+        onBackPressedDispatcher.addCallback(this, object : OnBackPressedCallback(true) {
+            override fun handleOnBackPressed() {
+                if (::adapter.isInitialized) {
+                    adapter.releaseAllPlayers()
+                }
+                finish()
+                overridePendingTransition(
+                    R.anim.slide_in_left,
+                    R.anim.slide_out_right
+                )
+            }
+
+        })
+    }
+    @OptIn(UnstableApi::class)
+    private fun observeViewModel() {
+        lifecycleScope.launch {
+            viewModel.videoStore.collectLatest { pagingData ->
+                adapter.submitData(pagingData)
+            }
+        }
+    }
+    override fun onPause() {
+        super.onPause()
+        val currentPosition = viewModel.currentPosition.value ?: 0
+        adapter.pause(currentPosition)
+    }
+    override fun onStart() {
+        super.onStart()
+        val currentPosition = viewModel.currentPosition.value ?: 0
+        val isLandscape = resources.configuration.orientation == Configuration.ORIENTATION_LANDSCAPE
+        if (isOnPageSelected && !isLandscape) {
+            adapter.createPlayer(currentPosition)
+            val holder = (viewPager.getChildAt(0) as RecyclerView).findViewHolderForAdapterPosition(viewModel.currentPosition.value ?: 0) as? VideoStorePagerAdapter.VideoViewHolder ?: return
+            holder.binding.playerView.player = players[viewModel.currentPosition.value ?: 0]
+            adapter.handlePlayerState(viewModel.currentPosition.value ?: 0)
+            adapter.setupTimeBar(holder, players[viewModel.currentPosition.value ?: 0]!!)
+        }
+        adapter.play(currentPosition)
+    }
+}

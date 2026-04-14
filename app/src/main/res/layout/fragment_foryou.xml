@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    tools:context=".Fragment.ForYouFragment">
+
+    <androidx.viewpager2.widget.ViewPager2
+        android:id="@+id/viewPager"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:background="@android:color/transparent"
+        android:overScrollMode="never"
+    />
+
+    <androidx.media3.ui.PlayerView
+        app:resize_mode="fit"
+        android:id="@+id/playerViewlc"
+        app:use_controller="true"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_gravity="center"
+        android:scaleType="centerCrop"
+        android:background="@color/black"
+        app:surface_type="texture_view"
+        android:visibility="gone"
+        app:controller_layout_id="@layout/layout_custom_controller"
+        app:show_timeout="3000"
+        app:auto_show="false"/>
+
+    <com.airbnb.lottie.LottieAnimationView
+        android:id="@+id/loadingView"
+        android:layout_width="50dp"
+        android:layout_height="50dp"
+        android:layout_gravity="center"
+        app:lottie_rawRes="@raw/loading"
+        app:lottie_autoPlay="true"
+        app:lottie_loop="true"
+        android:visibility="gone"/>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_gravity="center"
+        android:orientation="vertical"
+        android:gravity="center_horizontal"
+        android:id="@+id/ll_error"
+        android:visibility="gone">
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:gravity="center"
+            android:layout_weight="5">
+            <ImageView
+                android:layout_width="60dp"
+                android:layout_height="60dp"
+                android:src="@drawable/ic_refresh"
+                android:background="@null"
+                app:tint="@color/white"
+                android:layout_margin="12dp"/>
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="No internet connection. Tap to retry"
+                android:textColor="@color/white"
+                android:fontFamily="@font/tiktoksans_semibold"
+                android:textSize="16sp"
+                android:layout_margin="12dp"/>
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Connect to the internet and try again"
+                android:textColor="@color/white"
+                android:fontFamily="@font/tiktoksans_regular"
+                android:textSize="14sp"
+                android:layout_margin="12dp"/>
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_weight="5"
+            android:gravity="center">
+            <Button
+                android:id="@+id/errorView"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Vui lòng thử lại"
+                android:layout_marginHorizontal="48dp"
+                android:textColor="@color/white"
+                android:paddingHorizontal="8dp"
+                android:background="@drawable/bg_border_button_ui_black"
+                android:visibility="visible"
+                android:fontFamily="@font/tiktoksans_semibold"
+                android:textAllCaps="false"/>
+        </LinearLayout>
+
+    </LinearLayout>
+
+    <!--<Button
+        android:id="@+id/btn_refresh"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Refresh"
+        android:layout_gravity="center"/>-->
+
+
+
+</FrameLayout>

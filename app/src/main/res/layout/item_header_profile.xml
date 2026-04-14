@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@color/white"
+    android:orientation="vertical"
+    android:gravity="center_horizontal">
+
+    <ImageView
+        android:layout_width="100dp"
+        android:layout_height="100dp"
+        android:src="@drawable/asus"
+        android:background="@drawable/bg_circle"
+        android:clipToOutline="true"/>
+
+    <TextView
+        android:id="@+id/txtUsername"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="So"
+        android:textStyle="bold"
+        android:textSize="18sp"
+        android:layout_marginTop="8dp"
+        android:textColor="@color/black"
+        android:fontFamily="@font/tiktoksans_bold"/>
+
+    <TextView
+        android:id="@+id/txtUsername2"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Sokt304"
+        android:fontFamily="@font/tiktoksans_semibold"
+        android:textSize="14sp"
+        android:textColor="#686464"/>
+</LinearLayout>

@@ -1,0 +1,183 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/rv_emoji"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        android:orientation="horizontal"
+        android:layout_marginHorizontal="10dp"
+        android:layout_marginVertical="2dp"/>
+    <LinearLayout
+        android:id="@+id/ll_actionComment"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center_horizontal"
+        android:padding="10dp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/rv_emoji">
+        <ImageView
+            android:id="@+id/iv_avatar"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:background="@drawable/bg_circle"
+            android:contentDescription="AAA"
+            android:clipToOutline="true"
+            android:src="@drawable/asus" />
+        <androidx.cardview.widget.CardView
+            android:id="@+id/bottomBarComment"
+            android:layout_width="match_parent"
+            android:layout_height="70dp"
+            android:layout_marginStart="12dp"
+            android:backgroundTint="#F1F1F1"
+            app:cardCornerRadius="18dp"
+            app:cardElevation="0dp"
+            app:strokeWidth="1dp"
+            app:strokeColor="#1F1F1F">
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:padding="12dp">
+
+                <!-- EDIT TEXT -->
+                <EditText
+                    android:id="@+id/edtInputComment"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:layout_gravity="top"
+
+                    android:background="@null"
+                    android:hint="Thêm bình luận..."
+                    android:textSize="13sp"
+                    android:textColor="#000000"
+                    android:textColorHint="#B3858282"
+                    android:textCursorDrawable="@drawable/cursor"
+                    android:singleLine="true"
+                    android:ellipsize="end"
+                    android:scrollHorizontally="true"
+
+                    android:focusable="true"
+                    android:focusableInTouchMode="true"
+                    android:cursorVisible="true"
+                    android:fontFamily="@font/tiktoksans_regular"
+                    android:imeOptions="actionDone"/>
+
+            </LinearLayout>
+
+        </androidx.cardview.widget.CardView>
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/ll_actionComment"
+        android:gravity="center_vertical"
+        android:paddingBottom="8dp">
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="7">
+            <ImageView
+                android:id="@+id/ivEmoji"
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:layout_marginStart="16dp"
+                android:src="@drawable/ic_emoji"
+                app:tint="@color/black"/>
+
+            <!-- MENTION -->
+            <ImageView
+                android:id="@+id/ivMention"
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:layout_marginStart="16dp"
+                android:src="@drawable/ic_tag"
+                app:tint="@color/black"/>
+        </LinearLayout>
+        <ImageButton
+            android:id="@+id/bt_post"
+            android:layout_width="46dp"
+            android:layout_height="30dp"
+            android:background="@drawable/bg_round_pink"
+            android:src="@drawable/ic_arrow_forward"
+            android:layout_alignParentEnd="true"
+            android:layout_centerVertical="true"
+            android:scaleType="center"
+            android:contentDescription="Up"
+            app:tint="@color/white"
+            android:layout_marginEnd="16dp" />
+    </LinearLayout>
+
+
+
+
+    <!--<RelativeLayout
+        android:id="@+id/ll_actionInput"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        android:gravity="center_vertical"
+        android:layout_marginHorizontal="12dp">
+
+        <ImageButton
+            android:id="@+id/bt_post"
+            android:layout_width="52dp"
+            android:layout_height="36dp"
+            android:background="@drawable/bg_round_pink"
+            android:src="@drawable/ic_arrow_forward"
+            android:layout_alignParentEnd="true"
+            android:layout_centerVertical="true"
+            android:scaleType="center"
+            android:padding="6dp"
+            android:contentDescription="Up"
+            android:elevation="4dp"
+            android:layout_marginEnd="12dp"
+            android:layout_marginTop="12dp"
+            android:layout_marginBottom="12dp"
+            app:tint="@color/white" />
+
+
+        <ImageView
+            android:id="@+id/ivMention"
+            android:layout_width="20dp"
+            android:layout_height="20dp"
+            android:layout_toStartOf="@id/bt_post"
+            android:layout_marginEnd="16dp"
+            android:src="@drawable/ic_tag"
+            android:layout_centerVertical="true"/>
+
+        <ImageView
+            android:id="@+id/ivEmoji"
+            android:layout_width="20dp"
+            android:layout_height="20dp"
+            android:layout_toStartOf="@id/ivMention"
+            android:layout_marginEnd="16dp"
+            android:src="@drawable/ic_emoji"
+            android:layout_centerVertical="true"/>
+
+
+        <ImageView
+            android:id="@+id/ivImage"
+            android:layout_width="20dp"
+            android:layout_height="20dp"
+            android:layout_marginEnd="16dp"
+            android:layout_toStartOf="@+id/ivEmoji"
+            android:src="@drawable/ic_image"
+            android:layout_centerVertical="true"/>
+
+    </RelativeLayout>-->
+
+</androidx.constraintlayout.widget.ConstraintLayout>
