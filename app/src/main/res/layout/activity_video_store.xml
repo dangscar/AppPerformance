@@ -81,8 +81,10 @@
         android:layout_width="match_parent"
         android:layout_height="56dp"
         android:elevation="0dp"
-        android:stateListAnimator="@null"
         android:paddingHorizontal="12dp"
+        android:stateListAnimator="@null"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
         tools:ignore="MissingConstraints">
 
         <androidx.constraintlayout.widget.ConstraintLayout
@@ -95,10 +97,10 @@
                 android:layout_width="24dp"
                 android:layout_height="24dp"
                 android:src="@drawable/ic_back"
-                app:tint="@android:color/white"
+                app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent"
-                app:layout_constraintBottom_toBottomOf="parent" />
+                app:tint="@android:color/white" />
 
             <!-- SEARCH CONTAINER -->
             <LinearLayout
@@ -112,18 +114,18 @@
                 android:orientation="horizontal"
                 android:paddingHorizontal="8dp"
                 android:paddingVertical="8dp"
-                app:layout_constraintStart_toEndOf="@id/ivBackDetail"
+                app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintTop_toTopOf="parent"
-                app:layout_constraintBottom_toBottomOf="parent">
+                app:layout_constraintStart_toEndOf="@id/ivBackDetail"
+                app:layout_constraintTop_toTopOf="parent">
 
                 <!-- SEARCH ICON -->
                 <ImageView
-                    android:layout_width="16dp"
-                    android:layout_height="16dp"
+                    android:layout_width="18dp"
+                    android:layout_height="18dp"
+                    android:layout_marginStart="4dp"
                     android:src="@drawable/ic_search"
-                    app:tint="@color/white"
-                    android:layout_marginStart="4dp"/>
+                    app:tint="@color/white" />
 
                 <!-- EDIT TEXT -->
                 <EditText
@@ -133,39 +135,40 @@
                     android:layout_marginStart="6dp"
                     android:layout_weight="1"
                     android:background="@null"
-                    android:maxLines="1"
-                    android:singleLine="true"
+                    android:clickable="true"
+                    android:cursorVisible="false"
                     android:ellipsize="end"
-                    android:hint="Tìm nội dung liên quan"
-                    android:textSize="14sp"
-                    android:textColor="@android:color/white"
-                    android:textColorHint="@android:color/white"
-                    android:fontFamily="@font/tiktoksans_semibold"
                     android:focusable="false"
                     android:focusableInTouchMode="false"
-                    android:cursorVisible="false"
+                    android:fontFamily="@font/tiktoksans_semibold"
+                    android:hint="Tìm nội dung liên quan"
+                    android:includeFontPadding="false"
                     android:longClickable="false"
+                    android:maxLines="1"
+                    android:singleLine="true"
+                    android:textColor="@android:color/white"
+                    android:textColorHint="@android:color/white"
                     android:textIsSelectable="false"
-                    android:clickable="true"
-                    android:includeFontPadding="false"/>
+                    android:textSize="14sp" />
 
                 <!-- DIVIDER -->
                 <View
                     android:layout_width="1dp"
                     android:layout_height="15dp"
-                    android:layout_marginHorizontal="10dp"
-                    android:background="#4CFFFFFF"/>
+                    android:layout_marginHorizontal="6dp"
+                    android:background="#4CFFFFFF" />
 
                 <!-- SEARCH TEXT -->
                 <TextView
                     android:id="@+id/tvSearch"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:layout_marginHorizontal="6dp"
+                    android:fontFamily="@font/tiktoksans_semibold"
                     android:text="Tìm kiếm"
-                    android:textSize="14sp"
-                    android:textStyle="bold"
                     android:textColor="@android:color/white"
-                    android:layout_marginHorizontal="2dp"/>
+                    android:textSize="14sp"
+                    android:textStyle="bold" />
 
             </LinearLayout>
 

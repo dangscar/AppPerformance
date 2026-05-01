@@ -119,8 +119,8 @@
 
                 <!-- SEARCH ICON -->
                 <ImageView
-                    android:layout_width="16dp"
-                    android:layout_height="16dp"
+                    android:layout_width="18dp"
+                    android:layout_height="18dp"
                     android:src="@drawable/ic_search"
                     app:tint="@color/white"
                     android:layout_marginStart="4dp"/>
@@ -153,7 +153,7 @@
                 <View
                     android:layout_width="1dp"
                     android:layout_height="15dp"
-                    android:layout_marginHorizontal="10dp"
+                    android:layout_marginHorizontal="6dp"
                     android:background="#4CFFFFFF"/>
 
                 <!-- SEARCH TEXT -->
@@ -165,7 +165,8 @@
                     android:textSize="14sp"
                     android:textStyle="bold"
                     android:textColor="@android:color/white"
-                    android:layout_marginHorizontal="2dp"/>
+                    android:layout_marginHorizontal="6dp"
+                    android:fontFamily="@font/tiktoksans_semibold"/>
 
             </LinearLayout>
 

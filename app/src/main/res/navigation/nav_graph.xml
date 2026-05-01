@@ -20,6 +20,12 @@
         />
 
     <fragment
+        android:id="@+id/inboxFragment"
+        android:name="com.nlhd.appperformance.Fragment.InboxFragment"
+        android:label="Inbox"
+        />
+
+    <fragment
         android:id="@+id/profileFragment"
         android:name="com.nlhd.appperformance.Fragment.ProfileFragment"
         android:label="Profile"

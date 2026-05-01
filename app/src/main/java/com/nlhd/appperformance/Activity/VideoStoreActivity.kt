@@ -2,9 +2,12 @@ package com.nlhd.appperformance.Activity
 
 import android.annotation.SuppressLint
 import android.content.res.Configuration
+import android.content.res.Resources
+import android.graphics.Color
 import android.os.Bundle
 import android.util.Log
 import android.view.View
+import android.view.ViewGroup
 import android.widget.Button
 import android.widget.ImageView
 import android.widget.LinearLayout
@@ -20,6 +23,7 @@ import androidx.core.view.ViewCompat
 import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
+import androidx.core.view.updateLayoutParams
 import androidx.lifecycle.lifecycleScope
 import androidx.media3.common.Player
 import androidx.media3.common.util.UnstableApi
@@ -69,6 +73,10 @@ class VideoStoreActivity : AppCompatActivity() {
     private lateinit var commentBottomSheet: CommentBottomSheet
 
     private var isOnPageSelected = false
+    private var statusBarHeight = 0
+    fun Int.dpToPx(): Int {
+        return (this * Resources.getSystem().displayMetrics.density).toInt()
+    }
     val bottomSheetInput = BottomSheetInputComment(text ="",onChangeText = {}, onDone = {})
     @SuppressLint("MissingInflatedId")
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -77,16 +85,17 @@ class VideoStoreActivity : AppCompatActivity() {
         setContentView(R.layout.activity_video_store)
 
         val isLandscape = resources.configuration.orientation == Configuration.ORIENTATION_LANDSCAPE
-        window.statusBarColor = ContextCompat.getColor(this, R.color.black)
+        //window.statusBarColor = ContextCompat.getColor(this, R.color.black)
         window.navigationBarColor = ContextCompat.getColor(this, R.color.black)
         WindowCompat.setDecorFitsSystemWindows(window, false)
         WindowCompat.getInsetsController(window, window.decorView).isAppearanceLightStatusBars = false
-        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main)) { v, insets ->
-            val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
-            val cutout = insets.getInsets(WindowInsetsCompat.Type.displayCutout())
-            v.setPadding(maxOf(systemBars.left, cutout.left), systemBars.top, systemBars.right, systemBars.bottom)
-            insets
-        }
+//        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main)) { v, insets ->
+//            val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
+//            val cutout = insets.getInsets(WindowInsetsCompat.Type.displayCutout())
+//            v.setPadding(maxOf(systemBars.left, cutout.left), systemBars.top, systemBars.right, systemBars.bottom)
+//            insets
+//        }
+
 
         val controller = WindowInsetsControllerCompat(window, window.decorView)
         if (isLandscape) {
@@ -108,7 +117,18 @@ class VideoStoreActivity : AppCompatActivity() {
         val btnBack = playerView.findViewById<ImageView>(R.id.exo_back)
         val tv_titlePv = playerView.findViewById<TextView>(R.id.tv_titlePv)
 
+        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main)) { v, insets ->
+            val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
+            statusBarHeight = systemBars.top
 
+            toolbar.updateLayoutParams<ViewGroup.MarginLayoutParams> {
+                topMargin = systemBars.top
+            }
+            bottomComment.updateLayoutParams<ViewGroup.MarginLayoutParams> {
+                bottomMargin = systemBars.bottom
+            }
+            insets
+        }
 
         bottomComment.visibility = if (isLandscape) View.GONE else View.VISIBLE
         searchContainer.visibility = if (isLandscape) View.GONE else View.VISIBLE
@@ -144,7 +164,7 @@ class VideoStoreActivity : AppCompatActivity() {
                     val aspectRatio = holder.binding.playerView.width.toFloat() / holder.binding.playerView.height.toFloat()
                     val offset = offsetY   // [-1 .. 0]
                     val maxScale = 1f
-                    val minScale = 0.12f + (aspectRatio * 0.8f)
+                    val minScale = 0.16f + (aspectRatio * 0.8f)
 
                     val screenHeight= resources.configuration.screenHeightDp
                     val sheetHeight = height / density
@@ -159,7 +179,7 @@ class VideoStoreActivity : AppCompatActivity() {
                         scaleY = scale
 
                         val delta = height - height * scale
-                        translationY = -delta / 2f
+                        translationY = -delta / 2f + statusBarHeight * progress * 0.25f
                         resizeMode = AspectRatioFrameLayout.RESIZE_MODE_FIT
                     }
 
@@ -171,14 +191,14 @@ class VideoStoreActivity : AppCompatActivity() {
                             bottomInfo.alpha = 0f
                             llBottomAction.alpha = 0f
                         }
-                        window.navigationBarColor =
-                            ContextCompat.getColor(this, R.color.white)
+                        window.navigationBarColor = ContextCompat.getColor(this, R.color.white)
+                        window.statusBarColor = Color.BLACK
                     }
                 }
             },
             onDismiss = {
-                window.navigationBarColor =
-                    ContextCompat.getColor(this, R.color.black)
+                window.navigationBarColor = ContextCompat.getColor(this, R.color.black)
+                window.statusBarColor = Color.TRANSPARENT
 
                 val currentPosition = viewModel.currentPosition.value ?: 0
                 val holder = (viewPager.getChildAt(0) as RecyclerView).findViewHolderForAdapterPosition(currentPosition) as? VideoStorePagerAdapter.VideoViewHolder
@@ -232,7 +252,6 @@ class VideoStoreActivity : AppCompatActivity() {
                     }
                     if (position != currentPosition) {
                         adapter.seekToStart(position)
-                        Log.d("AAA", "Seek $position")
                     }
                     isOnPageSelected = true
                     viewModel.setCurrentPosition(position)

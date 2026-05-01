@@ -5,20 +5,28 @@ import android.animation.AnimatorListenerAdapter
 import android.animation.ValueAnimator
 import android.app.Dialog
 import android.content.DialogInterface
+import android.content.Intent
+import android.content.res.ColorStateList
 import android.content.res.Resources
+import android.graphics.Color
 import android.os.Bundle
 import android.util.Log
+import android.view.Gravity
 import android.view.LayoutInflater
+import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
 import android.view.ViewTreeObserver
+import android.view.WindowManager
 import android.widget.Button
 import android.widget.EditText
+import android.widget.FrameLayout
 import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.cardview.widget.CardView
 import androidx.core.content.ContextCompat
+import androidx.core.view.doOnNextLayout
 import androidx.fragment.app.viewModels
 import androidx.interpolator.view.animation.FastOutSlowInInterpolator
 import androidx.lifecycle.Lifecycle
@@ -36,6 +44,7 @@ import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import com.google.android.material.shape.CornerFamily
 import com.google.android.material.shape.MaterialShapeDrawable
 import com.google.android.material.shape.ShapeAppearanceModel
+import com.nlhd.appperformance.Activity.SearchActivity
 import com.nlhd.appperformance.Adapter.CommentPagerAdapter
 import com.nlhd.appperformance.Feature.LoginScreen.LoginBottomSheet
 import com.nlhd.appperformance.R
@@ -80,10 +89,41 @@ class CommentBottomSheet(
     ): View? {
         return inflater.inflate(R.layout.bottom_sheet_comment, container, false)
     }
+    // Extension
+    fun Int.dpToPx(): Int = (this * Resources.getSystem().displayMetrics.density).toInt()
 
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
         val dialog = super.onCreateDialog(savedInstanceState)
         dialog.setOnShowListener {
+            dialog?.window?.apply {
+                setFlags(
+                    WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL,
+                    WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL
+                )
+                clearFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND)
+
+                val decorView = decorView as? ViewGroup ?: return@apply
+                if (decorView.findViewWithTag<View>("search_icon") != null) return@apply
+
+                val ivSearch = ImageView(requireContext()).apply {
+                    tag = "search_icon"
+                    setImageResource(R.drawable.ic_search)
+                    imageTintList = ColorStateList.valueOf(Color.TRANSPARENT)
+                    layoutParams = FrameLayout.LayoutParams(
+                        28.dpToPx(), 28.dpToPx()
+                    ).apply {
+                        gravity = Gravity.TOP or Gravity.END
+                        topMargin = 12.dpToPx()
+                        marginEnd = 14.dpToPx()
+                    }
+                    setOnClickListener {
+                        val intent = Intent(requireActivity(),SearchActivity::class.java)
+                        startActivity(intent)
+                    }
+                }
+                decorView.addView(ivSearch)
+            }
+
             val bottomSheet =
                 dialog.findViewById<View>(
                     com.google.android.material.R.id.design_bottom_sheet
@@ -102,8 +142,17 @@ class CommentBottomSheet(
 
             behavior = BottomSheetBehavior.from(sheet)
             behavior.state = BottomSheetBehavior.STATE_EXPANDED
-
             behavior.addBottomSheetCallback(bottomSheetCallback)
+
+            // Lấy view scrim (vùng tối bên ngoài)
+            val scrim = dialog.window?.decorView?.findViewById<View>(
+                com.google.android.material.R.id.touch_outside
+            )
+            scrim?.setOnClickListener {
+                // Click bên ngoài bottomSheet
+                behavior.state = BottomSheetBehavior.STATE_COLLAPSED
+                dismissNow()
+            }
         }
         return dialog
     }
@@ -137,23 +186,24 @@ class CommentBottomSheet(
             behavior.state = BottomSheetBehavior.STATE_EXPANDED
             behavior.skipCollapsed = true
             behavior.isHideable = true
+            behavior.significantVelocityThreshold = 50
+            behavior.hideFriction = 0.05f
         }
-        bottomSheetGeneral.viewTreeObserver.addOnGlobalLayoutListener {
+        bottomSheetGeneral.doOnNextLayout {
             val width = bottomSheet.measuredWidth
             val height = bottomSheet.measuredHeight
-            if (!isOpening) {
-                bottomSheetAnimator = ValueAnimator.ofFloat(-1f, 0f).apply {
-                    duration = 200L
-                    interpolator = FastOutSlowInInterpolator() // gần giống material
-                    addUpdateListener {
-                        onChangeBottomSheet(width, height, it.animatedValue as Float)
-                    }
-                    start()
-                }
-                isOpening = true
-            }
 
+            bottomSheetAnimator = ValueAnimator.ofFloat(-1f, 0f).apply {
+                duration = 200L
+                interpolator = FastOutSlowInInterpolator()
+                addUpdateListener {
+                    onChangeBottomSheet(width, height, it.animatedValue as Float)
+                }
+                start()
+            }
+            isOpening = true
         }
+
 
         bottomBar.setOnClickListener {
             bottomSheetInputComment()
@@ -302,6 +352,11 @@ class CommentBottomSheet(
 
     override fun onDismiss(dialog: DialogInterface) {
         super.onDismiss(dialog)
+        val decorView = (dialog as? Dialog)?.window?.decorView as? ViewGroup
+        decorView?.findViewWithTag<View>("search_icon")?.let {
+            decorView.removeView(it)
+        }
+
         val bottomSheet = view?.parent as? View
         if (bottomSheet != null) {
             val width = bottomSheet.width
@@ -332,7 +387,6 @@ class CommentBottomSheet(
                         releaseAnimator()
                     }
                 })
-
                 start()
             }
         } else {

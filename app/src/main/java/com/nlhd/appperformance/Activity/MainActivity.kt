@@ -18,6 +18,7 @@ import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
+import androidx.core.view.WindowInsetsControllerCompat
 import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.ui.setupWithNavController
 import com.google.android.material.bottomnavigation.BottomNavigationView
@@ -45,13 +46,14 @@ class MainActivity: AppCompatActivity() {
         }
 
         val isLandscape = resources.configuration.orientation == Configuration.ORIENTATION_LANDSCAPE
-        viewModel.navigation.observe(this) {
+        /*viewModel.navigation.observe(this) {
             val color = if (it == Navigation.Home) R.color.black else R.color.white
             window.statusBarColor = ContextCompat.getColor(this, color)
             window.navigationBarColor = ContextCompat.getColor(this, color)
             WindowCompat.getInsetsController(window, window.decorView).isAppearanceLightStatusBars = false
-        }
+        }*/
 
+        window.statusBarColor = Color.TRANSPARENT
 
         WindowCompat.setDecorFitsSystemWindows(window, false)
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
@@ -72,12 +74,17 @@ class MainActivity: AppCompatActivity() {
             val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
             v.setPadding(
                 systemBars.left,
-                systemBars.top, // ❌ không padding top để cho phép tràn lên status bar
+                0, // ❌ không padding top để cho phép tràn lên status bar
                 systemBars.right,
                 0 // ❌ nếu bạn muốn full màn hình (video)
             )
             insets
         }
+
+//        WindowCompat.getInsetsController(window, window.decorView).apply {
+//            hide(WindowInsetsCompat.Type.statusBars())
+//            systemBarsBehavior = WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
+//        }
 
         val navHostFragment = supportFragmentManager.findFragmentById(R.id.nav_host) as NavHostFragment
         val navController = navHostFragment.navController
@@ -108,6 +115,23 @@ class MainActivity: AppCompatActivity() {
                 }
 
                 R.id.shopFragment -> {
+                    val colors = ColorStateList(
+                        arrayOf(
+                            intArrayOf(android.R.attr.state_checked),
+                            intArrayOf(-android.R.attr.state_checked)
+                        ),
+                        intArrayOf(
+                            Color.parseColor("#000000"), // selected
+                            Color.parseColor("#888888")  // unselected
+                        )
+                    )
+                    bottomNav.itemIconTintList = colors
+                    bottomNav.itemTextColor = colors
+                    bottomNav.setBackgroundColor(Color.WHITE)
+                    fabAdd.setImageResource(R.drawable.addblack_enhanced)
+                    viewModel.setNavigation(Navigation.Profile)
+                }
+                R.id.inboxFragment -> {
                     val colors = ColorStateList(
                         arrayOf(
                             intArrayOf(android.R.attr.state_checked),

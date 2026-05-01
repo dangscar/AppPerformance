@@ -49,6 +49,7 @@ class ProfileFragment: Fragment(R.layout.fragment_profile) {
     @OptIn(UnstableApi::class)
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        requireActivity().window.navigationBarColor = ContextCompat.getColor(requireContext(), R.color.white)
 
         profilePagerAdapter = ProfilePagerAdapter(requireActivity())
         binding.viewPager.adapter = profilePagerAdapter

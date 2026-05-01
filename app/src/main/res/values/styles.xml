@@ -38,9 +38,16 @@
         <item name="android:textSize">18sp</item>
         <item name="android:fontFamily">@font/tiktoksans_regular</item>
     </style>
+    <style name="MyTabTextSearch" parent="TextAppearance.Design.Tab">
+        <item name="textAllCaps">false</item>
+        <item name="android:textSize">14sp</item>
+        <item name="android:fontFamily">@font/tiktoksans_regular</item>
+    </style>
 
     <style name="BottomSheetNoScrim" parent="Theme.Design.Light.BottomSheetDialog">
         <item name="android:backgroundDimEnabled">false</item>
+        <item name="android:windowIsFloating">false</item>
+        <item name="android:windowAnimationStyle">@null</item>
         <!--<item name="bottomSheetStyle">@style/RoundedBottomSheetStyle</item>-->
     </style>
 

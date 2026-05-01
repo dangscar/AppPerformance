@@ -4,7 +4,8 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    tools:context=".Fragment.ForYouFragment">
+    tools:context=".Fragment.ForYouFragment"
+    android:background="@color/black">
 
     <androidx.viewpager2.widget.ViewPager2
         android:id="@+id/viewPager"
@@ -100,12 +101,17 @@
 
     </LinearLayout>
 
-    <!--<Button
-        android:id="@+id/btn_refresh"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Refresh"
-        android:layout_gravity="center"/>-->
+    <!-- Search icon overlay - ẩn mặc định -->
+    <ImageView
+        android:id="@+id/ivSearchOverlay"
+        android:layout_width="28dp"
+        android:layout_height="28dp"
+        android:layout_gravity="top|end"
+        android:src="@drawable/ic_search"
+        android:visibility="gone"
+        app:tint="@color/white"
+        android:layout_marginEnd="14dp"
+        android:layout_marginTop="12dp"/>
 
 
 

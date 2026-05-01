@@ -308,7 +308,7 @@ class FollowingFragment : Fragment() {
     override fun onStart() {
         super.onStart()
         val isLandscape = resources.configuration.orientation == Configuration.ORIENTATION_LANDSCAPE
-        mainViewModel.showBarAction(!isLandscape)
+        //mainViewModel.showBarAction(!isLandscape)
         mainViewModel.setLandscape(isLandscape)
         if (!isLandscape) {
             playerView.visibility = View.GONE

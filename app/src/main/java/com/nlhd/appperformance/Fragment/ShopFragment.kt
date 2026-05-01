@@ -6,6 +6,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.core.content.ContextCompat
+import androidx.fragment.app.viewModels
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.google.android.material.tabs.TabLayoutMediator
 import com.nlhd.appperformance.Adapter.IconTextLayout.CategoryItem
@@ -14,7 +15,11 @@ import com.nlhd.appperformance.Adapter.Shop.FlashSaleAdapter
 import com.nlhd.appperformance.Adapter.Shop.Product
 import com.nlhd.appperformance.Adapter.Shop.ProductPagerAdapter
 import com.nlhd.appperformance.R
+import com.nlhd.appperformance.Utils.Navigation
+import com.nlhd.appperformance.ViewModel.MainViewModel
 import com.nlhd.appperformance.databinding.FragmentShopBinding
+import dagger.hilt.android.AndroidEntryPoint
+import kotlin.getValue
 
 // TODO: Rename parameter arguments, choose names that match
 // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
@@ -26,8 +31,10 @@ private const val ARG_PARAM2 = "param2"
  * Use the [ShopFragment.newInstance] factory method to
  * create an instance of this fragment.
  */
+@AndroidEntryPoint
 class ShopFragment : Fragment() {
 
+    private val mainViewModel: MainViewModel by viewModels()
     private var _binding: FragmentShopBinding? = null
     private val binding get() = _binding!!
     private lateinit var productPagerAdapter: ProductPagerAdapter
@@ -43,9 +50,9 @@ class ShopFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-
+        mainViewModel.setNavigation(Navigation.Profile)
+        requireActivity().window.navigationBarColor = ContextCompat.getColor(requireContext(), R.color.white)
         productPagerAdapter = ProductPagerAdapter(requireActivity())
-
         val list = listOf(
             CategoryItem(R.drawable.ic_order, "Đơn hàng"),
             CategoryItem(R.drawable.ic_local_activity, "HÀNG VIỆT"),

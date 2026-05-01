@@ -1,87 +1,30 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="@color/white"
     tools:context=".Fragment.SearchSuccessFragment">
 
-    <com.airbnb.lottie.LottieAnimationView
-        android:id="@+id/loadingView"
-        android:layout_width="50dp"
-        android:layout_height="50dp"
-        android:layout_gravity="center"
-        app:lottie_rawRes="@raw/loading"
-        app:lottie_autoPlay="true"
-        app:lottie_loop="true"
-        android:visibility="gone"/>
-
-    <LinearLayout
+    <!-- Top TabLayout (Top, Video, Ảnh, Người dùng, Cửa hàng...) -->
+    <com.google.android.material.tabs.TabLayout
+        android:id="@+id/tabLayoutMain"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_gravity="center"
-        android:orientation="vertical"
-        android:gravity="center_horizontal"
-        android:id="@+id/ll_error"
-        android:visibility="gone">
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:gravity="center"
-            android:layout_weight="5">
-            <ImageView
-                android:layout_width="60dp"
-                android:layout_height="60dp"
-                android:src="@drawable/ic_refresh"
-                android:background="@null"
-                app:tint="@color/black"
-                android:layout_margin="12dp"/>
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="No internet connection. Tap to retry"
-                android:textColor="@color/black"
-                android:fontFamily="@font/tiktoksans_semibold"
-                android:textSize="16sp"
-                android:layout_margin="12dp"/>
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Connect to the internet and try again"
-                android:textColor="@color/black"
-                android:fontFamily="@font/tiktoksans_regular"
-                android:textSize="14sp"
-                android:layout_margin="12dp"/>
-        </LinearLayout>
+        android:layout_height="48dp"
+        app:tabMode="scrollable"
+        app:tabIndicatorColor="@color/black"
+        app:tabIndicatorHeight="2dp"
+        app:tabSelectedTextColor="@color/black"
+        app:tabTextColor="#808080"
+        app:tabTextAppearance="@style/MyTabTextSearch"
+        app:tabRippleColor="@android:color/transparent"/>
 
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_weight="5"
-            android:gravity="center">
-            <Button
-                android:id="@+id/errorView"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="Vui lòng thử lại"
-                android:layout_marginHorizontal="48dp"
-                android:textColor="@color/black"
-                android:paddingHorizontal="8dp"
-                android:background="@drawable/bg_border_button_ui_white"
-                android:visibility="visible"
-                android:fontFamily="@font/tiktoksans_semibold"
-                android:textAllCaps="false"/>
-        </LinearLayout>
 
-    </LinearLayout>
-
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/rvFeed"
+    <androidx.viewpager2.widget.ViewPager2
+        android:id="@+id/viewPager"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:padding="4dp"
-        android:clipToPadding="false"/>
+        android:layout_height="match_parent" />
 
-
-</FrameLayout>
+</LinearLayout>

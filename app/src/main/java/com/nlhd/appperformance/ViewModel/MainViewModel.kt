@@ -56,5 +56,6 @@ class MainViewModel @Inject constructor(
     }
     fun showBarAction(isShow: Boolean) {
         _showBar.value = isShow
+
     }
 }

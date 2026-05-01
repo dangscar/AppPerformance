@@ -3,6 +3,7 @@ package com.nlhd.appperformance.Fragment
 import android.content.Intent
 import android.content.pm.ActivityInfo
 import android.content.res.Configuration
+import android.content.res.Resources
 import android.graphics.Color
 import android.media.audiofx.BassBoost
 import android.media.audiofx.Equalizer
@@ -23,6 +24,11 @@ import android.widget.ImageView
 import android.widget.LinearLayout
 import androidx.annotation.OptIn
 import androidx.core.content.ContextCompat
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsCompat
+import androidx.core.view.doOnLayout
+import androidx.core.view.doOnPreDraw
+import androidx.core.view.updateLayoutParams
 import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
@@ -40,12 +46,14 @@ import com.airbnb.lottie.LottieAnimationView
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.nlhd.appperformance.Activity.ProfileActivity
+import com.nlhd.appperformance.Activity.SearchActivity
 import com.nlhd.appperformance.Adapter.LoadingAdapter
 import com.nlhd.appperformance.Adapter.VideoPagerAdapter
 import com.nlhd.appperformance.BottomSheet.BottomSheetShare
 import com.nlhd.appperformance.BottomSheet.CommentBottomSheet
 import com.nlhd.appperformance.Domain.Entity.Video.MessageResponse
 import com.nlhd.appperformance.R
+import com.nlhd.appperformance.ThuNghiem.TwoFingerScrollHelper
 import com.nlhd.appperformance.Utils.Navigation
 import com.nlhd.appperformance.Utils.ResultUI
 import com.nlhd.appperformance.Utils.TabSelected
@@ -54,6 +62,7 @@ import com.nlhd.appperformance.ViewModel.MainViewModel
 import com.nlhd.appperformance.ViewModel.VideoViewModel
 import com.nlhd.appperformance.databinding.FragmentForyouBinding
 import dagger.hilt.android.AndroidEntryPoint
+import io.ktor.client.plugins.logging.Logging
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -83,6 +92,7 @@ class ForYouFragment(
 
     private var commentBottomSheet: CommentBottomSheet? = null
     private var currentCommentVideoId: String = "-1"
+    private val ivSearchOverlay by lazy { binding.ivSearchOverlay }
 
     fun holder(position: Int) = (binding.viewPager.getChildAt(0) as RecyclerView).findViewHolderForAdapterPosition(position) as? VideoPagerAdapter.VideoViewHolder
     fun player(position: Int) = players[position]
@@ -122,17 +132,15 @@ class ForYouFragment(
     }
     private val registerOnPageChangeCallback = object :
         ViewPager2.OnPageChangeCallback() {
+
         override fun onPageSelected(position: Int) {
             super.onPageSelected(position)
             if (position >= adapter.itemCount) return
             setUpPlayer(position)
-
-            //GetFollowing
-            //val video = adapter.videoByPosition(position = position) ?: return
-            //viewModel.getFollowing(video.userId)
         }
         override fun onPageScrollStateChanged(state: Int) {
             super.onPageScrollStateChanged(state)
+
             val position = binding.viewPager.currentItem
             val holder = holder(position) ?: return
             if (state == ViewPager2.SCROLL_STATE_DRAGGING) {
@@ -151,9 +159,29 @@ class ForYouFragment(
         return _binding!!.root
     }
 
+    fun Int.dpToPx(): Int {
+        return (this * Resources.getSystem().displayMetrics.density).toInt()
+    }
+    private var statusBarHeight = 0
+
     @OptIn(UnstableApi::class)
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        view.doOnLayout {
+            val insets = ViewCompat.getRootWindowInsets(view)
+                ?.getInsets(WindowInsetsCompat.Type.systemBars())
+
+            insets?.let {
+                statusBarHeight = it.top
+                ivSearchOverlay.updateLayoutParams<ViewGroup.MarginLayoutParams> {
+                    topMargin = it.top + 12.dpToPx()  // ✅ status bar + margin thêm
+                    marginEnd = 14.dpToPx()
+                }
+            }
+        }
+
+        requireActivity().window.navigationBarColor = ContextCompat.getColor(requireContext(), R.color.black)
+        requireActivity().window.statusBarColor = Color.TRANSPARENT
 
         btnPlay = binding.playerViewlc.findViewById(R.id.exo_play)
         btnPause = binding.playerViewlc.findViewById(R.id.exo_pause)
@@ -184,7 +212,7 @@ class ForYouFragment(
                             val offset = offsetY   // [-1 .. 0]
                             if (holder != null) {
                                 val aspectRatio = holder.binding.playerView.width.toFloat() / holder.binding.playerView.height.toFloat()
-                                val minScale = 0.12f + (aspectRatio * 0.8f)
+                                val minScale = 0.16f + (aspectRatio * 0.8f)
                                 val progress = (1f + offset).coerceIn(0f, 1f)
                                 val scale = 1f - (1f - minScale) * progress
                                 val delta = height - height * scale
@@ -193,27 +221,42 @@ class ForYouFragment(
                                     pivotY = width / 3f
                                     scaleX = scale
                                     scaleY = scale
-                                    translationY = -delta/2f
+                                    translationY = -delta / 2f + statusBarHeight * progress * 0.25f
                                 }
 
                                 if (offset != -1f) {
                                     mainViewModel.showBarAction(false)
                                     layoutAlpha(holder, 0f)
+                                    requireActivity().window.statusBarColor = ContextCompat.getColor(requireContext(), R.color.black)
                                     requireActivity().window.navigationBarColor =
                                         ContextCompat.getColor(requireContext(), R.color.white)
                                 }
                             }
+
+                            val progress = (1f + offsetY).coerceIn(0f, 1f)
+
+                            // Show icon khi bottomSheet mở (progress > 0)
+                            if (progress > 0f && ivSearchOverlay.visibility != View.VISIBLE) {
+                                ivSearchOverlay.visibility = View.VISIBLE
+                                ivSearchOverlay.alpha = 0f
+                            }
+                            // Fade in/out theo progress
+                            ivSearchOverlay.alpha = 1f
                         },
                         onDismiss = {
                             //Dismiss bottomSheet
                             requireActivity().window.navigationBarColor =
                                 ContextCompat.getColor(requireContext(), R.color.black)
+                            requireActivity().window.statusBarColor = Color.TRANSPARENT
+
+                            ivSearchOverlay.visibility = View.GONE
 
                             val currentPosition = viewModel.currentPosition.value ?: 0
                             val holder = holder(currentPosition)
                             mainViewModel.showBarAction(true)
                             if (holder == null) return@CommentBottomSheet
                             layoutAlpha(holder, 1f)
+
                         },
                         onChangeComponent = {
                             //Update commentCount
@@ -305,30 +348,48 @@ class ForYouFragment(
             }
         }*/
 
+
     }
 
     fun refreshData() {
-        //Adapter
-        /*players.values.forEach { player ->
+        if (!::players.isInitialized) return
+        releaseAllPlayers()
+
+        binding.viewPager.setCurrentItem(0, false) // false = không animate, tránh race condition
+        adapter.refresh()
+
+        binding.viewPager.doOnPreDraw {
+            initializePlayerForCurrentItem()
+        }
+    }
+
+    private fun releaseAllPlayers() {
+        players.values.forEach { player ->
             player.stop()
             player.clearMediaItems()
             player.release()
         }
         players.clear()
-        adapter.refresh()
-        binding.viewPager.currentItem = 0
-        binding.viewPager.post {
-            adapter.createPlayer(0)
-            val holder = (binding.viewPager.getChildAt(0) as RecyclerView).findViewHolderForAdapterPosition(binding.viewPager.currentItem) as? VideoPagerAdapter.VideoViewHolder
-            val player = players[binding.viewPager.currentItem]
-            if (holder != null && player != null) {
-                holder.binding.playerView.player = player
-                adapter.setupTimeBar(holder, player)
-            }
-            adapter.handlePlayerState(binding.viewPager.currentItem)
-        }*/
+    }
 
+    private fun initializePlayerForCurrentItem() {
+        val currentIndex = binding.viewPager.currentItem // = 0
 
+        adapter.createPlayer(currentIndex)
+
+        val recyclerView = binding.viewPager.getChildAt(0) as? RecyclerView ?: return
+        val holder = recyclerView
+            .findViewHolderForAdapterPosition(currentIndex) as? VideoPagerAdapter.VideoViewHolder
+            ?: return
+
+        val player = players[currentIndex] ?: return
+
+        with(holder.binding.playerView) {
+            this.player = player
+        }
+
+        adapter.setupTimeBar(holder, player)
+        adapter.handlePlayerState(currentIndex)
     }
 
     @OptIn(UnstableApi::class)
@@ -346,7 +407,7 @@ class ForYouFragment(
         val isLandscape = resources.configuration.orientation == Configuration.ORIENTATION_LANDSCAPE
         val currentPosition = viewModel.currentPosition.value ?: 0
 
-        mainViewModel.showBarAction(!isLandscape)
+//        mainViewModel.showBarAction(!isLandscape)
         mainViewModel.setLandscape(isLandscape)
         observeViewModel()
         if (!isLandscape) {
@@ -381,7 +442,8 @@ class ForYouFragment(
 
         mainViewModel.navigation.observe(viewLifecycleOwner) {
             if (it == Navigation.Profile) {
-                adapter.pause(currentPosition)
+                val position = viewModel.currentPosition.value ?: 0
+                adapter.pause(position)
             }
         }
 
@@ -431,8 +493,5 @@ class ForYouFragment(
             val holderPrev = (binding.viewPager.getChildAt(0) as RecyclerView).findViewHolderForAdapterPosition(currentPrev) as? VideoPagerAdapter.VideoViewHolder ?: return
             holderPrev.binding.playerView.player = players[currentPrev]
         }
-
-
     }
-
 }

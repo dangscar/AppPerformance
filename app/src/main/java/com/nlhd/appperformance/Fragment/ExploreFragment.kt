@@ -24,6 +24,10 @@ import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import androidx.core.graphics.toColorInt
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsCompat
+import androidx.core.view.doOnLayout
+import androidx.core.view.updateLayoutParams
 
 // TODO: Rename parameter arguments, choose names that match
 // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
@@ -67,13 +71,16 @@ class ExploreFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        /*val topBarHeight = resources.getDimensionPixelSize(R.dimen.top_bar_height)
-        binding.rvFeed.setPadding(
-            binding.rvFeed.paddingLeft,
-            topBarHeight,
-            binding.rvFeed.paddingRight,
-            binding.rvFeed.paddingBottom
-        )*/
+        view.doOnLayout {
+            val insets = ViewCompat.getRootWindowInsets(view)
+                ?.getInsets(WindowInsetsCompat.Type.systemBars())
+
+            insets?.let {
+                binding.flExplore.updateLayoutParams<ViewGroup.MarginLayoutParams> {
+                    topMargin = it.top   // ✅ status bar + margin thêm
+                }
+            }
+        }
 
         binding.rvFeed.clipToPadding = false
         adapter = SearchSuccessAdapter(

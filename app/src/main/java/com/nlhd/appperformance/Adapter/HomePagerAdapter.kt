@@ -13,18 +13,19 @@ import com.nlhd.appperformance.Utils.TabSelected
 
 @UnstableApi
 class HomePagerAdapter(activity: FragmentActivity): FragmentStateAdapter(activity) {
+    val forYouFragment = ForYouFragment()
     override fun createFragment(position: Int): Fragment {
         return when (position) {
             0 -> FriendFragment()
             1-> FriendFragment()
             2-> FollowingFragment()
             3-> ExploreFragment()
-            else -> ForYouFragment()
+            else -> forYouFragment
         }
     }
 
     fun refreshData() {
-
+        forYouFragment.refreshData()
     }
 
     override fun getItemCount(): Int {

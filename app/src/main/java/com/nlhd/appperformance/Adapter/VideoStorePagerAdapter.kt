@@ -235,6 +235,7 @@ class VideoStorePagerAdapter(
         if (players.size >= 3 && currentPosition != current) {
             releaseFarthestPlayer()
         }
+
         val loadControl = DefaultLoadControl.Builder()
             .setBufferDurationsMs(
                 1500,  // minBufferMs (mặc định ~50_000)
@@ -402,6 +403,7 @@ class VideoStorePagerAdapter(
 
     fun updateCurrentPosition(position: Int) {
         currentPosition = position
+        Log.d("AAA", position.toString())
     }
 
     override fun onViewRecycled(holder: VideoViewHolder) {

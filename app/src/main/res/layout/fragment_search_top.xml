@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical">
+
+    <!-- Filter TabLayout (Tất cả, Chưa xem, Đã xem, Được tải lên gần đây) -->
+    <com.google.android.material.tabs.TabLayout
+        android:id="@+id/tabLayoutFilter"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:layout_marginBottom="4dp"
+        android:clipToPadding="false"
+        app:tabMode="scrollable"
+        app:tabMinWidth="0dp"
+        app:tabIndicatorHeight="0dp"
+        app:tabBackground="@drawable/tab_selector_gray"
+        app:tabSelectedTextColor="@color/black"
+        app:tabTextColor="#808080"
+        app:tabTextAppearance="@style/MyTabTextSearch"
+        app:tabRippleColor="@android:color/transparent"/>
+
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <com.airbnb.lottie.LottieAnimationView
+            android:id="@+id/loadingView"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:layout_gravity="center"
+            app:lottie_rawRes="@raw/loading"
+            app:lottie_autoPlay="true"
+            app:lottie_loop="true"
+            android:visibility="gone"/>
+
+        <LinearLayout
+            android:id="@+id/ll_error"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical"
+            android:gravity="center"
+            android:visibility="gone">
+            <ImageView
+                android:layout_width="60dp"
+                android:layout_height="60dp"
+                android:src="@drawable/ic_refresh"
+                app:tint="@color/black" />
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="No internet connection. Tap to retry"
+                android:textColor="@color/black"
+                android:fontFamily="@font/tiktoksans_semibold"
+                android:textSize="16sp"
+                android:layout_marginTop="12dp"/>
+            <Button
+                android:id="@+id/errorView"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Vui lòng thử lại"
+                android:layout_marginTop="24dp"
+                android:background="@drawable/bg_border_button_ui_white"
+                android:textAllCaps="false"/>
+        </LinearLayout>
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/rvFeed"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:paddingHorizontal="4dp"
+            android:clipToPadding="false"/>
+
+    </FrameLayout>
+</LinearLayout>

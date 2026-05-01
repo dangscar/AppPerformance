@@ -217,7 +217,7 @@
             android:orientation="vertical"
             android:layout_marginStart="12dp"
             android:layout_marginEnd="80dp"
-            android:layout_marginBottom="4dp"
+            android:layout_marginBottom="8dp"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintBottom_toTopOf="@id/ll_bottomAction"
             app:layout_constraintEnd_toStartOf="@id/actionColumn">
@@ -263,7 +263,8 @@
 
             <androidx.constraintlayout.widget.ConstraintLayout
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content">
+                android:layout_height="wrap_content"
+                android:layout_marginVertical="2dp">
 
                 <!-- Username -->
                 <TextView
@@ -370,7 +371,8 @@
                 android:layout_height="wrap_content"
                 android:background="#1F1F1F"
                 android:padding="8dp"
-                android:gravity="center_vertical">
+                android:gravity="center_vertical"
+                android:visibility="gone">
                 <com.google.android.material.imageview.ShapeableImageView
                     android:id="@+id/iv_search"
                     android:layout_width="16dp"

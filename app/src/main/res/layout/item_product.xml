@@ -3,79 +3,277 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    app:cardElevation="4dp"
-    android:background="@color/white"
-    app:cardCornerRadius="8dp">
+    app:cardElevation="2dp"
+    android:layout_margin="4dp"
+    app:cardCornerRadius="8dp"
+    android:background="@color/white">
 
-    <LinearLayout
+    <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="vertical">
+        android:layout_height="wrap_content">
 
-        <ImageView
-            android:id="@+id/iv_image"
-            android:layout_width="match_parent"
-            android:layout_height="250dp"
-            android:src="@color/black"
-            android:scaleType="centerCrop"/>
+        <!-- Product Image Container -->
+        <FrameLayout
+            android:id="@+id/fl_image_container"
+            android:layout_width="0dp"
+            android:layout_height="200dp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent">
 
-        <TextView
-            android:id="@+id/tv_name"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:textSize="13sp"
-            android:text="Màn hình oc Màn hình chơi game"
-            android:textColor="@color/black"
-            android:fontFamily="@font/tiktoksans_regular"
-            android:maxLines="1"
-            android:ellipsize="end"
-            android:layout_marginHorizontal="8dp"
-            android:layout_marginTop="8dp" />
-
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:textSize="16sp"
-            android:text="1.000.000đ"
-            android:textColor="#FFFD2656"
-            android:fontFamily="@font/tiktoksans_semibold"
-            android:maxLines="1"
-            android:ellipsize="end"
-            android:layout_marginHorizontal="8dp" />
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginHorizontal="8dp"
-            android:gravity="center_vertical">
             <ImageView
-                android:layout_width="18dp"
-                android:layout_height="18dp"
-                android:src="@drawable/test"
-                app:tint="#FFCA28"/>
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:textSize="13sp"
-                android:text="4.6"
-                android:textColor="#5B5858"
-                android:fontFamily="@font/tiktoksans_regular"
-                android:maxLines="1"
-                android:ellipsize="end"/>
-            <View
-                android:layout_width="0.5dp"
+                android:id="@+id/iv_image"
+                android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:background="#5B5858"
-                android:layout_margin="4dp"/>
+                android:scaleType="centerCrop"
+                android:src="@drawable/asus" />
+
+            <!-- Brand Badge -->
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:textSize="13sp"
-                android:text="Đã bán 108"
-                android:textColor="#5B5858"
-                android:fontFamily="@font/tiktoksans_regular"
-                android:maxLines="1"
-                android:ellipsize="end"/>
+                android:layout_gravity="top|center_horizontal"
+                android:background="@drawable/bg_button_red"
+                android:paddingHorizontal="8dp"
+                android:paddingVertical="2dp"
+                android:text="CLUBBLU OUTLETS"
+                android:textColor="@color/white"
+                android:textSize="9sp"
+                android:textStyle="bold"
+                android:fontFamily="@font/tiktoksans_bold"/>
+
+            <!-- Discount Badge -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="top|end"
+                android:background="#FF2156"
+                android:paddingHorizontal="6dp"
+                android:paddingVertical="2dp"
+                android:text="-50%"
+                android:textColor="@color/white"
+                android:textSize="11sp"
+                android:textStyle="bold" />
+
+            <!-- Voucher Extra Overlay -->
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="bottom|end"
+                android:layout_marginBottom="10dp"
+                android:background="#00A669"
+                android:orientation="vertical"
+                android:paddingHorizontal="4dp"
+                android:paddingVertical="2dp">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Voucher"
+                    android:textColor="@color/white"
+                    android:textSize="7sp" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Extra"
+                    android:textColor="@color/white"
+                    android:textSize="11sp"
+                    android:textStyle="bold" />
+            </LinearLayout>
+        </FrameLayout>
+
+        <!-- Promotion Banner -->
+        <LinearLayout
+            android:id="@+id/promo_banner"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:background="#00CC99"
+            android:orientation="horizontal"
+            android:padding="2dp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/fl_image_container">
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:gravity="center"
+                android:text="XTRA Freeship"
+                android:textColor="@color/white"
+                android:textSize="8sp"
+                android:fontFamily="@font/tiktoksans_regular"/>
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:gravity="center"
+                android:text="EXTRA Lên đến 14%"
+                android:textColor="@color/white"
+                android:textSize="8sp"
+                android:fontFamily="@font/tiktoksans_regular"/>
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:gravity="center"
+                android:text="Bonus Hoàn tiền"
+                android:textColor="@color/white"
+                android:textSize="8sp" />
         </LinearLayout>
-    </LinearLayout>
+
+
+        <!-- Product Info Area -->
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="8dp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/promo_banner">
+
+            <!-- Name with Trending Badge -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="top"
+                android:orientation="horizontal">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="18dp"
+                    android:background="@drawable/bg_round_pink"
+                    android:paddingHorizontal="4dp"
+                    android:paddingVertical="1dp"
+                    android:text="Xu Hướng"
+                    android:textColor="#FFFFFF"
+                    android:textSize="9sp"
+                    android:textStyle="bold"
+                    />
+
+                <TextView
+                    android:id="@+id/tv_name"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="4dp"
+                    android:ellipsize="end"
+                    android:fontFamily="@font/tiktoksans_regular"
+                    android:maxLines="2"
+                    android:text="-CLUBBLU- Chuột Gaming MX1 Có Đèn LED D..."
+                    android:textColor="@color/black"
+                    android:textSize="13sp" />
+            </LinearLayout>
+
+            <!-- Price Row -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:gravity="center_vertical"
+                android:orientation="horizontal">
+
+                <TextView
+                    android:id="@+id/tv_price"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:fontFamily="@font/tiktoksans_semibold"
+                    android:text="29.999đ"
+                    android:textColor="#FFFD2656"
+                    android:textSize="18sp"/>
+
+                <TextView
+                    android:id="@+id/tv_original_price"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="6dp"
+                    android:fontFamily="@font/tiktoksans_regular"
+                    android:text="60.000đ"
+                    android:textColor="#808080"
+                    android:textSize="13sp" />
+            </LinearLayout>
+
+            <!-- Flash Sale Row -->
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:background="#FFEFF2"
+                android:gravity="center_vertical"
+                android:orientation="horizontal"
+                android:paddingEnd="8dp">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:background="#FE2C55"
+                    android:paddingHorizontal="4dp"
+                    android:paddingVertical="1dp"
+                    android:text="Flash Sale"
+                    android:textColor="@color/white"
+                    android:textSize="11sp"
+                    android:textStyle="bold"
+                    android:fontFamily="@font/tiktoksans_bold"/>
+
+                <ImageView
+                    android:layout_width="14dp"
+                    android:layout_height="14dp"
+                    android:layout_marginStart="4dp"
+                    android:src="@drawable/coin" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="18dp"
+                    android:layout_marginStart="4dp"
+                    android:text="0 :29:41"
+                    android:textColor="#FE2C55"
+                    android:textSize="11sp"
+                    android:textStyle="bold"
+                    android:fontFamily="@font/tiktoksans_bold"/>
+            </LinearLayout>
+
+            <!-- Rating & Sold Row -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:gravity="center_vertical">
+
+                <ImageView
+                    android:layout_width="12dp"
+                    android:layout_height="12dp"
+                    android:src="@drawable/test"
+                    app:tint="#FFCA28" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="2dp"
+                    android:fontFamily="@font/tiktoksans_regular"
+                    android:text="4.5"
+                    android:textColor="#5B5858"
+                    android:textSize="12sp" />
+
+                <View
+                    android:layout_width="1dp"
+                    android:layout_height="10dp"
+                    android:layout_marginHorizontal="6dp"
+                    android:background="#D0D0D0" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:fontFamily="@font/tiktoksans_regular"
+                    android:text="Đã bán 4564"
+                    android:textColor="#5B5858"
+                    android:textSize="12sp" />
+            </LinearLayout>
+
+        </LinearLayout>
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
 </androidx.cardview.widget.CardView>

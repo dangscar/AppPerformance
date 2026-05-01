@@ -31,6 +31,9 @@ import kotlin.getValue
 import androidx.core.graphics.toColorInt
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
+import androidx.core.view.doOnLayout
+import androidx.core.view.updateLayoutParams
+import com.nlhd.appperformance.Utils.Navigation
 import com.nlhd.appperformance.Utils.TabSelected
 import com.nlhd.appperformance.Utils.tabs
 
@@ -107,6 +110,17 @@ class HomeFragment: Fragment(R.layout.fragment_home) {
         iv_refresh = view.findViewById(R.id.ivRefresh)
 
         val topBar = view.findViewById<View>(R.id.topBar)
+
+        view.doOnLayout {
+            val insets = ViewCompat.getRootWindowInsets(view)
+                ?.getInsets(WindowInsetsCompat.Type.systemBars())
+
+            insets?.let {
+                topBar.updateLayoutParams<ViewGroup.MarginLayoutParams> {
+                    topMargin = it.top  // ✅ margin top = status bar height
+                }
+            }
+        }
 
         homePagerAdapter = HomePagerAdapter(requireActivity())
 
@@ -190,12 +204,13 @@ class HomeFragment: Fragment(R.layout.fragment_home) {
 
         })
 
-        viewPager.post {
-            //Giữ trạng thái tab current hiện tại
-            mainViewModel.currentTab.observe(viewLifecycleOwner) {
-                if (!it) {
-                    viewPager.setCurrentItem(tabs.size-1, false)
-                }
+//        viewPager.post {
+//
+//        }
+        //Giữ trạng thái tab current hiện tại
+        mainViewModel.currentTab.observe(viewLifecycleOwner) {
+            if (!it) {
+                viewPager.setCurrentItem(tabs.size-1, false)
             }
         }
 
@@ -221,7 +236,6 @@ class HomeFragment: Fragment(R.layout.fragment_home) {
                     // Page 2: vuốt sang trái, positionOffset từ 0.5 → 1
                     position == 2 && positionOffset >= 0.5f -> {
                         updateTabColor(tabLayout, position)
-                        Log.d("AAA", "position 2")
                         val blend = (positionOffset - 0.5f) / 0.5f // Map 0.5..1 -> 0..1
                         interpolateColor(Color.BLACK, Color.WHITE, blend)
                     }
@@ -233,8 +247,8 @@ class HomeFragment: Fragment(R.layout.fragment_home) {
 
                 // Áp dụng màu đã nội suy
                 mainViewModel.setColorBottomNav(blendedColor)
-                requireActivity().window.statusBarColor = blendedColor
-                requireActivity().window.navigationBarColor = blendedColor
+                //requireActivity().window.statusBarColor = blendedColor
+                //requireActivity().window.navigationBarColor = blendedColor
             }
         })
 
@@ -246,10 +260,11 @@ class HomeFragment: Fragment(R.layout.fragment_home) {
         }
 
         iv_refresh.setOnClickListener {
-            tabLayout.setTabTextColors(
-                Color.BLACK, // unselected
-                Color.BLACK  // selected
-            )
+//            tabLayout.setTabTextColors(
+//                Color.BLACK, // unselected
+//                Color.BLACK  // selected
+//            )
+            homePagerAdapter?.refreshData()
 
         }
 
@@ -261,8 +276,8 @@ class HomeFragment: Fragment(R.layout.fragment_home) {
     }
 
     private fun colorSystemBars(color: Int) {
-        requireActivity().window.statusBarColor =
-            ContextCompat.getColor(requireContext(), color)
+//        requireActivity().window.statusBarColor =
+//            ContextCompat.getColor(requireContext(), color)
         requireActivity().window.navigationBarColor =
             ContextCompat.getColor(requireContext(), color)
     }

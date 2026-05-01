@@ -248,7 +248,7 @@ class VideoPagerAdapter(
     }
 
     fun createPlayer(current: Int) {
-        if (players.size >= 3 && currentPosition != current) {
+        /*if (players.size >= 3 && currentPosition != current) {
             releaseFarthestPlayer()
         }
         val loadControl = DefaultLoadControl.Builder()
@@ -270,7 +270,34 @@ class VideoPagerAdapter(
                     prepare()
                     playWhenReady = false
                 }
+        }*/
+
+        // ✅ Guard: item chưa load xong thì bỏ qua
+        val video = getItem(current) ?: return
+
+        // ✅ Player đã tồn tại thì không tạo lại
+        if (players.containsKey(current)) return
+
+        // ✅ Giới hạn số player, nhưng không release player đang active
+        if (players.size >= 3) {
+            releaseFarthestPlayer()
         }
+
+        val loadControl = DefaultLoadControl.Builder()
+            .setBufferDurationsMs(1500, 3000, 500, 1000)
+            .build()
+
+        val player = ExoPlayer.Builder(context)
+            .setLoadControl(loadControl)
+            .setMediaSourceFactory(defaultMediaSourceFactory)
+            .build().apply {
+                repeatMode = ExoPlayer.REPEAT_MODE_ONE
+                setMediaItem(MediaItem.fromUri(video.videoUrl))
+                prepare()
+                playWhenReady = false
+            }
+
+        players[current] = player
     }
 
     fun play(position: Int) {
