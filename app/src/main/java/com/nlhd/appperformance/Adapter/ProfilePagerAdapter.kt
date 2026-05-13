@@ -12,6 +12,7 @@ import com.nlhd.appperformance.Fragment.VideoGridFragment
 class ProfilePagerAdapter(
     activity: FragmentActivity
 ): FragmentStateAdapter(activity) {
+
     override fun createFragment(position: Int): Fragment {
         return when (position) {
             0 -> VideoGridFragment()

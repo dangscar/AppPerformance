@@ -1,5 +1,6 @@
 package com.nlhd.appperformance.Fragment
 
+import android.app.Activity
 import android.content.Intent
 import android.content.pm.ActivityInfo
 import android.content.res.Configuration
@@ -118,8 +119,13 @@ class ForYouFragment(
                 adapter.handlePlayerState(position)
             }
         }
+
+
         //Cập nhật vị trí position
         adapter.updateCurrentPosition(position)
+
+        //Set idProfile
+        mainViewModel.setIdProfile(adapter.videoByPosition(position)?.id ?: -1)
     }
 
     /* Thay đổi màu alpha của layout*/
@@ -145,9 +151,18 @@ class ForYouFragment(
             val holder = holder(position) ?: return
             if (state == ViewPager2.SCROLL_STATE_DRAGGING) {
                 layoutAlpha(holder, 0.4f)
-            } else {
-                layoutAlpha(holder, 1f)
+                holder.binding.seekBar.visibility = View.INVISIBLE
             }
+            else if (state == ViewPager2.SCROLL_STATE_SETTLING) {
+                layoutAlpha(holder, 1f)
+                holder.binding.seekBar.visibility = View.INVISIBLE
+            }
+            else {
+                layoutAlpha(holder, 1f)
+                holder.binding.seekBar.visibility = View.VISIBLE
+            }
+
+
         }
     }
 
@@ -349,17 +364,33 @@ class ForYouFragment(
         }*/
 
 
+        //Refresh trang
+        mainViewModel.refresh.observe(viewLifecycleOwner) {
+            if (it) {
+                refreshData()
+                mainViewModel.setRefresh(false)
+            }
+        }
     }
 
+    var isRefreshing = false
     fun refreshData() {
         if (!::players.isInitialized) return
+        isRefreshing = true
         releaseAllPlayers()
-
-        binding.viewPager.setCurrentItem(0, false) // false = không animate, tránh race condition
+        binding.viewPager.setCurrentItem(0, false)
         adapter.refresh()
 
         binding.viewPager.doOnPreDraw {
-            initializePlayerForCurrentItem()
+            adapter.addLoadStateListener {
+                if (it.refresh is LoadState.NotLoading && isRefreshing) {
+                    releaseAllPlayers()
+                    binding.viewPager.setCurrentItem(0, false)
+                    initializePlayerForCurrentItem()
+                    isRefreshing = false
+                }
+            }
+
         }
     }
 
@@ -373,7 +404,7 @@ class ForYouFragment(
     }
 
     private fun initializePlayerForCurrentItem() {
-        val currentIndex = binding.viewPager.currentItem // = 0
+        val currentIndex = 0 // = 0
 
         adapter.createPlayer(currentIndex)
 
@@ -441,9 +472,15 @@ class ForYouFragment(
         }
 
         mainViewModel.navigation.observe(viewLifecycleOwner) {
-            if (it == Navigation.Profile) {
+            if (it == Navigation.Profile || it == Navigation.User) {
                 val position = viewModel.currentPosition.value ?: 0
                 adapter.pause(position)
+            } else {
+                val isPlaying = mainViewModel.tabSelected.value == TabSelected.Suggestions
+                if (isPlaying) {
+                    val position = viewModel.currentPosition.value ?: 0
+                    adapter.handlePlayerState(position)
+                }
             }
         }
 
@@ -463,7 +500,6 @@ class ForYouFragment(
         val isLandscape = resources.configuration.orientation == Configuration.ORIENTATION_LANDSCAPE
         if (isLandscape) return
         val currentPosition = binding.viewPager.currentItem
-
 
         if (adapter.itemCount > 0) {
             adapter.createPlayer(currentPosition)

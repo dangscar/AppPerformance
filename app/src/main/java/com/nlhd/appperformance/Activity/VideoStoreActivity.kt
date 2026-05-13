@@ -283,10 +283,19 @@ class VideoStoreActivity : AppCompatActivity() {
                             actionColumn.alpha = 0.4f
                             bottomInfo.alpha = 0.4f
                             llBottomAction.alpha = 0.4f
-                        } else {
+                            holder.binding.seekBar.visibility = View.INVISIBLE
+                        }
+                        else if (state == ViewPager2.SCROLL_STATE_SETTLING) {
                             actionColumn.alpha = 1f
                             bottomInfo.alpha = 1f
                             llBottomAction.alpha = 1f
+                            holder.binding.seekBar.visibility = View.INVISIBLE
+                        }
+                        else {
+                            actionColumn.alpha = 1f
+                            bottomInfo.alpha = 1f
+                            llBottomAction.alpha = 1f
+                            holder.binding.seekBar.visibility = View.VISIBLE
                         }
                     }
                 }
@@ -423,4 +432,5 @@ class VideoStoreActivity : AppCompatActivity() {
         }
         adapter.play(currentPosition)
     }
+
 }

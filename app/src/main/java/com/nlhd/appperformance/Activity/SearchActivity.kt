@@ -8,6 +8,7 @@ import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.media3.exoplayer.ExoPlayer
+import androidx.navigation.NavOptions
 import androidx.navigation.findNavController
 import androidx.navigation.ui.AppBarConfiguration
 import androidx.navigation.ui.navigateUp
@@ -29,6 +30,10 @@ class SearchActivity : AppCompatActivity() {
 
     @Inject
     lateinit var players: MutableMap<Int, ExoPlayer>
+
+    companion object {
+        const val EXTRA_QUERY = "extra_query"
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -80,10 +85,11 @@ class SearchActivity : AppCompatActivity() {
                 SearchFragmentDirections
                     .actionSearchFragmentToSearchSuccessFragment(keyword)
             navController.navigate(action)
-
         }
+
+        val query = intent.getStringExtra(EXTRA_QUERY) ?: ""
         binding.ivBack.setOnClickListener {
-            if (!navController.popBackStack()) {
+            if (!navController.popBackStack() || query.isNotEmpty()) {
                 finish()
                 overridePendingTransition(
                     R.anim.slide_in_left,
@@ -97,7 +103,7 @@ class SearchActivity : AppCompatActivity() {
         //Nút backPress
         onBackPressedDispatcher.addCallback(this, object : OnBackPressedCallback(true) {
             override fun handleOnBackPressed() {
-                if (!navController.popBackStack()) {
+                if (!navController.popBackStack() || query.isNotEmpty()) {
                     finish()
                     overridePendingTransition(
                         R.anim.slide_in_left,
@@ -110,6 +116,21 @@ class SearchActivity : AppCompatActivity() {
 
         })
 
+        //Intent
+        if (query.isNotEmpty()) {
+            val action = SearchFragmentDirections
+                .actionSearchFragmentToSearchSuccessFragment(query)
+
+            val navOptions = NavOptions.Builder()
+                .setPopUpTo(R.id.SearchFragment, inclusive = true) // false = giữ SearchFragment
+                .build()
+
+            navController.navigate(action.actionId, action.arguments, navOptions)
+
+            binding.edtSearch.post {
+                binding.edtSearch.setText(query)
+            }
+        }
 
     }
 

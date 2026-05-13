@@ -2,36 +2,41 @@ package com.nlhd.appperformance.Activity
 
 import android.annotation.SuppressLint
 import android.content.Intent
-import android.content.res.ColorStateList
-import android.content.res.Configuration
+import android.content.res.Resources
 import android.graphics.Color
 import android.os.Build
 import android.os.Bundle
+import android.util.Log
+import android.view.GestureDetector
+import android.view.MotionEvent
 import android.view.View
 import android.view.WindowManager
-import android.widget.ImageView
+import android.widget.LinearLayout
 import androidx.activity.viewModels
 import androidx.annotation.OptIn
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.content.ContextCompat
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
-import androidx.core.view.WindowInsetsControllerCompat
-import androidx.navigation.fragment.NavHostFragment
-import androidx.navigation.ui.setupWithNavController
-import com.google.android.material.bottomnavigation.BottomNavigationView
-import com.nlhd.appperformance.ViewModel.MainViewModel
-import dagger.hilt.android.AndroidEntryPoint
 import androidx.media3.common.util.UnstableApi
-import com.nlhd.appperformance.Fragment.HomeFragment
+import androidx.recyclerview.widget.RecyclerView
+import androidx.viewpager2.widget.ViewPager2
+import com.nlhd.appperformance.Adapter.MainPagerAdapter
+import com.nlhd.appperformance.Fragment.ProfileFragment
 import com.nlhd.appperformance.R
 import com.nlhd.appperformance.Utils.Navigation
+import com.nlhd.appperformance.Utils.TabSelected
+import com.nlhd.appperformance.ViewModel.MainViewModel
+import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
-class MainActivity: AppCompatActivity() {
+class MainActivity : AppCompatActivity() {
     private val viewModel: MainViewModel by viewModels()
+    private lateinit var viewPager: ViewPager2
+    private lateinit var ll_play_speed: LinearLayout
+    private var id = -1
+    fun Int.dpToPx(): Int = (this * Resources.getSystem().displayMetrics.density).toInt()
 
     @OptIn(UnstableApi::class)
     @SuppressLint("MissingInflatedId")
@@ -40,204 +45,107 @@ class MainActivity: AppCompatActivity() {
         val splashScreen = installSplashScreen()
         setContentView(R.layout.activity_main)
 
-        // Giữ splash nếu cần load dữ liệu
-        splashScreen.setKeepOnScreenCondition {
-            false // đổi thành true nếu đang loading
-        }
-
-        val isLandscape = resources.configuration.orientation == Configuration.ORIENTATION_LANDSCAPE
-        /*viewModel.navigation.observe(this) {
-            val color = if (it == Navigation.Home) R.color.black else R.color.white
-            window.statusBarColor = ContextCompat.getColor(this, color)
-            window.navigationBarColor = ContextCompat.getColor(this, color)
-            WindowCompat.getInsetsController(window, window.decorView).isAppearanceLightStatusBars = false
-        }*/
+        splashScreen.setKeepOnScreenCondition { false }
 
         window.statusBarColor = Color.TRANSPARENT
-
         WindowCompat.setDecorFitsSystemWindows(window, false)
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
             window.attributes.layoutInDisplayCutoutMode =
                 WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_SHORT_EDGES
         }
 
+        viewPager = findViewById(R.id.viewPager)
+
+        viewPager.adapter = MainPagerAdapter(this)
+
+        viewModel.navigation.observe(this) {
+            if (it == Navigation.Home || it == Navigation.User) {
+                viewPager.isUserInputEnabled = true
+            } else {
+                viewPager.isUserInputEnabled = false
+            }
+        }
+        viewModel.tabSelected.observe(this) {
+            if (it == TabSelected.Explore) {
+                viewPager.isUserInputEnabled = false
+            } else {
+                viewPager.isUserInputEnabled = true
+            }
+        }
+         // Cho phép vuốt sang Profile
+
         val root = findViewById<View>(R.id.main)
-        /*ViewCompat.setOnApplyWindowInsetsListener(root) { v, insets ->
+        ViewCompat.setOnApplyWindowInsetsListener(root) { v, insets ->
             val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
-            val cutout = insets.getInsets(WindowInsetsCompat.Type.displayCutout())
-            v.setPadding(maxOf(systemBars.left, cutout.left), 0, systemBars.right, systemBars.bottom)
-            insets
-        }*/
-
-        val navHost = findViewById<View>(R.id.nav_host)
-        ViewCompat.setOnApplyWindowInsetsListener(navHost) { v, insets ->
-            val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
-            v.setPadding(
-                systemBars.left,
-                0, // ❌ không padding top để cho phép tràn lên status bar
-                systemBars.right,
-                0 // ❌ nếu bạn muốn full màn hình (video)
-            )
+            v.setPadding(systemBars.left, 0, systemBars.right, 0)
             insets
         }
 
-//        WindowCompat.getInsetsController(window, window.decorView).apply {
-//            hide(WindowInsetsCompat.Type.statusBars())
-//            systemBarsBehavior = WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
-//        }
+        val recyclerView = viewPager.getChildAt(0) as RecyclerView
+        recyclerView.addOnItemTouchListener(object : RecyclerView.OnItemTouchListener {
+            private var startX = 0f
+            private var startY = 0f
+            private val CLICK_THRESHOLD = 10.dpToPx()
 
-        val navHostFragment = supportFragmentManager.findFragmentById(R.id.nav_host) as NavHostFragment
-        val navController = navHostFragment.navController
-        val bottomNav = findViewById<BottomNavigationView>(R.id.bottomNav)
-        val fabAdd = findViewById<ImageView>(R.id.fabAdd)
-        //val dividerBottomBar = findViewById<MaterialDivider>(R.id.dvd_bottombar)
-        bottomNav.setupWithNavController(navController)
+            override fun onInterceptTouchEvent(rv: RecyclerView, e: MotionEvent): Boolean {
+                val bottomNavTop = rv.height - 100.dpToPx()
 
-        navController.addOnDestinationChangedListener { _, destination, _ ->
-            when (destination.id) {
-                R.id.homeFragment -> {
-                    val colors = ColorStateList(
-                        arrayOf(
-                            intArrayOf(android.R.attr.state_checked),
-                            intArrayOf(-android.R.attr.state_checked)
-                        ),
-                        intArrayOf(
-                            Color.parseColor("#FFFFFF"), // selected
-                            Color.parseColor("#888888")  // unselected
-                        )
-                    )
+                when (e.action) {
+                    MotionEvent.ACTION_DOWN -> {
+                        startX = e.x
+                        startY = e.y
+                    }
+                    MotionEvent.ACTION_MOVE -> {
+                        val dx = Math.abs(e.x - startX)
+                        val dy = Math.abs(e.y - startY)
+                        val isSwiping = dx > CLICK_THRESHOLD || dy > CLICK_THRESHOLD
 
-                    bottomNav.itemIconTintList = colors
-                    bottomNav.itemTextColor = colors
-                    bottomNav.setBackgroundColor(Color.BLACK)
-                    fabAdd.setImageResource(R.drawable.ic_addwhite)
-                    viewModel.setNavigation(Navigation.Home)
-                }
+                        val inBottomNav = e.y > bottomNavTop
 
-                R.id.shopFragment -> {
-                    val colors = ColorStateList(
-                        arrayOf(
-                            intArrayOf(android.R.attr.state_checked),
-                            intArrayOf(-android.R.attr.state_checked)
-                        ),
-                        intArrayOf(
-                            Color.parseColor("#000000"), // selected
-                            Color.parseColor("#888888")  // unselected
-                        )
-                    )
-                    bottomNav.itemIconTintList = colors
-                    bottomNav.itemTextColor = colors
-                    bottomNav.setBackgroundColor(Color.WHITE)
-                    fabAdd.setImageResource(R.drawable.addblack_enhanced)
-                    viewModel.setNavigation(Navigation.Profile)
+                        // Chỉ block khi swipe, không block click
+                        if (inBottomNav && isSwiping) return true
+                    }
                 }
-                R.id.inboxFragment -> {
-                    val colors = ColorStateList(
-                        arrayOf(
-                            intArrayOf(android.R.attr.state_checked),
-                            intArrayOf(-android.R.attr.state_checked)
-                        ),
-                        intArrayOf(
-                            Color.parseColor("#000000"), // selected
-                            Color.parseColor("#888888")  // unselected
-                        )
-                    )
-                    bottomNav.itemIconTintList = colors
-                    bottomNav.itemTextColor = colors
-                    bottomNav.setBackgroundColor(Color.WHITE)
-                    fabAdd.setImageResource(R.drawable.addblack_enhanced)
-                    viewModel.setNavigation(Navigation.Profile)
+                return false
+            }
+            override fun onTouchEvent(rv: RecyclerView, e: MotionEvent) {}
+            override fun onRequestDisallowInterceptTouchEvent(disallowIntercept: Boolean) {}
+        })
+
+
+        viewPager.registerOnPageChangeCallback(object : ViewPager2.OnPageChangeCallback() {
+            override fun onPageSelected(position: Int) {
+                super.onPageSelected(position)
+                when (position) {
+                    0 -> {
+                        window.navigationBarColor = Color.BLACK
+                        viewModel.setNavigation(Navigation.Home)
+                    }
+                    else -> {
+                        window.navigationBarColor = Color.WHITE
+                        viewModel.setNavigation(Navigation.User)
+                    }
                 }
-                R.id.profileFragment -> {
-                    val colors = ColorStateList(
-                        arrayOf(
-                            intArrayOf(android.R.attr.state_checked),
-                            intArrayOf(-android.R.attr.state_checked)
-                        ),
-                        intArrayOf(
-                            Color.parseColor("#000000"), // selected
-                            Color.parseColor("#888888")  // unselected
-                        )
-                    )
-                    bottomNav.itemIconTintList = colors
-                    bottomNav.itemTextColor = colors
-                    bottomNav.setBackgroundColor(Color.WHITE)
-                    fabAdd.setImageResource(R.drawable.addblack_enhanced)
-                    viewModel.setNavigation(Navigation.Profile)
-                }
+            }
+        })
+
+        viewModel.idProfile.observe(this@MainActivity) {
+            if (it != id) {
+                viewModel.triggerScrollToTop()  //Top đối với AppBarLayout
+                viewModel.setScrollToTopRecyclerView(true) //Top đối với VideoGridFragment
+                id = it
             }
         }
 
-        bottomNav.setOnItemReselectedListener { item ->
-
-            if (item.itemId == R.id.homeFragment) {
-
-                val navHostFragment =
-                    supportFragmentManager.findFragmentById(R.id.nav_host)
-
-                val currentFragment =
-                    navHostFragment?.childFragmentManager?.fragments?.firstOrNull()
-
-                if (currentFragment is HomeFragment) {
-                    currentFragment.refreshData()
-                }
+        viewModel.backPressed.observe(this@MainActivity) {
+            if (it && viewPager.currentItem == 1) {
+                viewPager.currentItem = 0
+                viewModel.setBackPressed(false)
+            } else if (it && viewPager.currentItem == 0) {
+                onBackPressedDispatcher.onBackPressed()
+                viewModel.setBackPressed(false)
             }
-        }
-
-        viewModel.colorBottomNav.observe(this) {
-            val selected = if (it == Color.BLACK) "#FFFFFF" else "#000000"
-            val colors = ColorStateList(
-                arrayOf(
-                    intArrayOf(android.R.attr.state_checked),
-                    intArrayOf(-android.R.attr.state_checked)
-                ),
-                intArrayOf(
-                    Color.parseColor(selected), // selected
-                    Color.parseColor("#888888")  // unselected
-                )
-            )
-
-            bottomNav.itemIconTintList = colors
-            bottomNav.itemTextColor = colors
-            bottomNav.setBackgroundColor(it)
-            if (it == Color.BLACK) {
-                fabAdd.setImageResource(R.drawable.ic_addwhite)
-            } else {
-                fabAdd.setImageResource(R.drawable.addblack_enhanced)
-            }
-            //dividerBottomBar.dividerColor = if (it == Color.BLACK) Color.parseColor("#98282727") else Color.parseColor("#98DEDDDD")
-        }
-
-
-        viewModel.showBar.observe(this) {
-            if (it) {
-                bottomNav.alpha = 1f
-                fabAdd.alpha = 1f
-                //dividerBottomBar.alpha = 1f
-            } else {
-                bottomNav.alpha = 0f
-                fabAdd.alpha = 0f
-                //dividerBottomBar.alpha = 0f
-            }
-        }
-        viewModel.isLandscape.observe(this) {
-            if (it) {
-                bottomNav.visibility = View.GONE
-                fabAdd.visibility = View.GONE
-                //dividerBottomBar.visibility = View.GONE
-            } else {
-                bottomNav.visibility = View.VISIBLE
-                fabAdd.visibility = View.VISIBLE
-                //dividerBottomBar.visibility = View.VISIBLE
-            }
-        }
-
-        fabAdd.setOnClickListener {
-            val intent = Intent(this, UploadVideoActivity::class.java)
-            startActivity(intent)
-            overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left)
         }
 
     }
-
 }

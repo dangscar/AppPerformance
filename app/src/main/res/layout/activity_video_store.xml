@@ -168,7 +168,8 @@
                     android:text="Tìm kiếm"
                     android:textColor="@android:color/white"
                     android:textSize="14sp"
-                    android:textStyle="bold" />
+                    android:textStyle="bold"
+                    android:includeFontPadding="false"/>
 
             </LinearLayout>
 
@@ -182,7 +183,7 @@
         android:layout_height="wrap_content"
         android:layout_marginHorizontal="12dp"
         android:layout_gravity="bottom"
-        android:backgroundTint="#1F1F1F"
+        android:backgroundTint="#333333"
         app:cardCornerRadius="28dp"
         app:cardElevation="0dp"
         app:strokeWidth="1dp"
@@ -196,7 +197,8 @@
             android:layout_height="match_parent"
             android:orientation="horizontal"
             android:gravity="center_vertical"
-            android:padding="10dp">
+            android:paddingHorizontal="12dp"
+            android:paddingVertical="10dp">
 
             <!-- EDIT TEXT -->
             <EditText
@@ -206,10 +208,11 @@
                 android:layout_weight="1"
 
                 android:background="@null"
-                android:hint="Add comment..."
+                android:hint="Thêm bình luận..."
                 android:textSize="13sp"
                 android:textColor="@android:color/white"
                 android:textColorHint="#B3FFFFFF"
+                android:fontFamily="@font/tiktoksans_regular"
 
                 android:maxLines="1"
                 android:singleLine="true"
@@ -223,31 +226,28 @@
                 android:textIsSelectable="false"/>
 
             <!-- IMAGE -->
-            <!--<ImageView
+            <ImageView
                 android:id="@+id/ivImage"
-                android:layout_width="20dp"
-                android:layout_height="20dp"
+                android:layout_width="28dp"
+                android:layout_height="28dp"
                 android:layout_marginStart="16dp"
-                android:src="@drawable/ic_image"
-                app:tint="@android:color/white"/>-->
+                android:src="@drawable/u1f602_u1f602" />
 
             <!-- EMOJI -->
             <ImageView
                 android:id="@+id/ivEmoji"
-                android:layout_width="24dp"
-                android:layout_height="24dp"
+                android:layout_width="28dp"
+                android:layout_height="28dp"
                 android:layout_marginStart="16dp"
-                android:src="@drawable/ic_emoji"
-                app:tint="@android:color/white"/>
+                android:src="@drawable/u1f604_u1f605"/>
 
             <!-- MENTION -->
             <ImageView
                 android:id="@+id/ivMention"
-                android:layout_width="24dp"
-                android:layout_height="24dp"
+                android:layout_width="28dp"
+                android:layout_height="28dp"
                 android:layout_marginStart="16dp"
-                android:src="@drawable/ic_tag"
-                app:tint="@android:color/white"/>
+                android:src="@drawable/u1f970_u2764_ufe0f"/>
 
         </LinearLayout>
 

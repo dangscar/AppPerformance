@@ -3,15 +3,20 @@ package com.nlhd.appperformance.ViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
-import androidx.media3.exoplayer.ExoPlayer
 import com.nlhd.appperformance.Domain.UseCase.Video.VideoUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
+
 @HiltViewModel
 class SearchSuccessViewModel @Inject constructor(
     private val videoUseCase: VideoUseCase
 ): ViewModel() {
-    fun videos(query: String) = videoUseCase.searchVideos(query)
+    fun videos(query: String, timestamp: Long) = videoUseCase.searchVideos(query, timestamp)
+    
+    fun clearSearchFlow(query: String, timestamp: Long) {
+        videoUseCase.clearSearchFlow(query, timestamp)
+    }
+
     val videosExplore = videoUseCase.getVideosExplore()
 
     private var _currentPosition: MutableLiveData<Int> = MutableLiveData(0)
@@ -36,5 +41,4 @@ class SearchSuccessViewModel @Inject constructor(
             _currentPosition.value = position
         }
     }
-
 }

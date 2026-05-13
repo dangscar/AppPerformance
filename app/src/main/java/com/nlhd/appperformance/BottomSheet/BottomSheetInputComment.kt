@@ -13,12 +13,16 @@ import android.view.inputmethod.EditorInfo
 import android.view.inputmethod.InputMethodManager
 import android.widget.EditText
 import android.widget.ImageView
+import android.widget.LinearLayout
 import android.widget.RelativeLayout
 import androidx.core.content.ContextCompat
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
+import androidx.core.view.doOnLayout
+import androidx.core.view.updateLayoutParams
 import androidx.core.widget.doOnTextChanged
+import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -33,11 +37,13 @@ import com.google.android.material.shape.ShapeAppearanceModel
 import com.nlhd.appperformance.Adapter.EmojiAdapter
 import com.nlhd.appperformance.Feature.LoginScreen.LoginBottomSheet
 import com.nlhd.appperformance.R
+import com.nlhd.appperformance.ViewModel.MainViewModel
 import com.nlhd.appperformance.ViewModel.ProfileViewModel
+import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 import kotlin.getValue
 
-
+@AndroidEntryPoint
 class BottomSheetInputComment(
     private val imageUrl: String = "",
     private val text: String,
@@ -47,6 +53,9 @@ class BottomSheetInputComment(
     private lateinit var edtInputComment: EditText
     private lateinit var iv_avatar: ImageView
     private lateinit var rv_emoji: RecyclerView
+    private lateinit var rv_icon: RecyclerView
+    private lateinit var ll_actionInput: LinearLayout
+    private val viewModel: MainViewModel by activityViewModels()
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -57,7 +66,23 @@ class BottomSheetInputComment(
 
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
         val dialog = super.onCreateDialog(savedInstanceState)
+        WindowCompat.setDecorFitsSystemWindows(dialog.window!!, false)
+        dialog.window?.setWindowAnimations(0)
         dialog.setOnShowListener {
+            val decorView = dialog.window?.decorView ?: return@setOnShowListener
+            WindowCompat.setDecorFitsSystemWindows(dialog.window!!, false)
+
+            ViewCompat.setOnApplyWindowInsetsListener(decorView) { _, insets ->
+                val ime = insets.getInsets(WindowInsetsCompat.Type.ime()).bottom
+                val nav = insets.getInsets(WindowInsetsCompat.Type.navigationBars()).bottom
+                val keyboardHeight = ime - nav
+
+                if (keyboardHeight > 0 && keyboardHeight != viewModel.text.value) {
+                    viewModel.setText(keyboardHeight)
+                }
+                insets
+            }
+
             val bottomSheet =
                 dialog.findViewById<View>(
                     com.google.android.material.R.id.design_bottom_sheet
@@ -74,7 +99,10 @@ class BottomSheetInputComment(
             behavior.state = BottomSheetBehavior.STATE_EXPANDED
         }
         dialog.apply {
-            window?.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE)
+            window?.setSoftInputMode(
+                WindowManager.LayoutParams.SOFT_INPUT_ADJUST_PAN or
+                        WindowManager.LayoutParams.SOFT_INPUT_STATE_VISIBLE
+            )
         }
         return dialog
         /*return BottomSheetDialog(requireContext(), theme).apply {
@@ -82,6 +110,15 @@ class BottomSheetInputComment(
                 WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE
             )
         }*/
+    }
+
+
+
+    private fun getKeyboardHeight(): Int {
+        val rect = Rect()
+        requireActivity().window.decorView.getWindowVisibleDisplayFrame(rect)
+        val screenHeight = requireActivity().window.decorView.height
+        return screenHeight - rect.bottom
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -92,7 +129,16 @@ class BottomSheetInputComment(
         edtInputComment = view.findViewById<EditText>(R.id.edtInputComment)
         iv_avatar = view.findViewById<ImageView>(R.id.iv_avatar)
         rv_emoji = view.findViewById<RecyclerView>(R.id.rv_emoji)
+        rv_icon = view.findViewById<RecyclerView>(R.id.rv_icon)
+        ll_actionInput = view.findViewById<LinearLayout>(R.id.ll_actionInput)
 
+        viewModel.text.observe(viewLifecycleOwner) { text->
+            if (text > 0) {
+                rv_icon.updateLayoutParams {
+                    height = text
+                }
+            }
+        }
 
         Glide.with(iv_avatar).load(imageUrl).error(R.drawable.asus).into(iv_avatar)
         edtInputComment.post {
@@ -102,6 +148,7 @@ class BottomSheetInputComment(
                     as InputMethodManager
 
             imm.showSoftInput(edtInputComment, InputMethodManager.SHOW_IMPLICIT)
+
         }
         edtInputComment.setText(text)
         edtInputComment.setOnEditorActionListener { _, actionId, _ ->
@@ -136,8 +183,8 @@ class BottomSheetInputComment(
 
         rv_emoji.adapter = adapter
 
-    }
 
+    }
 
 
 }

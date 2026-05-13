@@ -7,7 +7,6 @@
     android:background="@color/black"
     android:id="@+id/homeFragment">
 
-
     <androidx.viewpager2.widget.ViewPager2
         android:id="@+id/vpTabs"
         android:layout_width="match_parent"
@@ -27,8 +26,8 @@
         <!-- LIVE -->
         <ImageView
             android:id="@+id/ivRefresh"
-            android:layout_width="28dp"
-            android:layout_height="28dp"
+            android:layout_width="26dp"
+            android:layout_height="26dp"
             android:src="@drawable/live"
             app:tint="#FFFFFF"
             android:layout_marginStart="14dp"
@@ -38,7 +37,7 @@
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="1"
-            android:layout_marginHorizontal="4dp">
+            >
 
             <com.google.android.material.tabs.TabLayout
                 android:id="@+id/tabLayout"
@@ -64,8 +63,8 @@
         <!-- SEARCH -->
         <ImageView
             android:id="@+id/ivSearch"
-            android:layout_width="28dp"
-            android:layout_height="28dp"
+            android:layout_width="26dp"
+            android:layout_height="26dp"
             android:src="@drawable/ic_search"
             app:tint="#CDEDECEC"
             android:layout_marginEnd="14dp"

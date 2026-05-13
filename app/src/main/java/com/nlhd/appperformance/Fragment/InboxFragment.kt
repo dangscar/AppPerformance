@@ -20,6 +20,7 @@ class InboxFragment : Fragment(R.layout.fragment_inbox) {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+
         requireActivity().window.navigationBarColor = ContextCompat.getColor(requireContext(), R.color.white)
         rvStories = view.findViewById(R.id.rvStories)
         rvInbox = view.findViewById(R.id.rvInbox)

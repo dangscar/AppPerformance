@@ -3,11 +3,13 @@ package com.nlhd.appperformance.Fragment
 import android.annotation.SuppressLint
 import android.content.Intent
 import android.content.res.ColorStateList
+import android.content.res.Resources
 import android.graphics.Color
 import android.graphics.Typeface
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
+import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
@@ -27,12 +29,12 @@ import com.nlhd.appperformance.R
 import com.nlhd.appperformance.Activity.SearchActivity
 import com.nlhd.appperformance.ViewModel.MainViewModel
 import dagger.hilt.android.AndroidEntryPoint
-import kotlin.getValue
 import androidx.core.graphics.toColorInt
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.doOnLayout
 import androidx.core.view.updateLayoutParams
+import androidx.recyclerview.widget.RecyclerView
 import com.nlhd.appperformance.Utils.Navigation
 import com.nlhd.appperformance.Utils.TabSelected
 import com.nlhd.appperformance.Utils.tabs
@@ -48,7 +50,7 @@ class HomeFragment: Fragment(R.layout.fragment_home) {
     private lateinit var iv_refresh: ImageView
     private val mainViewModel: MainViewModel by activityViewModels()
 
-    private var homePagerAdapter: HomePagerAdapter? = null
+    private lateinit var homePagerAdapter: HomePagerAdapter
 
     private fun centerSelectedTab(tabLayout: TabLayout, tab: TabLayout.Tab?) {
         if (tab == null) return
@@ -76,7 +78,7 @@ class HomeFragment: Fragment(R.layout.fragment_home) {
                 iv_search.imageTintList = ColorStateList.valueOf(Color.BLACK)
             }
             else {
-                tv.setTextColor("#CDEDECEC".toColorInt())
+                tv.setTextColor("#B3FFFFFF".toColorInt())
                 iv_refresh.imageTintList = ColorStateList.valueOf(Color.WHITE)
                 iv_search.imageTintList = ColorStateList.valueOf(Color.WHITE)
             }
@@ -84,22 +86,24 @@ class HomeFragment: Fragment(R.layout.fragment_home) {
                 tv.setTextColor(Color.WHITE)
                 iv_refresh.imageTintList = ColorStateList.valueOf(Color.WHITE)
                 iv_search.imageTintList = ColorStateList.valueOf(Color.WHITE)
-                mainViewModel.setTabSelected(TabSelected.Following)
             }
             if (i == tabLayout.tabCount-1 && (selectedPos == tabLayout.tabCount-1)) {
                 tv.setTextColor(Color.WHITE)
                 iv_refresh.imageTintList = ColorStateList.valueOf(Color.WHITE)
                 iv_search.imageTintList = ColorStateList.valueOf(Color.WHITE)
-                mainViewModel.setTabSelected(TabSelected.Suggestions)
             }
 
         }
     }
 
-    @SuppressLint("ResourceType")
+    // Extension
+    fun Int.dpToPx(): Int = (this * Resources.getSystem().displayMetrics.density).toInt()
+
+    @SuppressLint("ResourceType", "ClickableViewAccessibility")
     @OptIn(UnstableApi::class)
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+
 
         viewPager = view.findViewById(R.id.vpTabs)
         topBar = view.findViewById(R.id.topBar)
@@ -109,7 +113,28 @@ class HomeFragment: Fragment(R.layout.fragment_home) {
         iv_search = view.findViewById(R.id.ivSearch)
         iv_refresh = view.findViewById(R.id.ivRefresh)
 
-        val topBar = view.findViewById<View>(R.id.topBar)
+        // Fix Nested ViewPager2 Scrolling
+        val recyclerView = viewPager.getChildAt(0) as RecyclerView
+        recyclerView.addOnItemTouchListener(object : RecyclerView.OnItemTouchListener {
+            override fun onInterceptTouchEvent(rv: RecyclerView, e: MotionEvent): Boolean {
+                when (e.action) {
+                    MotionEvent.ACTION_DOWN -> {
+                        // Khi bắt đầu chạm vào ViewPager con, yêu cầu cha không chặn
+                        if (e.x < viewPager.width-100.dpToPx()) {
+                            rv.parent.requestDisallowInterceptTouchEvent(true)
+                        } else {
+                            rv.parent.requestDisallowInterceptTouchEvent(false)
+
+                        }
+
+
+                    }
+                }
+                return false
+            }
+            override fun onTouchEvent(rv: RecyclerView, e: MotionEvent) {}
+            override fun onRequestDisallowInterceptTouchEvent(disallowIntercept: Boolean) {}
+        })
 
         view.doOnLayout {
             val insets = ViewCompat.getRootWindowInsets(view)
@@ -190,6 +215,11 @@ class HomeFragment: Fragment(R.layout.fragment_home) {
                 }
                 updateTabColor(tabLayout, tab.position)
 
+                when (tab.position) {
+                    4 -> { mainViewModel.setTabSelected(TabSelected.Suggestions) }
+                    2 -> { mainViewModel.setTabSelected(TabSelected.Following) }
+                    else -> { mainViewModel.setTabSelected(TabSelected.Explore) }
+                }
             }
 
             override fun onTabUnselected(tab: TabLayout.Tab?) {
@@ -204,9 +234,6 @@ class HomeFragment: Fragment(R.layout.fragment_home) {
 
         })
 
-//        viewPager.post {
-//
-//        }
         //Giữ trạng thái tab current hiện tại
         mainViewModel.currentTab.observe(viewLifecycleOwner) {
             if (!it) {
@@ -223,32 +250,26 @@ class HomeFragment: Fragment(R.layout.fragment_home) {
                 super.onPageScrolled(position, positionOffset, positionOffsetPixels)
 
                 val blendedColor = when {
-                    // Page 3: vuốt sang phải, positionOffset từ 0 → 0.5
                     position == 3 && positionOffset > 0.5f -> {
                         updateTabColor(tabLayout, position+1)
                         Color.BLACK
                     }
                     position == 3 && positionOffset <= 0.5f -> {
                         updateTabColor(tabLayout, position)
-                        val blend = positionOffset / 0.5f // Map 0..0.5 -> 0..1
+                        val blend = positionOffset / 0.5f
                         interpolateColor(Color.WHITE, Color.BLACK, blend)
                     }
-                    // Page 2: vuốt sang trái, positionOffset từ 0.5 → 1
                     position == 2 && positionOffset >= 0.5f -> {
                         updateTabColor(tabLayout, position)
-                        val blend = (positionOffset - 0.5f) / 0.5f // Map 0.5..1 -> 0..1
+                        val blend = (positionOffset - 0.5f) / 0.5f
                         interpolateColor(Color.BLACK, Color.WHITE, blend)
                     }
-                    // Các trường hợp còn lại: giữ màu đen
                     else -> {
                         Color.BLACK
                     }
                 }
 
-                // Áp dụng màu đã nội suy
                 mainViewModel.setColorBottomNav(blendedColor)
-                //requireActivity().window.statusBarColor = blendedColor
-                //requireActivity().window.navigationBarColor = blendedColor
             }
         })
 
@@ -260,15 +281,9 @@ class HomeFragment: Fragment(R.layout.fragment_home) {
         }
 
         iv_refresh.setOnClickListener {
-//            tabLayout.setTabTextColors(
-//                Color.BLACK, // unselected
-//                Color.BLACK  // selected
-//            )
-            homePagerAdapter?.refreshData()
-
+            mainViewModel.setRefresh(true)
         }
 
-        //Hiển thị topBar
         mainViewModel.showBar.observe(viewLifecycleOwner) {
             topBar.visibility = if (it) View.VISIBLE else View.GONE
         }
@@ -276,13 +291,10 @@ class HomeFragment: Fragment(R.layout.fragment_home) {
     }
 
     private fun colorSystemBars(color: Int) {
-//        requireActivity().window.statusBarColor =
-//            ContextCompat.getColor(requireContext(), color)
-        requireActivity().window.navigationBarColor =
-            ContextCompat.getColor(requireContext(), color)
+        requireActivity().window.navigationBarColor = ContextCompat.getColor(requireContext(), color)
+        requireActivity().window.statusBarColor = Color.TRANSPARENT
     }
 
-    //Thay đổi màu topBar, bottomBar
     private fun interpolateColor(startColor: Int, endColor: Int, fraction: Float): Int {
         val startA = Color.alpha(startColor)
         val startR = Color.red(startColor)
@@ -303,13 +315,9 @@ class HomeFragment: Fragment(R.layout.fragment_home) {
     }
 
 
+    @OptIn(UnstableApi::class)
     fun refreshData() {
-        if (homePagerAdapter == null) return
-        homePagerAdapter?.refreshData()
+
     }
 
-    override fun onDestroyView() {
-        super.onDestroyView()
-        homePagerAdapter = null
-    }
 }

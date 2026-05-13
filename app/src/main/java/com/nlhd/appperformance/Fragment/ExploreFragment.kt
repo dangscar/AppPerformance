@@ -1,6 +1,7 @@
 package com.nlhd.appperformance.Fragment
 
 import android.content.Intent
+import android.content.res.Resources
 import android.graphics.Color
 import android.os.Bundle
 import android.util.Log
@@ -28,6 +29,9 @@ import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.doOnLayout
 import androidx.core.view.updateLayoutParams
+import androidx.fragment.app.activityViewModels
+import com.nlhd.appperformance.Utils.TabSelected
+import com.nlhd.appperformance.ViewModel.MainViewModel
 
 // TODO: Rename parameter arguments, choose names that match
 // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
@@ -50,7 +54,9 @@ class ExploreFragment : Fragment() {
 
     private lateinit var adapter: SearchSuccessAdapter
     private val viewModel: ExploreViewModel by viewModels()
+    private val mainViewModel: MainViewModel by activityViewModels()
     private var isLoaded = false
+    fun Int.dpToPx(): Int = (this * Resources.getSystem().displayMetrics.density).toInt()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -76,8 +82,8 @@ class ExploreFragment : Fragment() {
                 ?.getInsets(WindowInsetsCompat.Type.systemBars())
 
             insets?.let {
-                binding.flExplore.updateLayoutParams<ViewGroup.MarginLayoutParams> {
-                    topMargin = it.top   // ✅ status bar + margin thêm
+                binding.rvFeed.updateLayoutParams<ViewGroup.MarginLayoutParams> {
+                    topMargin = it.top + 50.dpToPx()   // ✅ status bar + margin thêm
                 }
             }
         }
@@ -119,11 +125,13 @@ class ExploreFragment : Fragment() {
     override fun onResume() {
         super.onResume()
         if (!isLoaded) {
-            binding.flExplore.setBackgroundColor("#FFFFFFFF".toColorInt())
+            binding.flExplore.setBackgroundColor("#F2FFFFFF".toColorInt())
             binding.rvFeed.setBackgroundColor("#FFF2F2F2".toColorInt())
             observeViewModel()
             isLoaded = true
         }
+        mainViewModel.setTabSelected(TabSelected.Explore)
+
     }
 
     @OptIn(UnstableApi::class)

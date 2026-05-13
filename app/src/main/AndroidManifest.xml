@@ -18,6 +18,11 @@
         android:theme="@style/Theme.AppPerformance"
         android:usesCleartextTraffic="true">
         <activity
+            android:name=".Activity.CapCutVideoActivity"
+            android:exported="false"
+            android:screenOrientation="portrait"
+            android:theme="@style/Theme.AppPerformance" />
+        <activity
             android:name=".Activity.ProfileActivity"
             android:exported="false" />
         <activity

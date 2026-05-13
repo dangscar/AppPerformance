@@ -1,6 +1,7 @@
 package com.nlhd.appperformance.Adapter
 
 import android.content.Context
+import android.content.Intent
 import android.graphics.Color
 import android.graphics.PorterDuff
 import android.graphics.Typeface
@@ -14,6 +15,9 @@ import android.text.Spannable
 import android.text.SpannableString
 import android.text.SpannableStringBuilder
 import android.text.Spanned
+import android.text.TextPaint
+import android.text.method.LinkMovementMethod
+import android.text.style.ClickableSpan
 import android.text.style.ForegroundColorSpan
 import android.text.style.RelativeSizeSpan
 import android.text.style.StyleSpan
@@ -44,6 +48,8 @@ import androidx.paging.PagingDataAdapter
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
+import com.nlhd.appperformance.Activity.CapCutVideoActivity
+import com.nlhd.appperformance.Activity.SearchActivity
 import com.nlhd.appperformance.Domain.Entity.Video.Video
 import com.nlhd.appperformance.R
 import com.nlhd.appperformance.databinding.ItemVideoBinding
@@ -181,6 +187,14 @@ class VideoPagerAdapter(
             onClickShare()
         }
 
+        //Capcut
+        holder.binding.llCapcut.setOnClickListener {
+            val intent = Intent(context, CapCutVideoActivity::class.java).apply {
+                putExtra(CapCutVideoActivity.EXTRA_VIDEO_URL, video.videoUrl)
+            }
+            context.startActivity(intent)
+        }
+
         val username = video.user.name
         val time = " • 2 giờ trước"
 
@@ -205,7 +219,11 @@ class VideoPagerAdapter(
         )
 
         holder.binding.txtUsername.text = username
-        formatDescription(holder.binding.txtDescription, video.caption)
+        if (video.caption.isNotEmpty()) {
+            formatDescription(holder.binding.txtDescription, video.caption)
+        } else {
+            holder.binding.txtDescription.visibility = View.GONE
+        }
         holder.binding.llComment.setOnClickListener {
             onClickComment(video.id)
         }
@@ -345,7 +363,9 @@ class VideoPagerAdapter(
 
             players.forEach { (pos, player) ->
                 when {
-                    pos == current -> player.playWhenReady = true
+                    pos == current ->{
+                        player.playWhenReady = true
+                    }
                     pos in keepRange -> {
                         player.seekTo(0)
                         player.playWhenReady = false
@@ -437,31 +457,40 @@ class VideoPagerAdapter(
 
     fun formatDescription(textView: TextView, text: String) {
         val spannable = SpannableString(text)
-
         val regex = Regex("([@#][A-Za-z0-9_]+)")
 
-        regex.findAll(text).forEach {
-            val start = it.range.first
-            val end = it.range.last + 1
+        regex.findAll(text).forEach { match ->
+            val start = match.range.first
+            val end = match.range.last + 1
+            val tag = match.value
 
-            // đổi màu
-            spannable.setSpan(
-                ForegroundColorSpan(Color.parseColor("#B3FAFAFA")),
-                start,
-                end,
-                Spannable.SPAN_EXCLUSIVE_EXCLUSIVE
-            )
+            // Click
+            val clickSpan = object : ClickableSpan() {
+                override fun onClick(widget: View) {
+                    val intent = Intent(context, SearchActivity::class.java).apply {
+                        putExtra(SearchActivity.EXTRA_QUERY, tag) // truyền "#xuhuong" hoặc "@username"
+                    }
+                    context.startActivity(intent)
+                }
+                // Giữ màu chữ tự set, không dùng màu mặc định của ClickableSpan
+                override fun updateDrawState(ds: TextPaint) {
+                    ds.color = Color.parseColor("#B3FAFAFA")
+                    ds.isUnderlineText = false
+                }
+            }
 
-            // semibold
+            spannable.setSpan(clickSpan, start, end, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE)
             spannable.setSpan(
                 StyleSpan(Typeface.BOLD),
-                start,
-                end,
+                start, end,
                 Spannable.SPAN_EXCLUSIVE_EXCLUSIVE
             )
         }
 
         textView.text = spannable
+        textView.movementMethod = LinkMovementMethod.getInstance()
+        // Xóa highlight màu khi click
+        textView.highlightColor = Color.TRANSPARENT
     }
 
     fun updateCurrentPosition(position: Int) {

@@ -96,6 +96,7 @@ class FollowingFragment : Fragment() {
                 viewPager.post {
                     val player = players[position]
                     holder.binding.playerView.player = player
+                    if (player == null) return@post
                     adapter.setupTimeBar(holder, players[position]!!)
                 }
             }

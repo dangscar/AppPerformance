@@ -1,15 +1,18 @@
 package com.nlhd.appperformance.Fragment
 
 import android.content.Intent
+import android.graphics.Typeface
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.TextView
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.paging.LoadState
 import androidx.recyclerview.widget.GridLayoutManager
+import com.google.android.material.tabs.TabLayout
 import com.nlhd.appperformance.Adapter.SearchSuccessAdapter
 import com.nlhd.appperformance.DetailVideoActivity
 import com.nlhd.appperformance.ViewModel.SearchSuccessViewModel
@@ -26,12 +29,14 @@ class SearchFeedFragment : Fragment() {
     private lateinit var adapter: SearchSuccessAdapter
     private val viewModel: SearchSuccessViewModel by viewModels()
     private var keyword: String = ""
+    private var searchTimestamp: Long = 0L
 
     companion object {
         fun newInstance(keyword: String): SearchFeedFragment {
             val fragment = SearchFeedFragment()
             val args = Bundle()
             args.putString("keyword", keyword)
+            args.putLong("timestamp", System.currentTimeMillis())
             fragment.arguments = args
             return fragment
         }
@@ -48,6 +53,7 @@ class SearchFeedFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         keyword = arguments?.getString("keyword") ?: ""
+        searchTimestamp = arguments?.getLong("timestamp") ?: 0L
 
         setupTabs()
         setupRecyclerView()
@@ -67,6 +73,7 @@ class SearchFeedFragment : Fragment() {
                 val intent = Intent(requireContext(), DetailVideoActivity::class.java)
                 intent.putExtra("position", position)
                 intent.putExtra("keyword", keyword)
+                intent.putExtra("timestamp", searchTimestamp)
                 startActivity(intent)
             }
         )
@@ -89,11 +96,25 @@ class SearchFeedFragment : Fragment() {
         binding.errorView.setOnClickListener {
             adapter.retry()
         }
+
+        binding.tabLayoutFilter.addOnTabSelectedListener(object : TabLayout.OnTabSelectedListener {
+            override fun onTabSelected(tab: TabLayout.Tab?) {
+                tab?.view?.findViewById<TextView>(android.R.id.text1)
+                    ?.setTypeface(null, Typeface.BOLD)
+            }
+
+            override fun onTabUnselected(tab: TabLayout.Tab?) {
+                tab?.view?.findViewById<TextView>(android.R.id.text1)
+                    ?.setTypeface(null, Typeface.NORMAL)
+            }
+
+            override fun onTabReselected(tab: TabLayout.Tab?) {}
+        })
     }
 
     private fun observeViewModel() {
         viewLifecycleOwner.lifecycleScope.launch {
-            viewModel.videos(keyword).collectLatest { pagingData ->
+            viewModel.videos(keyword, searchTimestamp).collectLatest { pagingData ->
                 adapter.submitData(pagingData)
             }
         }
@@ -103,4 +124,10 @@ class SearchFeedFragment : Fragment() {
         super.onDestroyView()
         _binding = null
     }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        viewModel.clearSearchFlow(keyword, searchTimestamp)
+    }
+
 }

@@ -5,7 +5,8 @@
     android:layout_height="match_parent"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     tools:context=".Fragment.ShopFragment"
-    android:background="@color/white">
+    android:background="@color/white"
+    android:id="@+id/cdl_shop">
 
     <com.google.android.material.appbar.AppBarLayout
         android:id="@+id/appBarLayout2"

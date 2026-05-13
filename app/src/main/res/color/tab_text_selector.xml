@@ -3,6 +3,7 @@
     <item android:state_selected="true"
         android:color="#FFFFFF" />
 <!--    <item android:color="#888888"/>-->
-    <item android:state_selected="false" android:color="#CDDEDBDB"/>
+<!--    <item android:state_selected="false" android:color="#CDDEDBDB"/>-->
+    <item android:state_selected="false" android:color="#F2FFFFFF"/>
     <item android:color="@color/black"/>
 </selector>

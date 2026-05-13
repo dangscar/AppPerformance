@@ -1,0 +1,185 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/black">
+
+    <androidx.fragment.app.FragmentContainerView
+        android:id="@+id/nav_host"
+        android:name="androidx.navigation.fragment.NavHostFragment"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        app:defaultNavHost="true"
+        app:layout_constraintBottom_toTopOf="@id/bottomBar"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:navGraph="@navigation/nav_graph" />
+
+    <FrameLayout
+        android:id="@+id/bottomBar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:visibility="visible"
+        app:layout_constraintBottom_toBottomOf="parent">
+
+        <com.google.android.material.bottomnavigation.BottomNavigationView
+            android:id="@+id/bottomNav"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="bottom"
+            android:background="@android:color/transparent"
+            app:itemIconSize="32dp"
+            app:itemIconTint="@color/bottom_nav_color"
+            app:itemTextAppearanceActive="@style/BottomNavTextActive"
+            app:itemTextAppearanceInactive="@style/BottomNavTextInactive"
+            app:itemTextColor="@color/bottom_nav_color"
+            app:labelVisibilityMode="labeled"
+            app:menu="@menu/bottom_menu"
+            android:nestedScrollingEnabled="false">
+
+            <ImageView
+                android:id="@+id/fabAdd"
+                android:layout_width="46dp"
+                android:layout_height="46dp"
+                android:layout_gravity="top|center_horizontal"
+                android:elevation="10dp"
+                android:src="@drawable/ic_addwhite" />
+        </com.google.android.material.bottomnavigation.BottomNavigationView>
+    </FrameLayout>
+
+    <!-- Bottom Bar -->
+<!--    <LinearLayout-->
+<!--        android:id="@+id/bottomBarNew"-->
+<!--        android:layout_width="match_parent"-->
+<!--        android:layout_height="wrap_content"-->
+<!--        android:background="#000"-->
+<!--        android:baselineAligned="false"-->
+<!--        android:gravity="center"-->
+<!--        android:orientation="horizontal"-->
+<!--        android:weightSum="5"-->
+<!--        app:layout_constraintBottom_toBottomOf="parent"-->
+<!--        app:layout_constraintStart_toStartOf="parent">-->
+
+<!--        &lt;!&ndash; Home &ndash;&gt;-->
+<!--        <LinearLayout-->
+<!--            android:id="@+id/navHome"-->
+<!--            android:layout_width="0dp"-->
+<!--            android:layout_height="match_parent"-->
+<!--            android:layout_weight="1"-->
+<!--            android:gravity="center"-->
+<!--            android:orientation="vertical">-->
+
+<!--            <ImageView-->
+<!--                android:layout_width="30dp"-->
+<!--                android:layout_height="30dp"-->
+<!--                android:src="@drawable/ic_home"-->
+<!--                app:tint="#FFFFFF" />-->
+
+<!--            <TextView-->
+<!--                android:layout_width="wrap_content"-->
+<!--                android:layout_height="wrap_content"-->
+<!--                android:text="Trang chủ"-->
+<!--                android:textColor="#FFFFFF"-->
+<!--                android:textSize="10sp"/>-->
+<!--        </LinearLayout>-->
+
+<!--        &lt;!&ndash; Explore &ndash;&gt;-->
+<!--        <LinearLayout-->
+<!--            android:id="@+id/navExplore"-->
+<!--            android:layout_width="0dp"-->
+<!--            android:layout_height="match_parent"-->
+<!--            android:layout_weight="1"-->
+<!--            android:gravity="center"-->
+<!--            android:orientation="vertical">-->
+
+<!--            <ImageView-->
+<!--                android:layout_width="30dp"-->
+<!--                android:layout_height="30dp"-->
+<!--                android:src="@drawable/ic_explore"-->
+<!--                android:tint="#FFFFFF"/>-->
+
+<!--            <TextView-->
+<!--                android:layout_width="wrap_content"-->
+<!--                android:layout_height="wrap_content"-->
+<!--                android:text="Cửa hàng"-->
+<!--                android:textColor="#FFFFFF"-->
+<!--                android:textSize="10sp"/>-->
+<!--        </LinearLayout>-->
+
+<!--        &lt;!&ndash; Add Button &ndash;&gt;-->
+<!--        <FrameLayout-->
+<!--            android:id="@+id/navAdd"-->
+<!--            android:layout_width="0dp"-->
+<!--            android:layout_height="match_parent"-->
+<!--            android:layout_weight="1"-->
+<!--            android:gravity="center">-->
+
+<!--            <ImageView-->
+<!--                android:id="@+id/fabAdd"-->
+<!--                android:layout_width="46dp"-->
+<!--                android:layout_height="46dp"-->
+<!--                android:layout_gravity="top|center_horizontal"-->
+<!--                android:elevation="10dp"-->
+<!--                android:src="@drawable/ic_addwhite" />-->
+<!--        </FrameLayout>-->
+
+<!--        &lt;!&ndash; Chat &ndash;&gt;-->
+<!--        <LinearLayout-->
+<!--            android:id="@+id/navChat"-->
+<!--            android:layout_width="0dp"-->
+<!--            android:layout_height="match_parent"-->
+<!--            android:layout_weight="1"-->
+<!--            android:gravity="center"-->
+<!--            android:orientation="vertical">-->
+
+<!--            <ImageView-->
+<!--                android:layout_width="32dp"-->
+<!--                android:layout_height="32dp"-->
+<!--                android:src="@drawable/inbox"-->
+<!--                android:tint="#FFFFFF"/>-->
+
+<!--            <TextView-->
+<!--                android:layout_width="wrap_content"-->
+<!--                android:layout_height="wrap_content"-->
+<!--                android:text="Hộp thư"-->
+<!--                android:textColor="#FFFFFF"-->
+<!--                android:textSize="10sp"/>-->
+<!--        </LinearLayout>-->
+
+<!--        &lt;!&ndash; Profile &ndash;&gt;-->
+<!--        <LinearLayout-->
+<!--            android:id="@+id/navProfile"-->
+<!--            android:layout_width="0dp"-->
+<!--            android:layout_height="match_parent"-->
+<!--            android:layout_weight="1"-->
+<!--            android:gravity="center"-->
+<!--            android:orientation="vertical">-->
+
+<!--            <ImageView-->
+<!--                android:layout_width="30dp"-->
+<!--                android:layout_height="30dp"-->
+<!--                android:src="@drawable/ic_profile"-->
+<!--                app:tint="#FFFFFF" />-->
+
+<!--            <TextView-->
+<!--                android:layout_width="wrap_content"-->
+<!--                android:layout_height="wrap_content"-->
+<!--                android:text="Hồ sơ"-->
+<!--                android:textColor="#FFFFFF"-->
+<!--                android:textSize="10sp"/>-->
+<!--        </LinearLayout>-->
+
+<!--    </LinearLayout>-->
+
+    <!-- View này phải nằm ở cuối file để đè lên trên tất cả (Z-index cao nhất) -->
+<!--    <LinearLayout-->
+<!--        android:id="@+id/playSpeedRight"-->
+<!--        android:layout_width="150dp"-->
+<!--        android:layout_height="match_parent"-->
+<!--        android:background="@android:color/transparent"-->
+<!--        app:layout_constraintEnd_toEndOf="parent"-->
+<!--        app:layout_constraintTop_toTopOf="parent" />-->
+
+</androidx.constraintlayout.widget.ConstraintLayout>

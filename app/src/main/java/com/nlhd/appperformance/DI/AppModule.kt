@@ -5,6 +5,7 @@ import com.nlhd.appperformance.ApplicationScope
 import com.nlhd.appperformance.Data.Repository.VideoRepositoryImp
 import com.nlhd.appperformance.Domain.Repository.VideoRepository
 import com.nlhd.appperformance.Domain.UseCase.Video.AddComment
+import com.nlhd.appperformance.Domain.UseCase.Video.ClearSearchFlow
 import com.nlhd.appperformance.Domain.UseCase.Video.GetComments
 import com.nlhd.appperformance.Domain.UseCase.Video.GetFollowing
 import com.nlhd.appperformance.Domain.UseCase.Video.GetVideos
@@ -87,7 +88,8 @@ object AppModule {
             getComments = GetComments(repository),
             addComment = AddComment(repository),
             getFollowing = GetFollowing(repository),
-            uploadVideo = UploadVideo(repository)
+            uploadVideo = UploadVideo(repository),
+            clearSearchFlow = ClearSearchFlow(repository)
         )
     }
 

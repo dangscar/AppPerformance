@@ -31,6 +31,38 @@ class MainViewModel @Inject constructor(
     private var _navigation: MutableLiveData<Navigation> = MutableLiveData(Navigation.Home)
     val navigation: LiveData<Navigation> = _navigation
 
+    private var _idProfile = MutableLiveData<Int>(-1)
+    val idProfile: LiveData<Int> = _idProfile
+
+    private var _backPressed = MutableLiveData(false)
+    val backPressed: LiveData<Boolean> = _backPressed
+
+    private val _scrollToTop = MutableLiveData<Boolean>()
+    val scrollToTop: LiveData<Boolean> = _scrollToTop
+
+    private var _scrollToTopRecyclerView = MutableLiveData<Boolean>()
+    val scrollToTopRecyclerView: LiveData<Boolean> = _scrollToTopRecyclerView
+
+    fun setScrollToTopRecyclerView(scroll: Boolean) {
+        _scrollToTopRecyclerView.value = scroll
+    }
+
+    fun triggerScrollToTop() {
+        _scrollToTop.value = true
+    }
+
+    fun resetScrollToTop() {
+        _scrollToTop.value = false
+    }
+
+    fun setBackPressed(back: Boolean) {
+        _backPressed.value = back
+    }
+
+    fun setIdProfile(id: Int) {
+        _idProfile.value = id
+    }
+
     fun setNavigation(navigation: Navigation) {
         _navigation.value = navigation
     }
@@ -56,6 +88,19 @@ class MainViewModel @Inject constructor(
     }
     fun showBarAction(isShow: Boolean) {
         _showBar.value = isShow
+    }
 
+    //Refresh trang
+    private var _refresh = MutableLiveData(false)
+    val refresh: LiveData<Boolean> = _refresh
+
+    fun setRefresh(refresh: Boolean) { _refresh.value = refresh }
+
+    //BottomSheet
+    private val _text = MutableLiveData<Int>(0)
+    val text: LiveData<Int> = _text
+
+    fun setText(value: Int) {
+        _text.value = value
     }
 }

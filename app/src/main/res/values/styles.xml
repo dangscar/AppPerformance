@@ -43,12 +43,24 @@
         <item name="android:textSize">14sp</item>
         <item name="android:fontFamily">@font/tiktoksans_regular</item>
     </style>
+    <style name="MyTabTextSearchBelow" parent="TextAppearance.Design.Tab">
+        <item name="textAllCaps">false</item>
+        <item name="android:textSize">12sp</item>
+        <item name="android:fontFamily">@font/tiktoksans_regular</item>
+    </style>
 
     <style name="BottomSheetNoScrim" parent="Theme.Design.Light.BottomSheetDialog">
         <item name="android:backgroundDimEnabled">false</item>
         <item name="android:windowIsFloating">false</item>
         <item name="android:windowAnimationStyle">@null</item>
         <!--<item name="bottomSheetStyle">@style/RoundedBottomSheetStyle</item>-->
+    </style>
+
+    <style name="BottomNavStyle" parent="Widget.MaterialComponents.BottomNavigationView">
+        <item name="itemPaddingTop">0dp</item>
+        <item name="itemPaddingBottom">0dp</item>
+        <item name="paddingTopNoTitle">0dp</item>
+        <item name="paddingBottomNoButtons">0dp</item>
     </style>
 
     <!--<style name="RoundedBottomSheetStyle" parent="Widget.Design.BottomSheet.Modal">

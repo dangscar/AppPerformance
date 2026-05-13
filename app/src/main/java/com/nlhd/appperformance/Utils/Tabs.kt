@@ -1,7 +1,7 @@
 package com.nlhd.appperformance.Utils
 
 val tabs = listOf(
-    "Hồ Chí Minh",
+    "Lai Châu",
     "Đã follow",
     "Bạn bè",
     "Khám phá",

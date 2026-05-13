@@ -11,7 +11,8 @@ import kotlinx.coroutines.flow.Flow
 
 interface VideoRepository {
     fun getVideos(token: String): Flow<PagingData<Video>>
-    fun searchVideos(query: String): Flow<PagingData<Video>>
+    fun searchVideos(query: String, timestamp: Long): Flow<PagingData<Video>>
+    fun clearSearchFlow(query: String, timestamp: Long)
     fun getVideosExplore(): Flow<PagingData<Video>>
     fun getVideosFollowing(token: String): Flow<PagingData<Video>>
     suspend fun like(token: String, videoId: String): ResultWrapper<MessageResponse>

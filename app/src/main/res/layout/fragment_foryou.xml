@@ -104,8 +104,8 @@
     <!-- Search icon overlay - ẩn mặc định -->
     <ImageView
         android:id="@+id/ivSearchOverlay"
-        android:layout_width="28dp"
-        android:layout_height="28dp"
+        android:layout_width="26dp"
+        android:layout_height="26dp"
         android:layout_gravity="top|end"
         android:src="@drawable/ic_search"
         android:visibility="gone"

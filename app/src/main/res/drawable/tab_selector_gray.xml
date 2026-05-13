@@ -3,7 +3,7 @@
     <item android:state_selected="true">
         <inset android:insetLeft="4dp" android:insetRight="4dp">
             <shape android:shape="rectangle">
-                <corners android:radius="20dp" />
+                <corners android:radius="8dp" />
                 <solid android:color="#F1F1F1" />
             </shape>
         </inset>
@@ -11,7 +11,7 @@
     <item>
         <inset android:insetLeft="4dp" android:insetRight="4dp">
             <shape android:shape="rectangle">
-                <corners android:radius="20dp" />
+                <corners android:radius="8dp" />
                 <solid android:color="#F8F8F8" />
             </shape>
         </inset>

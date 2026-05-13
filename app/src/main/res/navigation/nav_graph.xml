@@ -27,9 +27,6 @@
 
     <fragment
         android:id="@+id/profileFragment"
-        android:name="com.nlhd.appperformance.Fragment.ProfileFragment"
-        android:label="Profile"
-        app:popUpToSaveState="true"
-        app:restoreState="false"
-        app:launchSingleTop="true"/>
+        android:name="com.nlhd.appperformance.Fragment.ProfileUpFragment"
+        android:label="Profile" />
 </navigation>

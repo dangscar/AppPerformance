@@ -1,11 +1,17 @@
 package com.nlhd.appperformance.Fragment
 
+import android.graphics.Color
 import android.os.Bundle
+import android.util.Log
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.core.content.ContextCompat
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsCompat
+import androidx.core.view.doOnLayout
+import androidx.core.view.updateLayoutParams
 import androidx.fragment.app.viewModels
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.google.android.material.tabs.TabLayoutMediator
@@ -50,7 +56,23 @@ class ShopFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+
+        view.doOnLayout {
+            val insets = ViewCompat.getRootWindowInsets(view)
+                ?.getInsets(WindowInsetsCompat.Type.systemBars())
+
+            insets?.let {
+                binding.appBarLayout2.updateLayoutParams<ViewGroup.MarginLayoutParams> {
+                    topMargin = it.top
+                }
+                binding.viewPager.updateLayoutParams<ViewGroup.MarginLayoutParams> {
+                    bottomMargin = it.bottom
+                }
+            }
+        }
+
         mainViewModel.setNavigation(Navigation.Profile)
+        requireActivity().window.statusBarColor = Color.WHITE
         requireActivity().window.navigationBarColor = ContextCompat.getColor(requireContext(), R.color.white)
         productPagerAdapter = ProductPagerAdapter(requireActivity())
         val list = listOf(

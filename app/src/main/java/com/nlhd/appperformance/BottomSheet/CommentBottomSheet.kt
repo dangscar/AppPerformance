@@ -71,7 +71,7 @@ class CommentBottomSheet(
     private lateinit var ivClose: ImageView
     private lateinit var llBottomInput: LinearLayout
     private var isOnSlide: Boolean = false
-    private var isOpening: Boolean = false
+//    private var isOpening: Boolean = false
     private lateinit var behavior: BottomSheetBehavior<View>
     private lateinit var loadingView: LottieAnimationView
 
@@ -110,7 +110,7 @@ class CommentBottomSheet(
                     setImageResource(R.drawable.ic_search)
                     imageTintList = ColorStateList.valueOf(Color.TRANSPARENT)
                     layoutParams = FrameLayout.LayoutParams(
-                        28.dpToPx(), 28.dpToPx()
+                        26.dpToPx(), 26.dpToPx()
                     ).apply {
                         gravity = Gravity.TOP or Gravity.END
                         topMargin = 12.dpToPx()
@@ -187,25 +187,29 @@ class CommentBottomSheet(
             behavior.skipCollapsed = true
             behavior.isHideable = true
             behavior.significantVelocityThreshold = 50
-            behavior.hideFriction = 0.05f
+            behavior.hideFriction = -1f
         }
         bottomSheetGeneral.doOnNextLayout {
             val width = bottomSheet.measuredWidth
             val height = bottomSheet.measuredHeight
 
             bottomSheetAnimator = ValueAnimator.ofFloat(-1f, 0f).apply {
-                duration = 200L
+                duration = 150L
                 interpolator = FastOutSlowInInterpolator()
                 addUpdateListener {
                     onChangeBottomSheet(width, height, it.animatedValue as Float)
                 }
                 start()
             }
-            isOpening = true
+            //isOpening = true
         }
 
 
         bottomBar.setOnClickListener {
+            bottomSheetInputComment()
+        }
+
+        edtComment.setOnClickListener {
             bottomSheetInputComment()
         }
 
@@ -323,10 +327,12 @@ class CommentBottomSheet(
         }
     }
 
+    private var lastSlideOffset = 0f
 
     val bottomSheetCallback = object : BottomSheetBehavior.BottomSheetCallback() {
         override fun onSlide(bottomSheet: View, slideOffset: Float) {
             if (!isOnSlide) isOnSlide = true
+            lastSlideOffset = slideOffset
             val width = bottomSheet.width
             val height = bottomSheet.height
             onChangeBottomSheet(width, height, slideOffset)
@@ -341,6 +347,7 @@ class CommentBottomSheet(
                     if (isOnSlide) isOnSlide = false
                 }
                 BottomSheetBehavior.STATE_SETTLING -> {
+
                 }
                 BottomSheetBehavior.STATE_DRAGGING -> {
                 }
@@ -369,7 +376,7 @@ class CommentBottomSheet(
     fun dismissOnSlide(width: Int, height: Int) {
         if (!isOnSlide) {
             bottomSheetAnimator = ValueAnimator.ofFloat(0f, -1f).apply {
-                duration = 200L
+                duration = 100L
                 interpolator = FastOutSlowInInterpolator()
 
                 addUpdateListener {
@@ -396,7 +403,7 @@ class CommentBottomSheet(
         }
 
         isOnSlide = false
-        isOpening = false
+        //isOpening = false
     }
 
     private fun releaseAnimator() {

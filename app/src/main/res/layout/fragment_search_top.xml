@@ -10,7 +10,7 @@
     <com.google.android.material.tabs.TabLayout
         android:id="@+id/tabLayoutFilter"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="36dp"
         android:layout_marginTop="8dp"
         android:layout_marginBottom="4dp"
         android:clipToPadding="false"
@@ -20,7 +20,7 @@
         app:tabBackground="@drawable/tab_selector_gray"
         app:tabSelectedTextColor="@color/black"
         app:tabTextColor="#808080"
-        app:tabTextAppearance="@style/MyTabTextSearch"
+        app:tabTextAppearance="@style/MyTabTextSearchBelow"
         app:tabRippleColor="@android:color/transparent"/>
 
     <FrameLayout

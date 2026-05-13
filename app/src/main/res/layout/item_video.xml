@@ -134,10 +134,11 @@
                 android:id="@+id/ll_comment">
 
                 <ImageView
-                    android:layout_width="36dp"
+                    android:layout_width="32dp"
                     android:layout_height="32dp"
-                    android:src="@drawable/ic_chat"
-                    android:scaleType="centerCrop"/>
+                    android:src="@drawable/comment"
+                    android:scaleType="centerCrop"
+                    app:tint="@color/white" />
 
                 <TextView
                     android:id="@+id/txtComment"
@@ -181,7 +182,8 @@
                 <ImageView
                     android:layout_width="32dp"
                     android:layout_height="32dp"
-                    android:src="@drawable/ic_share"/>
+                    android:src="@drawable/share"
+                    app:tint="@color/white" />
 
                 <TextView
                     android:id="@+id/txtShare"
@@ -223,6 +225,7 @@
             app:layout_constraintEnd_toStartOf="@id/actionColumn">
 
             <LinearLayout
+                android:id="@+id/ll_capcut"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:background="@drawable/bg_border_button_ui_black"
@@ -277,6 +280,7 @@
                     android:textStyle="bold"
                     android:maxLines="1"
                     android:ellipsize="end"
+                    android:includeFontPadding="false"
                     android:fontFamily="@font/tiktoksans_bold"
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toTopOf="parent"
@@ -290,6 +294,9 @@
                     android:text=" • "
                     android:textColor="#83FAFAFA"
                     android:maxLines="1"
+                    android:includeFontPadding="false"
+                    android:textSize="10sp"
+                    android:fontFamily="@font/tiktoksans_regular"
                     app:layout_constraintStart_toEndOf="@id/txtUsername"
                     app:layout_constraintTop_toTopOf="parent"
                     app:layout_constraintBottom_toBottomOf="parent"/>
@@ -303,6 +310,7 @@
                     android:textSize="14sp"
                     android:maxLines="1"
                     android:ellipsize="end"
+                    android:includeFontPadding="false"
                     android:fontFamily="@font/tiktoksans_semibold"
                     app:layout_constraintStart_toEndOf="@id/txtDot"
                     app:layout_constraintTop_toTopOf="parent"
@@ -410,7 +418,7 @@
                 app:touch_target_height="10dp"
                 app:bar_height="1.5dp"
                 app:scrubber_color="#FFFFFF"
-                />
+                android:visibility="invisible"/>
         </LinearLayout>
 
 

@@ -3,10 +3,13 @@ package com.nlhd.appperformance
 import android.annotation.SuppressLint
 import android.content.Intent
 import android.content.res.Configuration
+import android.graphics.Color
 import android.os.Bundle
 import android.util.Log
 import android.view.View
+import android.view.ViewGroup
 import android.widget.Button
+import android.widget.EditText
 import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TextView
@@ -21,6 +24,7 @@ import androidx.core.view.ViewCompat
 import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
+import androidx.core.view.updateLayoutParams
 import androidx.lifecycle.lifecycleScope
 import androidx.media3.common.Player
 import androidx.media3.common.util.UnstableApi
@@ -58,6 +62,8 @@ class DetailVideoActivity : AppCompatActivity() {
     private lateinit var loadingView: LottieAnimationView
     private lateinit var errorButton: Button
     private lateinit var playerView: PlayerView
+    private lateinit var edtSearch: EditText
+    private lateinit var edtComment: EditText
 
     private val viewModel: SearchSuccessViewModel by viewModels()
     private val commentViewModel: CommentViewModel by viewModels()
@@ -69,6 +75,8 @@ class DetailVideoActivity : AppCompatActivity() {
     lateinit var defaultMediaSourceFactory: DefaultMediaSourceFactory
 
     private var isOnPageSelected = false
+    private var currentCommentVideoId: String = "-1"
+    private var statusBarHeight = 0
 
     private lateinit var commentBottomSheet: CommentBottomSheet
     val bottomSheetInput = BottomSheetInputComment(text = "",onChangeText = {}, onDone = {})
@@ -80,15 +88,15 @@ class DetailVideoActivity : AppCompatActivity() {
         enableEdgeToEdge()
         setContentView(R.layout.activity_detail_video)
         val isLandscape = resources.configuration.orientation == Configuration.ORIENTATION_LANDSCAPE
-        window.statusBarColor = ContextCompat.getColor(this, R.color.black)
+        window.statusBarColor = Color.TRANSPARENT
         window.navigationBarColor = ContextCompat.getColor(this, R.color.black)
         WindowCompat.getInsetsController(window, window.decorView).isAppearanceLightStatusBars = false
-        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main)) { v, insets ->
+        /*ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main)) { v, insets ->
             val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
             val cutout = insets.getInsets(WindowInsetsCompat.Type.displayCutout())
             v.setPadding(maxOf(systemBars.left, cutout.left), systemBars.top, systemBars.right, systemBars.bottom)
             insets
-        }
+        }*/
 
         val controller = WindowInsetsControllerCompat(window, window.decorView)
         if (isLandscape) {
@@ -105,11 +113,25 @@ class DetailVideoActivity : AppCompatActivity() {
         loadingView = findViewById(R.id.loadingView)
         errorButton = findViewById(R.id.errorView)
         playerView = findViewById(R.id.playerViewStore)
+        edtSearch = findViewById(R.id.edtSearch)
+        edtComment = findViewById(R.id.edtComment)
 
         val btnPlay = playerView.findViewById<ImageView>(R.id.exo_play)
         val btnPause = playerView.findViewById<ImageView>(R.id.exo_pause)
         val btnBack = playerView.findViewById<ImageView>(R.id.exo_back)
         val tv_titlePv = playerView.findViewById<TextView>(R.id.tv_titlePv)
+
+        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main)) { v, insets ->
+            val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
+            statusBarHeight = systemBars.top
+            toolbar.updateLayoutParams<ViewGroup.MarginLayoutParams> {
+                topMargin = systemBars.top
+            }
+            bottomComment.updateLayoutParams<ViewGroup.MarginLayoutParams> {
+                bottomMargin = systemBars.bottom
+            }
+            insets
+        }
 
         bottomComment.visibility = if (isLandscape) View.GONE else View.VISIBLE
         searchContainer.visibility = if (isLandscape) View.GONE else View.VISIBLE
@@ -133,77 +155,84 @@ class DetailVideoActivity : AppCompatActivity() {
             }
         }
 
-        //BottomSheet
-        commentBottomSheet = CommentBottomSheet(
-            viewModel = commentViewModel,
-            onChangeBottomSheet = { width, height, offsetY ->
-                viewPager.post {
-                    val currentPosition = viewModel.currentPosition.value ?: 0
-                    val holder = (viewPager.getChildAt(0) as RecyclerView).findViewHolderForAdapterPosition(currentPosition) as? VideoPagerAdapter.VideoViewHolder
-                    if (holder == null) return@post
-                    val density = holder.binding.playerView.resources.displayMetrics.density
-                    val offset = offsetY   // [-1 .. 0]
 
-                    val aspectRatio = holder.binding.playerView.width.toFloat() / holder.binding.playerView.height.toFloat()
-                    val maxScale = 1f
-                    val minScale = 0.12f + (aspectRatio * 0.8f)
-
-                    val screenHeight= resources.configuration.screenHeightDp
-                    val sheetHeight = height / density
-                    val sheetVisible =   (sheetHeight / screenHeight)
-                    val targetScale = (maxScale - (sheetVisible.coerceAtMost(0.6f) / 0.6f) * (maxScale - minScale))
-                    val progress = (1f + offset).coerceIn(0f, 1f)
-                    val scale = 1f - (1f - minScale) * progress
-
-                    holder.binding.playerView.apply {
-                        pivotY = width / 3f
-                        scaleX = scale
-                        scaleY = scale
-
-                        val delta = height - height * scale
-                        translationY = -delta / 2f
-                        resizeMode = AspectRatioFrameLayout.RESIZE_MODE_FIT
-                    }
-
-                    if (offset != -1f) {
-                        toolbar.alpha = 0f
-                        bottomComment.alpha = 0f
-                        holder!!.binding.apply {
-                            actionColumn.alpha = 0f
-                            bottomInfo.alpha = 0f
-                            llBottomAction.alpha = 0f
-                        }
-                        window.navigationBarColor =
-                            ContextCompat.getColor(this, R.color.white)
-                    }
-                }
-            },
-            onDismiss = {
-                window.navigationBarColor =
-                    ContextCompat.getColor(this, R.color.black)
-
-                val currentPosition = viewModel.currentPosition.value ?: 0
-                val holder = (viewPager.getChildAt(0) as RecyclerView).findViewHolderForAdapterPosition(currentPosition) as? VideoPagerAdapter.VideoViewHolder
-                toolbar.alpha = 1f
-                bottomComment.alpha = 1f
-                holder!!.binding.apply {
-                    actionColumn.alpha = 1f
-                    bottomInfo.alpha = 1f
-                    llBottomAction.alpha = 1f
-                }
-            },
-            onChangeComponent = {}
-        )
 
         adapter = VideoPagerAdapter(
             this,
             defaultMediaSourceFactory,
             players,
-            onClickComment = {
-                commentBottomSheet.show(
-                    supportFragmentManager,
-                    CommentBottomSheet::class.java.simpleName
-                )
+            onClickComment = { videoId->
+                if (videoId == currentCommentVideoId.toInt()) {
+                    commentBottomSheet.show(
+                        supportFragmentManager,
+                        CommentBottomSheet::class.java.simpleName
+                    )
+                } else {
+                    currentCommentVideoId = videoId.toString()
+                    //BottomSheet
+                    commentBottomSheet = CommentBottomSheet(
+                        viewModel = commentViewModel,
+                        videoId = videoId.toString(),
+                        onChangeBottomSheet = { width, height, offsetY ->
+                            viewPager.post {
+                                val currentPosition = viewModel.currentPosition.value ?: 0
+                                val holder = (viewPager.getChildAt(0) as RecyclerView).findViewHolderForAdapterPosition(currentPosition) as? VideoPagerAdapter.VideoViewHolder
+                                if (holder == null) return@post
+                                val density = holder.binding.playerView.resources.displayMetrics.density
+                                val offset = offsetY   // [-1 .. 0]
+
+                                val aspectRatio = holder.binding.playerView.width.toFloat() / holder.binding.playerView.height.toFloat()
+                                val maxScale = 1f
+                                val minScale = 0.16f + (aspectRatio * 0.8f)
+
+                                val screenHeight= resources.configuration.screenHeightDp
+                                val sheetHeight = height / density
+                                val sheetVisible =   (sheetHeight / screenHeight)
+                                val targetScale = (maxScale - (sheetVisible.coerceAtMost(0.6f) / 0.6f) * (maxScale - minScale))
+                                val progress = (1f + offset).coerceIn(0f, 1f)
+                                val scale = 1f - (1f - minScale) * progress
+
+                                holder.binding.playerView.apply {
+                                    pivotY = width / 3f
+                                    scaleX = scale
+                                    scaleY = scale
+
+                                    val delta = height - height * scale
+                                    translationY = -delta / 2f + statusBarHeight * progress * 0.25f
+                                    resizeMode = AspectRatioFrameLayout.RESIZE_MODE_FIT
+                                }
+
+                                if (offset != -1f) {
+                                    toolbar.alpha = 0f
+                                    bottomComment.alpha = 0f
+                                    holder!!.binding.apply {
+                                        actionColumn.alpha = 0f
+                                        bottomInfo.alpha = 0f
+                                        llBottomAction.alpha = 0f
+                                    }
+                                    window.navigationBarColor = ContextCompat.getColor(this, R.color.white)
+                                    window.statusBarColor = Color.BLACK
+                                }
+                            }
+                        },
+                        onDismiss = {
+
+                            val currentPosition = viewModel.currentPosition.value ?: 0
+                            val holder = (viewPager.getChildAt(0) as RecyclerView).findViewHolderForAdapterPosition(currentPosition) as? VideoPagerAdapter.VideoViewHolder
+                            toolbar.alpha = 1f
+                            bottomComment.alpha = 1f
+                            holder!!.binding.apply {
+                                actionColumn.alpha = 1f
+                                bottomInfo.alpha = 1f
+                                llBottomAction.alpha = 1f
+                            }
+                            window.navigationBarColor = Color.BLACK
+                            window.statusBarColor = Color.TRANSPARENT
+                        },
+                        onChangeComponent = {}
+                    )
+                }
+
             },
             onClickLike = { videoId, position->
 
@@ -272,10 +301,19 @@ class DetailVideoActivity : AppCompatActivity() {
                             actionColumn.alpha = 0.4f
                             bottomInfo.alpha = 0.4f
                             llBottomAction.alpha = 0.4f
-                        } else {
+                            holder.binding.seekBar.visibility = View.INVISIBLE
+                        }
+                        else if(state == ViewPager2.SCROLL_STATE_SETTLING){
                             actionColumn.alpha = 1f
                             bottomInfo.alpha = 1f
                             llBottomAction.alpha = 1f
+                            holder.binding.seekBar.visibility = View.INVISIBLE
+                        }
+                        else {
+                            actionColumn.alpha = 1f
+                            bottomInfo.alpha = 1f
+                            llBottomAction.alpha = 1f
+                            holder.binding.seekBar.visibility = View.VISIBLE
                         }
                     }
                 }
@@ -357,10 +395,6 @@ class DetailVideoActivity : AppCompatActivity() {
 
         //Click bottomSheetComment
         bottomComment.setOnClickListener {
-            commentBottomSheet.show(
-                supportFragmentManager,
-                CommentBottomSheet::class.java.simpleName
-            )
             bottomSheetInput.show(
                 supportFragmentManager,
                 BottomSheetInputComment::class.java.simpleName
@@ -393,12 +427,26 @@ class DetailVideoActivity : AppCompatActivity() {
             }
 
         })
+
+        edtSearch.setOnClickListener {
+            Intent(this, SearchActivity::class.java).apply {
+                startActivity(this)
+            }
+        }
+        edtComment.setOnClickListener {
+            bottomSheetInput.show(
+                supportFragmentManager,
+                BottomSheetInputComment::class.java.simpleName
+            )
+        }
+
     }
 
     @OptIn(UnstableApi::class)
     private fun observeViewModel() {
         val keyword = intent.getStringExtra("keyword") ?: ""
         val type = intent.getStringExtra("type") ?: ""
+        val timestamp = intent.getLongExtra("timestamp", 0L)
         when (type) {
             "explore" -> {
                 lifecycleScope.launch {
@@ -409,7 +457,7 @@ class DetailVideoActivity : AppCompatActivity() {
             }
             else -> {
                 lifecycleScope.launch {
-                    viewModel.videos(keyword).collectLatest { pagingData ->
+                    viewModel.videos(keyword, timestamp).collectLatest { pagingData ->
                         adapter.submitData(pagingData)
                     }
                 }

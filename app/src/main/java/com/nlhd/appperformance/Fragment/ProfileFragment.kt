@@ -1,18 +1,27 @@
 package com.nlhd.appperformance.Fragment
 
+import android.content.res.Resources
+import android.graphics.Color
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
+import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
+import androidx.activity.OnBackPressedCallback
 import androidx.annotation.OptIn
 import androidx.coordinatorlayout.widget.CoordinatorLayout
 import androidx.core.content.ContextCompat
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsCompat
+import androidx.core.view.doOnLayout
+import androidx.core.view.updateLayoutParams
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.media3.common.util.UnstableApi
+import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.google.android.material.appbar.AppBarLayout
 import com.google.android.material.tabs.TabLayoutMediator
@@ -35,6 +44,7 @@ class ProfileFragment: Fragment(R.layout.fragment_profile) {
     private val binding get() = _binding!!
 
     private val viewModel: ProfileViewModel by viewModels()
+    private val mainViewModel: MainViewModel by activityViewModels()
     private val bottomSheet: LoginBottomSheet = LoginBottomSheet()
 
     override fun onCreateView(
@@ -46,10 +56,25 @@ class ProfileFragment: Fragment(R.layout.fragment_profile) {
         return _binding!!.root
     }
 
+    fun Int.dpToPx(): Int = (this * Resources.getSystem().displayMetrics.density).toInt()
+
     @OptIn(UnstableApi::class)
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        requireActivity().window.navigationBarColor = ContextCompat.getColor(requireContext(), R.color.white)
+
+        view.doOnLayout {
+            val insets = ViewCompat.getRootWindowInsets(view)
+                ?.getInsets(WindowInsetsCompat.Type.systemBars())
+
+            insets?.let {
+                binding.appBarLayout.updateLayoutParams<ViewGroup.MarginLayoutParams> {
+                    topMargin = it.top
+                }
+                binding.cdlProfile.updateLayoutParams<ViewGroup.MarginLayoutParams> {
+                    bottomMargin = it.bottom
+                }
+            }
+        }
 
         profilePagerAdapter = ProfilePagerAdapter(requireActivity())
         binding.viewPager.adapter = profilePagerAdapter
@@ -62,6 +87,47 @@ class ProfileFragment: Fragment(R.layout.fragment_profile) {
                 else -> ContextCompat.getDrawable(requireContext(), R.drawable.ic_favorite_border)
             }
         }.attach()
+
+        // Fix Nested ViewPager2 Scrolling
+        val recyclerView = binding.viewPager.getChildAt(0) as RecyclerView
+        var startX = 0f
+        recyclerView.addOnItemTouchListener(object : RecyclerView.OnItemTouchListener {
+            override fun onInterceptTouchEvent(rv: RecyclerView, e: MotionEvent): Boolean {
+                when (e.action) {
+                    MotionEvent.ACTION_DOWN -> {
+                        startX = e.x // Lưu điểm bắt đầu chạm
+                        rv.parent.requestDisallowInterceptTouchEvent(false)
+                    }
+                    MotionEvent.ACTION_MOVE -> {
+                        val deltaX = e.x - startX
+                        /*
+                        * Delta < 0 vuốt sang phải
+                        * Delta > 0 vuốt sang trái
+                        * */
+                        when {
+                            deltaX < 0 -> {
+                                rv.parent.requestDisallowInterceptTouchEvent(true)
+                            }
+                            deltaX > 0 -> {
+                                if (binding.viewPager.currentItem == 0) {
+                                    rv.parent.requestDisallowInterceptTouchEvent(false)
+                                } else {
+                                    rv.parent.requestDisallowInterceptTouchEvent(true)
+                                }
+
+                            }
+                        }
+                    }
+
+                    MotionEvent.ACTION_UP, MotionEvent.ACTION_CANCEL -> {
+                        startX = 0f
+                    }
+                }
+                return false
+            }
+            override fun onTouchEvent(rv: RecyclerView, e: MotionEvent) {}
+            override fun onRequestDisallowInterceptTouchEvent(disallowIntercept: Boolean) {}
+        })
 
         //Nếu người dùng
         lifecycleScope.launch {
@@ -89,8 +155,23 @@ class ProfileFragment: Fragment(R.layout.fragment_profile) {
             }
         }
 
+        binding.btnBack.setOnClickListener {
+            mainViewModel.setBackPressed(true)
+        }
 
+        requireActivity().onBackPressedDispatcher.addCallback(this, object : OnBackPressedCallback(true) {
+            override fun handleOnBackPressed() {
+                mainViewModel.setBackPressed(true)
+            }
+        })
 
+        // Scroll to Top đối với appBarLayout
+        mainViewModel.scrollToTop.observe(viewLifecycleOwner) { shouldScroll ->
+            if (shouldScroll) {
+                scrollToTop()
+                mainViewModel.resetScrollToTop()
+            }
+        }
     }
 
     fun setText(user: User) {
@@ -110,12 +191,9 @@ class ProfileFragment: Fragment(R.layout.fragment_profile) {
         binding.tvLike.text = "0"
     }
 
-    override fun onResume() {
-        super.onResume()
-    }
-    override fun onDestroyView() {
-        super.onDestroyView()
-        viewModel.setCleared(true)
+
+    fun scrollToTop() {
+        binding.appBarLayout.setExpanded(true, false)
     }
 
 }

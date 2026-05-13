@@ -6,6 +6,7 @@ import android.graphics.Bitmap
 import android.media.MediaMetadataRetriever
 import android.net.Uri
 import android.provider.OpenableColumns
+import android.util.Log
 import androidx.paging.Pager
 import androidx.paging.PagingConfig
 import androidx.paging.PagingData
@@ -71,19 +72,26 @@ class VideoRepositoryImp(
         return feedFlow!!
     }
 
-    override fun searchVideos(query: String): Flow<PagingData<Video>> {
-        val key = query.trim().lowercase()
-        return searchFlows.getOrPut(key) {
+    override fun searchVideos(query: String, timestamp: Long): Flow<PagingData<Video>> {
+        val queryKey = query.trim().lowercase()
+        val uniqueKey = "${queryKey}_$timestamp"
+        val searchVideos = searchFlows.getOrPut(uniqueKey) {
             Pager(
                 config = PagingConfig(
                     pageSize = 3,
                     prefetchDistance = 1
                 ),
                 pagingSourceFactory = {
-                    SearchVideosPagingSource(ktor, key)
+                    SearchVideosPagingSource(ktor, queryKey)
                 }
             ).flow.cachedIn(appScope)
         }
+        return searchVideos
+    }
+
+    override fun clearSearchFlow(query: String, timestamp: Long) {
+        val uniqueKey = "${query.trim().lowercase()}_$timestamp"
+        searchFlows.remove(uniqueKey)
     }
 
     override fun getVideosExplore(): Flow<PagingData<Video>> {

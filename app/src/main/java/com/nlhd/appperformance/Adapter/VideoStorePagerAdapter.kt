@@ -1,9 +1,7 @@
 package com.nlhd.appperformance.Adapter
 
 import android.content.Context
-import android.media.audiofx.BassBoost
-import android.media.audiofx.Equalizer
-import android.media.audiofx.LoudnessEnhancer
+import android.content.Intent
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.MotionEvent
@@ -22,6 +20,7 @@ import androidx.paging.PagingDataAdapter
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
+import com.nlhd.appperformance.Activity.CapCutVideoActivity
 import com.nlhd.appperformance.Domain.Entity.VideoStore
 import com.nlhd.appperformance.R
 import com.nlhd.appperformance.databinding.ItemVideoBinding
@@ -53,87 +52,15 @@ class VideoStorePagerAdapter(
         return VideoViewHolder(binding)
     }
 
-//    private val equalizers = mutableMapOf<Int, Equalizer>()
-//    private val bassBoosts = mutableMapOf<Int, BassBoost>()
-//    private val loudnessEnhancers = mutableMapOf<Int, LoudnessEnhancer>()
     private fun listener(onPlay: () -> Unit, onPause: () -> Unit) = object : Player.Listener {
         override fun onPlaybackStateChanged(playbackState: Int) {
             super.onPlaybackStateChanged(playbackState)
             if (playbackState == Player.STATE_READY) {
                 onPlay()
-
             } else {
                 onPause()
             }
         }
-
-        /*override fun onAudioSessionIdChanged(audioSessionId: Int) {
-            super.onAudioSessionIdChanged(audioSessionId)
-            if (equalizers.containsKey(audioSessionId)) return
-
-            equalizers.forEach { (sessionId, comp) ->
-                if (sessionId != audioSessionId) {
-                    comp.release()
-                    equalizers.remove(sessionId)
-                }
-            }
-
-            bassBoosts.forEach { (sessionId, comp) ->
-                if (sessionId != audioSessionId) {
-                    comp.release()
-                    bassBoosts.remove(sessionId)
-                }
-            }
-
-            loudnessEnhancers.forEach { (sessionId, comp) ->
-                if (sessionId != audioSessionId) {
-                    comp.release()
-                    loudnessEnhancers.remove(sessionId)
-                }
-            }
-
-
-            try {
-                equalizers[audioSessionId] = Equalizer(0, audioSessionId).apply {
-
-                    enabled = true
-
-                    for (i in 0 until numberOfBands) {
-
-                        val freq = getCenterFreq(i.toShort()) / 1000
-
-                        when {
-                            freq < 200 -> {
-                                setBandLevel(i.toShort(), (-500).toShort()) // giảm bass nhẹ
-                            }
-
-                            freq in 200..2000 -> {
-                                setBandLevel(i.toShort(), -500) // mid boost nhẹ
-                            }
-
-                            else -> {
-                                setBandLevel(i.toShort(), (-500).toShort()) // treble giảm nhẹ
-                            }
-                        }
-                    }
-                }
-
-                bassBoosts[audioSessionId] = BassBoost(0, audioSessionId).apply {
-                    setStrength(100.toShort()) // bass nhẹ thôi
-                    enabled = true
-                }
-
-                loudnessEnhancers[audioSessionId] = LoudnessEnhancer(audioSessionId).apply {
-                    setTargetGain(0) // không tăng gain để tránh bể
-                    enabled = true
-                }
-
-            } catch (e: Exception) {
-                Log.d("AAA", "error $e")
-            }
-
-            Log.d("AAA", equalizers.toString())
-        }*/
     }
 
     fun playStateExoPlayer(exoPlayer: ExoPlayer, onPlay: ()-> Unit, onPause: ()-> Unit) {
@@ -152,10 +79,10 @@ class VideoStorePagerAdapter(
 
         Glide.with(holder.binding.ivAvatar).load("").error(R.drawable.asus).into(holder.binding.ivAvatar)
 
-        holder.binding.txtLike.text = "0"
-        holder.binding.txtComment.text = "0"
-        holder.binding.txtFavorite.text = "0"
-        holder.binding.txtShare.text = "Shares"
+        holder.binding.txtLike.text = "14,5 N"
+        holder.binding.txtComment.text = "50"
+        holder.binding.txtFavorite.text = "1.599"
+        holder.binding.txtShare.text = "450"
 
         holder.binding.apply {
             txtUsername.text = video.name
@@ -164,16 +91,22 @@ class VideoStorePagerAdapter(
         holder.binding.llComment.setOnClickListener {
             onClickComment(1)
         }
+        
+        // Capcut intent
+        holder.binding.llCapcut.setOnClickListener {
+            val intent = Intent(context, CapCutVideoActivity::class.java).apply {
+                putExtra(CapCutVideoActivity.EXTRA_VIDEO_URL, video.uri.toString())
+            }
+            context.startActivity(intent)
+        }
+
         holder.binding.playSpeedRight.setOnTouchListener { v, event ->
             val player = players[position] ?: return@setOnTouchListener false
 
             when (event.actionMasked) {
-
                 MotionEvent.ACTION_DOWN -> {
                     v.parent.requestDisallowInterceptTouchEvent(true)
-
                     player.playbackParameters = PlaybackParameters(2f)
-
                     holder.binding.apply {
                         actionColumn.fadeTo(0f)
                         bottomInfo.fadeTo(0f)
@@ -181,13 +114,10 @@ class VideoStorePagerAdapter(
                     }
                     true
                 }
-
                 MotionEvent.ACTION_UP,
                 MotionEvent.ACTION_CANCEL -> {
                     v.parent.requestDisallowInterceptTouchEvent(false)
-
                     player.playbackParameters = PlaybackParameters(1f)
-
                     holder.binding.apply {
                         actionColumn.fadeTo(1f)
                         bottomInfo.fadeTo(1f)
@@ -195,7 +125,6 @@ class VideoStorePagerAdapter(
                     }
                     true
                 }
-
                 else -> false
             }
         }
@@ -364,14 +293,8 @@ class VideoStorePagerAdapter(
     fun setupTimeBar(holder: VideoViewHolder, exoPlayer: ExoPlayer) {
         val seekBar = holder.binding.seekBar
         seekBar.addListener(object : TimeBar.OnScrubListener {
-            override fun onScrubStart(timeBar: TimeBar, position: Long) {
-
-            }
-
-            override fun onScrubMove(timeBar: TimeBar, position: Long) {
-
-            }
-
+            override fun onScrubStart(timeBar: TimeBar, position: Long) {}
+            override fun onScrubMove(timeBar: TimeBar, position: Long) {}
             override fun onScrubStop(
                 timeBar: TimeBar,
                 position: Long,
@@ -418,7 +341,4 @@ class VideoStorePagerAdapter(
             }
         }
     }
-
-
 }
-
