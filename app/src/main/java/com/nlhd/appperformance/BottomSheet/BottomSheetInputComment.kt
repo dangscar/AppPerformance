@@ -72,15 +72,29 @@ class BottomSheetInputComment(
             val decorView = dialog.window?.decorView ?: return@setOnShowListener
             WindowCompat.setDecorFitsSystemWindows(dialog.window!!, false)
 
-            ViewCompat.setOnApplyWindowInsetsListener(decorView) { _, insets ->
-                val ime = insets.getInsets(WindowInsetsCompat.Type.ime()).bottom
-                val nav = insets.getInsets(WindowInsetsCompat.Type.navigationBars()).bottom
-                val keyboardHeight = ime - nav
+            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.R) {
+                // Android 11+ dùng WindowInsets
+                ViewCompat.setOnApplyWindowInsetsListener(decorView) { _, insets ->
+                    val ime = insets.getInsets(WindowInsetsCompat.Type.ime()).bottom
+                    val nav = insets.getInsets(WindowInsetsCompat.Type.navigationBars()).bottom
+                    val keyboardHeight = ime - nav
 
-                if (keyboardHeight > 0 && keyboardHeight != viewModel.text.value) {
-                    viewModel.setText(keyboardHeight)
+                    if (keyboardHeight > 0 && keyboardHeight != viewModel.text.value) {
+                        viewModel.setText(keyboardHeight)
+                    }
+                    insets
                 }
-                insets
+            } else {
+                // Android 10 trở xuống dùng GlobalLayoutListener
+                decorView.viewTreeObserver.addOnGlobalLayoutListener {
+                    val rect = Rect()
+                    decorView.getWindowVisibleDisplayFrame(rect)
+                    val keyboardHeight = decorView.height - rect.bottom
+
+                    if (keyboardHeight > 200 && keyboardHeight != viewModel.text.value) {
+                        viewModel.setText(keyboardHeight)
+                    }
+                }
             }
 
             val bottomSheet =

@@ -15,9 +15,11 @@ import com.nlhd.appperformance.ApplicationScope
 import com.nlhd.appperformance.Data.Mapper.toDomain
 import com.nlhd.appperformance.Data.Model.Video.AddCommentRequestDto
 import com.nlhd.appperformance.Data.Model.Video.MessageResponseDto
+import com.nlhd.appperformance.Data.Model.Video.Profile
 import com.nlhd.appperformance.Data.Remote.GetCommentsPagingSource
 import com.nlhd.appperformance.Data.Remote.GetVideosPagingSource
 import com.nlhd.appperformance.Data.Remote.SearchVideosPagingSource
+import com.nlhd.appperformance.Data.Remote.VideosProfilePagingSource
 import com.nlhd.appperformance.Domain.Entity.Video.Comment
 import com.nlhd.appperformance.Domain.Entity.Video.MessageResponse
 import com.nlhd.appperformance.Domain.Entity.Video.Video
@@ -56,6 +58,7 @@ class VideoRepositoryImp(
     private var exploreFlow : Flow<PagingData<Video>>? = null
 
     private var followingFlow : Flow<PagingData<Video>>? = null
+    private var profileFlow = mutableMapOf<String, Flow<PagingData<Video>>>()
 
 
     override fun getVideos(token: String): Flow<PagingData<Video>> {
@@ -275,5 +278,39 @@ class VideoRepositoryImp(
         }
     }
 
+    override suspend fun getProfile(userId: Int): ResultWrapper<Profile> {
+        return try {
+            val response = ktor.get(Utils.BASE_URL+"/api/video/profile/$userId") {
+                contentType(ContentType.Application.Json)
+            }.body<Profile>()
+            ResultWrapper.Success(response)
+        } catch (e: Exception) {
+            ResultWrapper.Error(e)
+        }
+    }
+
+
+    override fun getVideosProfile(userId: String, timestamp: Long): Flow<PagingData<Video>> {
+        val uniqueKey = "${userId}_$timestamp"
+        val profileVideos = profileFlow.getOrPut(uniqueKey) {
+            Pager(
+                config = PagingConfig(
+                    pageSize = 3,
+                    prefetchDistance = 1
+                ),
+                pagingSourceFactory = {
+                    VideosProfilePagingSource(ktor, userId.toString())
+                }
+            ).flow.cachedIn(appScope)
+        }
+        Log.d("AAA", "getVideosProfile: ${profileFlow}")
+        return profileVideos
+    }
+
+    override fun clearProfileFlow(userId: String, timestamp: Long) {
+        val uniqueKey = "${userId}_$timestamp"
+        profileFlow.remove(uniqueKey)
+        Log.d("AAA", "clearProfileFlow: ${profileFlow}")
+    }
 
 }

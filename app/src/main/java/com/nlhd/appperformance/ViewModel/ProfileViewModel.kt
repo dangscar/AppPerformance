@@ -3,10 +3,12 @@ package com.nlhd.appperformance.ViewModel
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.nlhd.appperformance.Data.Model.Video.Profile
 import com.nlhd.appperformance.Domain.Entity.DataStore.UserPreference
 import com.nlhd.appperformance.Domain.Entity.GetUser.User
 import com.nlhd.appperformance.Domain.UseCase.Authenticate.AuthenticateUseCase
 import com.nlhd.appperformance.Domain.UseCase.UserDataStore.UserDataStoreUseCase
+import com.nlhd.appperformance.Domain.UseCase.Video.VideoUseCase
 import com.nlhd.appperformance.Utils.ResultUI
 import com.nlhd.appperformance.Utils.ResultWrapper
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -18,7 +20,8 @@ import javax.inject.Inject
 @HiltViewModel
 class ProfileViewModel @Inject constructor(
     private val userDataStoreUseCase: UserDataStoreUseCase,
-    private val authenticateUseCase: AuthenticateUseCase
+    private val authenticateUseCase: AuthenticateUseCase,
+    private val videoUseCase: VideoUseCase
 ): ViewModel() {
     val userState = userDataStoreUseCase.getUser().stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000),
         UserPreference())
@@ -60,4 +63,22 @@ class ProfileViewModel @Inject constructor(
     fun logout() = viewModelScope.launch {
         userDataStoreUseCase.clearUser()
     }
+
+    private var _profileState = MutableLiveData<ResultUI<Profile>>(ResultUI.Idle)
+    val profileState get() = _profileState
+
+    fun getProfile(userId: Int) = viewModelScope.launch {
+        videoUseCase.getProfile(userId).let { result ->
+            when (result) {
+                is ResultWrapper.Error -> {
+                    _profileState.value = ResultUI.Error(result.exception.message.toString())
+                }
+                is ResultWrapper.Success<*> -> {
+                    val profile = result.value as Profile
+                    _profileState.value = ResultUI.Success(profile)
+                }
+            }
+        }
+    }
+
 }

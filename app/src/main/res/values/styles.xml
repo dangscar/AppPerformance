@@ -53,7 +53,6 @@
         <item name="android:backgroundDimEnabled">false</item>
         <item name="android:windowIsFloating">false</item>
         <item name="android:windowAnimationStyle">@null</item>
-        <!--<item name="bottomSheetStyle">@style/RoundedBottomSheetStyle</item>-->
     </style>
 
     <style name="BottomNavStyle" parent="Widget.MaterialComponents.BottomNavigationView">
@@ -63,16 +62,8 @@
         <item name="paddingBottomNoButtons">0dp</item>
     </style>
 
-    <!--<style name="RoundedBottomSheetStyle" parent="Widget.Design.BottomSheet.Modal">
-        <item name="shapeAppearanceOverlay">@style/RoundedBottomSheetShape</item>
-    </style>
-
-    <style name="RoundedBottomSheetShape">
-        <item name="cornerFamily">rounded</item>
-        <item name="cornerSizeTopLeft">20dp</item>
-        <item name="cornerSizeTopRight">20dp</item>
-        <item name="cornerSizeBottomLeft">0dp</item>
-        <item name="cornerSizeBottomRight">0dp</item>
-    </style>-->
+<!--    <style name="CircleImage">-->
+<!--        <item name="cornerSize">50%</item>-->
+<!--    </style>-->
 
 </resources>

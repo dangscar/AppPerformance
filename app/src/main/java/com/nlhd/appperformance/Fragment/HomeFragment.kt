@@ -3,6 +3,7 @@ package com.nlhd.appperformance.Fragment
 import android.annotation.SuppressLint
 import android.content.Intent
 import android.content.res.ColorStateList
+import android.content.res.Configuration
 import android.content.res.Resources
 import android.graphics.Color
 import android.graphics.Typeface
@@ -284,9 +285,11 @@ class HomeFragment: Fragment(R.layout.fragment_home) {
             mainViewModel.setRefresh(true)
         }
 
+        val isLandscape = resources.configuration.orientation == Configuration.ORIENTATION_LANDSCAPE
         mainViewModel.showBar.observe(viewLifecycleOwner) {
-            topBar.visibility = if (it) View.VISIBLE else View.GONE
+            topBar.visibility = if (it && !isLandscape) View.VISIBLE else View.GONE
         }
+
 
     }
 

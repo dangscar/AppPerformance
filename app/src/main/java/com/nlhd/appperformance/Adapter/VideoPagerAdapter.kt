@@ -242,10 +242,11 @@ class VideoPagerAdapter(
     }
 
     fun updateLike(holder: VideoViewHolder, video: Video) {
-        holder.binding.btnLike.setColorFilter(
+        /*holder.binding.btnLike.setColorFilter(
             ContextCompat.getColor(context, if (video.isLiked == "1") R.color.red else R.color.white),
             PorterDuff.Mode.SRC_IN
-        )
+        )*/
+        holder.binding.btnLike.setImageResource(if (video.isLiked == "1") R.drawable.ic_hearted else R.drawable.ic_heart)
         holder.binding.txtLike.text = video.likesCount
     }
 

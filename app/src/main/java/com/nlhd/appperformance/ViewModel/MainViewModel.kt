@@ -1,6 +1,7 @@
 package com.nlhd.appperformance.ViewModel
 
 import android.graphics.Color
+import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel

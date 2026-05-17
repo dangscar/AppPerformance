@@ -10,5 +10,8 @@ data class VideoUseCase(
     val getComments: GetComments,
     val addComment: AddComment,
     val getFollowing: GetFollowing,
-    val uploadVideo: UploadVideo
+    val uploadVideo: UploadVideo,
+    val getProfile: GetProfile,
+    val getVideoProfile: GetVideoProfile,
+    val clearProfileFlow: ClearProfileFlow
 )

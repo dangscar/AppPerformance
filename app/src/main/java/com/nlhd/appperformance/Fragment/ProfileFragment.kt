@@ -26,6 +26,7 @@ import com.bumptech.glide.Glide
 import com.google.android.material.appbar.AppBarLayout
 import com.google.android.material.tabs.TabLayoutMediator
 import com.nlhd.appperformance.Adapter.ProfilePagerAdapter
+import com.nlhd.appperformance.Data.Model.Video.Profile
 import com.nlhd.appperformance.Domain.Entity.GetUser.User
 import com.nlhd.appperformance.Feature.LoginScreen.LoginBottomSheet
 import com.nlhd.appperformance.R
@@ -55,8 +56,6 @@ class ProfileFragment: Fragment(R.layout.fragment_profile) {
         _binding = FragmentProfileBinding.inflate(inflater, container, false)
         return _binding!!.root
     }
-
-    fun Int.dpToPx(): Int = (this * Resources.getSystem().displayMetrics.density).toInt()
 
     @OptIn(UnstableApi::class)
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -142,7 +141,7 @@ class ProfileFragment: Fragment(R.layout.fragment_profile) {
             }
         }
 
-        viewModel.state.observe(viewLifecycleOwner) {
+        /*viewModel.state.observe(viewLifecycleOwner) {
             when (it) {
                 is ResultUI.Error<*> -> {
                     setText()
@@ -150,6 +149,24 @@ class ProfileFragment: Fragment(R.layout.fragment_profile) {
                 is ResultUI.Success<*> -> {
                     val user = (it as ResultUI.Success).data
                     setText(user)
+                }
+                else -> {}
+            }
+        }*/
+
+        mainViewModel.idProfile.observe(viewLifecycleOwner) {
+            if (it != -1) {
+                viewModel.getProfile(it)
+            }
+        }
+        viewModel.profileState.observe(viewLifecycleOwner) {
+            when(it) {
+                is ResultUI.Error<*> -> {
+                    setText()
+                }
+                is ResultUI.Success<*> -> {
+                    val profile = (it as ResultUI.Success).data
+                    setProfile(profile)
                 }
                 else -> {}
             }
@@ -181,6 +198,15 @@ class ProfileFragment: Fragment(R.layout.fragment_profile) {
         binding.tvFollower.text = user.followersCount.toString()
         binding.tvLike.text = user.receivedLikesCount.toString()
         Glide.with(requireContext()).load(user.avatarUrl ?: R.drawable.asus).error(R.drawable.asus).into(binding.ivAvatar)
+    }
+
+    fun setProfile(profile: Profile) {
+        binding.tvName.text = profile.name
+        binding.tvUsername.text = profile.email
+        binding.tvFollowed.text = profile.followers_count.toString()
+        binding.tvFollower.text = profile.followings_count.toString()
+        binding.tvLike.text = profile.received_likes_count.toString()
+        Glide.with(requireContext()).load(profile.avatar_url ?: R.drawable.asus).error(R.drawable.asus).into(binding.ivAvatar)
     }
 
     fun setText() {

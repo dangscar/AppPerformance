@@ -1,5 +1,6 @@
 package com.nlhd.appperformance.Fragment
 
+import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.Intent
 import android.content.pm.ActivityInfo
@@ -9,6 +10,7 @@ import android.graphics.Color
 import android.media.audiofx.BassBoost
 import android.media.audiofx.Equalizer
 import android.media.audiofx.LoudnessEnhancer
+import android.os.Build
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
@@ -23,9 +25,12 @@ import android.view.ViewTreeObserver
 import android.widget.Button
 import android.widget.ImageView
 import android.widget.LinearLayout
+import androidx.activity.SystemBarStyle
+import androidx.activity.enableEdgeToEdge
 import androidx.annotation.OptIn
 import androidx.core.content.ContextCompat
 import androidx.core.view.ViewCompat
+import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.doOnLayout
 import androidx.core.view.doOnPreDraw
@@ -125,7 +130,7 @@ class ForYouFragment(
         adapter.updateCurrentPosition(position)
 
         //Set idProfile
-        mainViewModel.setIdProfile(adapter.videoByPosition(position)?.id ?: -1)
+        mainViewModel.setIdProfile(adapter.videoByPosition(position)?.userId?.toInt() ?: -1)
     }
 
     /* Thay đổi màu alpha của layout*/
@@ -161,7 +166,38 @@ class ForYouFragment(
                 layoutAlpha(holder, 1f)
                 holder.binding.seekBar.visibility = View.VISIBLE
             }
+        }
 
+        override fun onPageScrolled(
+            position: Int,
+            positionOffset: Float,
+            positionOffsetPixels: Int
+        ) {
+            super.onPageScrolled(position, positionOffset, positionOffsetPixels)
+            currentOffset = positionOffset
+            currentPositionV = position
+
+            val recyclerView = binding.viewPager.getChildAt(0) as RecyclerView
+            val pageHeight = recyclerView.height
+
+            // % kéo thực tế theo pixel
+            val progress =
+                positionOffsetPixels.toFloat() / pageHeight.toFloat()
+            if (viewModel.currentPosition.value == position && progress <= 0.95f) {
+                isLock = false
+            }
+            else if (viewModel.currentPosition.value!!-1 == position && progress >= 0.05f) {
+                isLock = false
+            }
+            else if (viewModel.currentPosition.value == position && positionOffset <= 0.95f) {
+                isLock = false
+            }
+            else if (viewModel.currentPosition.value!!-1 == position &&positionOffset >= 0.05f){
+                isLock = false
+            }
+            else {
+                isLock = true
+            }
 
         }
     }
@@ -178,7 +214,12 @@ class ForYouFragment(
         return (this * Resources.getSystem().displayMetrics.density).toInt()
     }
     private var statusBarHeight = 0
+    private var currentOffset = 0f
+    private var currentPositionV = 0
 
+    private var isLock = false
+
+    @SuppressLint("ClickableViewAccessibility")
     @OptIn(UnstableApi::class)
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -243,8 +284,10 @@ class ForYouFragment(
                                     mainViewModel.showBarAction(false)
                                     layoutAlpha(holder, 0f)
                                     requireActivity().window.statusBarColor = ContextCompat.getColor(requireContext(), R.color.black)
-                                    requireActivity().window.navigationBarColor =
-                                        ContextCompat.getColor(requireContext(), R.color.white)
+                                    requireActivity().window.navigationBarColor = ContextCompat.getColor(requireContext(), R.color.white)
+                                    /*requireActivity().enableEdgeToEdge(
+                                        statusBarStyle = SystemBarStyle.dark(android.graphics.Color.BLACK)
+                                    )*/
                                 }
                             }
 
@@ -293,7 +336,13 @@ class ForYouFragment(
 
             },
             onClickLike = { videoId, position->
-
+                lifecycleScope.launch {
+                    viewModel.userState.collect { userPreference ->
+                        if (userPreference.isLoggedIn && userPreference.token.isNotEmpty()) {
+                            viewModel.like(userPreference.token, videoId.toString())
+                        }
+                    }
+                }
             },
             onClickShare = {
                 val bottomSheetShare = BottomSheetShare()
@@ -371,6 +420,86 @@ class ForYouFragment(
                 mainViewModel.setRefresh(false)
             }
         }
+
+        viewModel.likeState.observe(viewLifecycleOwner) {
+            when (it) {
+                is ResultUI.Error<*> -> {}
+                ResultUI.Idle -> {}
+                ResultUI.Loading -> {}
+                is ResultUI.Success<*> -> {
+                    val message = (it as ResultUI.Success).data
+                    val position = viewModel.currentPosition.value ?: 0
+                    val video = adapter.videoByPosition(position)
+                    when (message.message) {
+                        "Added" -> {
+                            video?.isLiked =  1.toString()
+                            video?.likesCount = video.likesCount.toInt().plus(1).toString()
+                        }
+                        "Deleted" -> {
+                            video?.isLiked =  0.toString()
+                            video?.likesCount = video.likesCount.toInt().minus(1).toString()
+                        }
+                    }
+
+                    val holder = (binding.viewPager.getChildAt(0) as RecyclerView).findViewHolderForAdapterPosition(position) as? VideoPagerAdapter.VideoViewHolder
+                    if (holder != null && video != null) {
+                        adapter.updateLike(holder, video)
+                    }
+                    viewModel.updateStateLike()
+                }
+            }
+        }
+
+        /*var startY = 0f
+        var lastDy = 0f
+
+        binding.viewPager.getChildAt(0).setOnTouchListener { _, event ->
+
+            when (event.actionMasked) {
+
+                MotionEvent.ACTION_DOWN -> {
+
+                    startY = event.rawY
+                    lastDy = 0f
+                }
+
+                MotionEvent.ACTION_MOVE -> {
+
+                    val dy = event.rawY - startY
+
+
+                    // So sánh với frame trước
+                    val isSwipeUp = dy > lastDy
+                    val isSwipeDown = dy < lastDy
+
+                    when {
+
+                        isSwipeUp -> {
+                            Log.d("AAA", "VUỐT LÊN")
+                        }
+
+                        isSwipeDown -> {
+                            Log.d("AAA", "VUỐT XUỐNG")
+                        }
+                    }
+
+                    // cập nhật frame trước
+                    lastDy = dy
+
+                    if (isLock) {
+                        return@setOnTouchListener true
+                    }
+                }
+
+                MotionEvent.ACTION_UP,
+                MotionEvent.ACTION_CANCEL -> {
+
+                    lastDy = 0f
+                }
+            }
+
+            false
+        }*/
     }
 
     var isRefreshing = false

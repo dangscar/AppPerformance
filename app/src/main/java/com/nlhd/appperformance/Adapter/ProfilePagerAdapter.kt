@@ -8,15 +8,16 @@ import androidx.viewpager2.adapter.FragmentStateAdapter
 import com.nlhd.appperformance.Fragment.FollowingFragment
 import com.nlhd.appperformance.Fragment.FriendFragment
 import com.nlhd.appperformance.Fragment.VideoGridFragment
+import com.nlhd.appperformance.Fragment.VideoProfileFragment
 
 class ProfilePagerAdapter(
-    activity: FragmentActivity
+    activity: FragmentActivity,
 ): FragmentStateAdapter(activity) {
 
     override fun createFragment(position: Int): Fragment {
         return when (position) {
-            0 -> VideoGridFragment()
-            1 -> FriendFragment()
+            0 -> VideoProfileFragment()
+            1 -> VideoGridFragment()
             2 -> FriendFragment()
             3 -> FriendFragment()
             else -> FriendFragment()

@@ -3,6 +3,7 @@ package com.nlhd.appperformance.Fragment
 import android.annotation.SuppressLint
 import android.content.Intent
 import android.content.res.ColorStateList
+import android.content.res.Configuration
 import android.content.res.Resources
 import android.graphics.Color
 import android.os.Bundle
@@ -87,7 +88,7 @@ class MainContainerFragment : Fragment() {
                     bottomNav.itemIconTintList = colors
                     bottomNav.itemTextColor = colors
                     bottomNav.setBackgroundColor(Color.WHITE)
-                    fabAdd.setImageResource(R.drawable.addblack_enhanced)
+                    fabAdd.setImageResource(R.drawable.addblack_new)
                     viewModel.setNavigation(Navigation.Profile)
                     bottomNav.menu.findItem(R.id.homeFragment).setIcon(R.drawable.home_white)
                     bottomNav.menu.findItem(R.id.inboxFragment).setIcon(R.drawable.inboxwhite)
@@ -107,7 +108,7 @@ class MainContainerFragment : Fragment() {
                     bottomNav.itemIconTintList = colors
                     bottomNav.itemTextColor = colors
                     bottomNav.setBackgroundColor(Color.WHITE)
-                    fabAdd.setImageResource(R.drawable.addblack_enhanced)
+                    fabAdd.setImageResource(R.drawable.addblack_new)
                     viewModel.setNavigation(Navigation.Profile)
                     bottomNav.menu.findItem(R.id.homeFragment).setIcon(R.drawable.home_white)
                     bottomNav.menu.findItem(R.id.inboxFragment).setIcon(R.drawable.inbox)
@@ -127,7 +128,7 @@ class MainContainerFragment : Fragment() {
                     bottomNav.itemIconTintList = colors
                     bottomNav.itemTextColor = colors
                     bottomNav.setBackgroundColor(Color.WHITE)
-                    fabAdd.setImageResource(R.drawable.addblack_enhanced)
+                    fabAdd.setImageResource(R.drawable.addblack_new)
                     viewModel.setNavigation(Navigation.Profile)
                     bottomNav.menu.findItem(R.id.homeFragment).setIcon(R.drawable.home_white)
                     bottomNav.menu.findItem(R.id.inboxFragment).setIcon(R.drawable.inbox)
@@ -175,7 +176,7 @@ class MainContainerFragment : Fragment() {
             if (it == Color.BLACK) {
                 fabAdd.setImageResource(R.drawable.ic_addwhite)
             } else {
-                fabAdd.setImageResource(R.drawable.addblack_enhanced)
+                fabAdd.setImageResource(R.drawable.addblack_new)
             }
 
             // ✅ Set tintList SAU CÙNG → trigger redraw icon
@@ -207,6 +208,7 @@ class MainContainerFragment : Fragment() {
             val intent = Intent(requireContext(), UploadVideoActivity::class.java)
             startActivity(intent)
         }
+
     }
 
     fun Int.dpToPx(): Int = (this * Resources.getSystem().displayMetrics.density).toInt()

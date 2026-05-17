@@ -1,13 +1,12 @@
 package com.nlhd.appperformance.Data.Remote
 
-import android.util.Log
+import android.net.Uri
 import androidx.paging.PagingSource
 import androidx.paging.PagingState
 import com.nlhd.appperformance.Data.Mapper.Authenticate.toDomain
 import com.nlhd.appperformance.Data.Mapper.toDomain
 import com.nlhd.appperformance.Data.Model.VideoResponseDto
 import com.nlhd.appperformance.Domain.Entity.Video.Video
-import com.nlhd.appperformance.Utils.TYPE_URL
 import com.nlhd.appperformance.Utils.Utils
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
@@ -16,25 +15,10 @@ import io.ktor.client.request.header
 import io.ktor.http.ContentType
 import io.ktor.http.contentType
 
-class GetVideosPagingSource(
-    private val typeUrl: TYPE_URL,
+class VideosProfilePagingSource(
     private val ktor: HttpClient,
-    private val token: String = ""
+    private val userId: String,
 ): PagingSource<Int, Video>() {
-    fun url(typeUrl: TYPE_URL, page: Int): String {
-        return when (typeUrl) {
-            TYPE_URL.SUGGEST -> {
-                Utils.BASE_URL+"/api/video?page=$page"
-            }
-            TYPE_URL.EXPLORE -> {
-                Utils.BASE_URL+"/api/videoExplore?page=$page"
-            }
-
-            TYPE_URL.FOLLOWING -> {
-                Utils.BASE_URL+"/api/video/videoFollow?page=$page"
-            }
-        }
-    }
     override fun getRefreshKey(state: PagingState<Int, Video>): Int? {
         return state.anchorPosition?.let {
             val anchorPage = state.closestPageToPosition(it)
@@ -45,8 +29,7 @@ class GetVideosPagingSource(
     override suspend fun load(params: LoadParams<Int>): LoadResult<Int, Video> {
         val page = params.key ?: 1
         return try {
-            val responseDto = ktor.get(url(typeUrl, page)) {
-                header("Authorization", "Bearer $token")
+            val responseDto = ktor.get(Utils.BASE_URL+"/api/video/profile/allVideo/${userId}?page=$page") {
                 contentType(ContentType.Application.Json)
             }.body<VideoResponseDto>()
             val response = responseDto.toDomain(responseDto)
@@ -65,7 +48,6 @@ class GetVideosPagingSource(
                 )
             }
         } catch (e: Exception) {
-            Log.d("AAA", e.message.toString())
             LoadResult.Error(e)
         }
     }

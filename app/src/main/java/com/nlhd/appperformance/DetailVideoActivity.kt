@@ -25,6 +25,7 @@ import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
 import androidx.core.view.updateLayoutParams
+import androidx.lifecycle.asFlow
 import androidx.lifecycle.lifecycleScope
 import androidx.media3.common.Player
 import androidx.media3.common.util.UnstableApi
@@ -77,6 +78,8 @@ class DetailVideoActivity : AppCompatActivity() {
     private var isOnPageSelected = false
     private var currentCommentVideoId: String = "-1"
     private var statusBarHeight = 0
+    private var timeProfile = 0L
+    private var userId = "0"
 
     private lateinit var commentBottomSheet: CommentBottomSheet
     val bottomSheetInput = BottomSheetInputComment(text = "",onChangeText = {}, onDone = {})
@@ -455,6 +458,19 @@ class DetailVideoActivity : AppCompatActivity() {
                     }
                 }
             }
+            "profile" -> {
+                timeProfile = intent.getLongExtra("timestamp", 0L)
+                userId = intent.getStringExtra("userId") ?: "0"
+                lifecycleScope.launch {
+                    viewModel.videosProfile(
+                        userId,
+                        timeProfile
+                    ).collectLatest { pagingData ->
+
+                        adapter.submitData(pagingData)
+                    }
+                }
+            }
             else -> {
                 lifecycleScope.launch {
                     viewModel.videos(keyword, timestamp).collectLatest { pagingData ->
@@ -492,5 +508,8 @@ class DetailVideoActivity : AppCompatActivity() {
         adapter.play(currentPosition)
     }
 
+    override fun onDestroy() {
+        super.onDestroy()
+    }
 
 }

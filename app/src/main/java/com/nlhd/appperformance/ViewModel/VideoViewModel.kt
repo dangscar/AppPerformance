@@ -92,4 +92,13 @@ class VideoViewModel @Inject constructor(
             _currentPosition.value = position
         }
     }
+
+    private var _currentOffset: MutableLiveData<Float> = MutableLiveData(0f)
+    val currentOffset: LiveData<Float> = _currentOffset
+
+    fun setCurrentOffset(offset: Float) {
+        _currentOffset.value = offset
+    }
+
+
 }

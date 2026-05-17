@@ -19,6 +19,7 @@ class SearchSuccessViewModel @Inject constructor(
 
     val videosExplore = videoUseCase.getVideosExplore()
 
+
     private var _currentPosition: MutableLiveData<Int> = MutableLiveData(0)
     val currentPosition: LiveData<Int> = _currentPosition
 
@@ -41,4 +42,7 @@ class SearchSuccessViewModel @Inject constructor(
             _currentPosition.value = position
         }
     }
+
+    fun videosProfile(userId: String, timestamp: Long) = videoUseCase.getVideoProfile(userId, timestamp)
+    fun clearVideosProfile(userId: String, timestamp: Long) = videoUseCase.clearProfileFlow(userId, timestamp)
 }
