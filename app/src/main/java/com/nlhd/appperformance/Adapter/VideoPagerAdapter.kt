@@ -267,6 +267,7 @@ class VideoPagerAdapter(
     }
 
     fun createPlayer(current: Int) {
+        Log.d("AAA", "Create")
         /*if (players.size >= 3 && currentPosition != current) {
             releaseFarthestPlayer()
         }

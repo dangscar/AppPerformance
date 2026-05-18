@@ -14,6 +14,7 @@ import androidx.core.view.doOnLayout
 import androidx.core.view.updateLayoutParams
 import androidx.fragment.app.viewModels
 import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.viewpager2.adapter.FragmentStateAdapter
 import com.google.android.material.tabs.TabLayoutMediator
 import com.nlhd.appperformance.Adapter.IconTextLayout.CategoryItem
 import com.nlhd.appperformance.Adapter.IconTextLayout.ItemCategoryAdapter
@@ -76,7 +77,19 @@ class ProfileUpFragment : Fragment() {
         requireActivity().window.statusBarColor = Color.WHITE
         requireActivity().window.navigationBarColor = ContextCompat.getColor(requireContext(), R.color.white)
 
-        binding.viewPager.adapter = ProfilePagerAdapter(requireActivity())
+        val adapter = object : FragmentStateAdapter(this) {
+            override fun getItemCount(): Int = 5
+            override fun createFragment(position: Int): Fragment {
+                return when (position) {
+                    0 -> VideoGridFragment()
+                    1 -> FriendFragment()
+                    2 -> FriendFragment()
+                    3 -> FriendFragment()
+                    else -> FriendFragment()
+                }
+            }
+        }
+        binding.viewPager.adapter = adapter
         TabLayoutMediator(binding.tabLayout, binding.viewPager) { tab, position ->
             tab.icon = when (position) {
                 0 -> ContextCompat.getDrawable(requireContext(), R.drawable.ic_video)

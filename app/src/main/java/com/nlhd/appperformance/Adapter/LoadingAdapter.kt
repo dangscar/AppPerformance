@@ -9,6 +9,7 @@ import android.widget.ProgressBar
 import androidx.paging.LoadState
 import androidx.paging.LoadStateAdapter
 import androidx.recyclerview.widget.RecyclerView
+import com.airbnb.lottie.LottieAnimationView
 import com.nlhd.appperformance.R
 
 class LoadingAdapter(
@@ -16,8 +17,8 @@ class LoadingAdapter(
 ) : LoadStateAdapter<LoadingAdapter.LoadingViewHolder>() {
 
     inner class LoadingViewHolder(view: View): RecyclerView.ViewHolder(view) {
-        val progressBar: ProgressBar = view.findViewById(R.id.progressBar)
-        val btnRetry: Button = view.findViewById(R.id.btnRetry)
+        val progressBar: LottieAnimationView = view.findViewById(R.id.loadingView)
+        val btnRetry: Button = view.findViewById(R.id.errorView)
     }
     override fun onCreateViewHolder(
         parent: ViewGroup,

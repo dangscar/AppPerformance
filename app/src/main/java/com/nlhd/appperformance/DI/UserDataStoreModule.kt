@@ -6,6 +6,7 @@ import com.nlhd.appperformance.Domain.Repository.UserDataStoreRepository
 import com.nlhd.appperformance.Domain.UseCase.UserDataStore.ClearUser
 import com.nlhd.appperformance.Domain.UseCase.UserDataStore.GetUser
 import com.nlhd.appperformance.Domain.UseCase.UserDataStore.IsLoggedIn
+import com.nlhd.appperformance.Domain.UseCase.UserDataStore.SaveKeyboardPadding
 import com.nlhd.appperformance.Domain.UseCase.UserDataStore.SaveUser
 import com.nlhd.appperformance.Domain.UseCase.UserDataStore.UserDataStoreUseCase
 import dagger.Module
@@ -32,7 +33,8 @@ object UserDataStoreModule {
             saveUser = SaveUser(repository),
             getUser = GetUser(repository),
             clearUser = ClearUser(repository),
-            isLoggedIn = IsLoggedIn(repository)
+            isLoggedIn = IsLoggedIn(repository),
+            saveKeyboardPadding = SaveKeyboardPadding(repository)
         )
     }
 }

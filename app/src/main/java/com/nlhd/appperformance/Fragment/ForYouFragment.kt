@@ -386,6 +386,8 @@ class ForYouFragment(
             binding.viewPager.apply {
                 registerOnPageChangeCallback(registerOnPageChangeCallback)
             }
+            val recyclerView = binding.viewPager.getChildAt(0) as RecyclerView
+            recyclerView.overScrollMode = View.OVER_SCROLL_NEVER
 //            binding.btnRefresh.setOnClickListener {
 //                adapter.refresh()
 //                adapter.releaseAllPlayers()

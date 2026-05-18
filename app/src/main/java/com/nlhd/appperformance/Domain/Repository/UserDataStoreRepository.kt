@@ -8,4 +8,5 @@ interface UserDataStoreRepository {
     suspend fun saveUser(userPreference: UserPreference)
     suspend fun clearUser()
     suspend fun isLoggedIn(): Boolean
+    suspend fun saveKeyboardPadding(padding: Int)
 }

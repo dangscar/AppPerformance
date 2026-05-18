@@ -4,5 +4,6 @@ data class UserDataStoreUseCase(
     val saveUser: SaveUser,
     val getUser: GetUser,
     val clearUser: ClearUser,
-    val isLoggedIn: IsLoggedIn
+    val isLoggedIn: IsLoggedIn,
+    val saveKeyboardPadding: SaveKeyboardPadding
 )

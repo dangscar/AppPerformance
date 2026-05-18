@@ -66,6 +66,7 @@ class BottomSheetInputComment(
 
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
         val dialog = super.onCreateDialog(savedInstanceState)
+
         WindowCompat.setDecorFitsSystemWindows(dialog.window!!, false)
         dialog.window?.setWindowAnimations(0)
         dialog.setOnShowListener {

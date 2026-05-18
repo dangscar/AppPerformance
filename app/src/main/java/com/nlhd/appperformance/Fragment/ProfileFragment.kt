@@ -61,18 +61,17 @@ class ProfileFragment: Fragment(R.layout.fragment_profile) {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        view.doOnLayout {
-            val insets = ViewCompat.getRootWindowInsets(view)
-                ?.getInsets(WindowInsetsCompat.Type.systemBars())
+        ViewCompat.setOnApplyWindowInsetsListener(binding.cdlProfile) { v, insets ->
+            val statusBar = insets.getInsets(WindowInsetsCompat.Type.statusBars())
+            val bottomBar = insets.getInsets(WindowInsetsCompat.Type.navigationBars())
+            v.setPadding(
+                v.paddingLeft,
+                statusBar.top,
+                v.paddingRight,
+                bottomBar.bottom
+            )
 
-            insets?.let {
-                binding.appBarLayout.updateLayoutParams<ViewGroup.MarginLayoutParams> {
-                    topMargin = it.top
-                }
-                binding.cdlProfile.updateLayoutParams<ViewGroup.MarginLayoutParams> {
-                    bottomMargin = it.bottom
-                }
-            }
+            insets
         }
 
         profilePagerAdapter = ProfilePagerAdapter(requireActivity())
@@ -167,6 +166,7 @@ class ProfileFragment: Fragment(R.layout.fragment_profile) {
                 is ResultUI.Success<*> -> {
                     val profile = (it as ResultUI.Success).data
                     setProfile(profile)
+
                 }
                 else -> {}
             }
@@ -189,6 +189,28 @@ class ProfileFragment: Fragment(R.layout.fragment_profile) {
                 mainViewModel.resetScrollToTop()
             }
         }
+
+        binding.tvNameTopBar.alpha = 0f
+
+        binding.appBarLayout.addOnOffsetChangedListener(
+            AppBarLayout.OnOffsetChangedListener { appBarLayout, verticalOffset ->
+
+                val isCollapsed =
+                    kotlin.math.abs(verticalOffset) >= appBarLayout.totalScrollRange
+
+                if (isCollapsed) {
+                    binding.tvNameTopBar.animate()
+                        .alpha(1f)
+                        .setDuration(10)
+                        .start()
+                } else {
+                    binding.tvNameTopBar.animate()
+                        .alpha(0f)
+                        .setDuration(10)
+                        .start()
+                }
+            }
+        )
     }
 
     fun setText(user: User) {
@@ -207,6 +229,7 @@ class ProfileFragment: Fragment(R.layout.fragment_profile) {
         binding.tvFollower.text = profile.followings_count.toString()
         binding.tvLike.text = profile.received_likes_count.toString()
         Glide.with(requireContext()).load(profile.avatar_url ?: R.drawable.asus).error(R.drawable.asus).into(binding.ivAvatar)
+        binding.tvNameTopBar.text = profile.name
     }
 
     fun setText() {
