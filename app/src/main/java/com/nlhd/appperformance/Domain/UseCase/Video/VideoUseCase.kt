@@ -13,5 +13,6 @@ data class VideoUseCase(
     val uploadVideo: UploadVideo,
     val getProfile: GetProfile,
     val getVideoProfile: GetVideoProfile,
-    val clearProfileFlow: ClearProfileFlow
+    val clearProfileFlow: ClearProfileFlow,
+    val follow: Follow
 )

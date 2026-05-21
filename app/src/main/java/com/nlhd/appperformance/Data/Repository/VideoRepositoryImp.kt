@@ -303,14 +303,28 @@ class VideoRepositoryImp(
                 }
             ).flow.cachedIn(appScope)
         }
-        Log.d("AAA", "getVideosProfile: ${profileFlow}")
         return profileVideos
     }
 
     override fun clearProfileFlow(userId: String, timestamp: Long) {
         val uniqueKey = "${userId}_$timestamp"
         profileFlow.remove(uniqueKey)
-        Log.d("AAA", "clearProfileFlow: ${profileFlow}")
+    }
+
+    override suspend fun follow(
+        token: String,
+        userId: String
+    ): ResultWrapper<MessageResponse> {
+        return try {
+            val responseDto = ktor.post(Utils.BASE_URL+"/api/follows/${userId}") {
+                contentType(ContentType.Application.Json)
+                header("Authorization", "Bearer $token")
+            }.body<MessageResponseDto>()
+            val response = responseDto.toDomain(responseDto)
+            ResultWrapper.Success(response)
+        } catch (e: Exception) {
+            ResultWrapper.Error(e)
+        }
     }
 
 }

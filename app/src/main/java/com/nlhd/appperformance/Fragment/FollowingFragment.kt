@@ -239,6 +239,9 @@ class FollowingFragment : Fragment() {
                     R.anim.slide_in_right,
                     R.anim.slide_out_left
                 )
+            },
+            onClickFollow = {
+
             }
         )
 

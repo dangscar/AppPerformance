@@ -58,8 +58,10 @@ import com.nlhd.appperformance.Adapter.VideoPagerAdapter
 import com.nlhd.appperformance.BottomSheet.BottomSheetShare
 import com.nlhd.appperformance.BottomSheet.CommentBottomSheet
 import com.nlhd.appperformance.Domain.Entity.Video.MessageResponse
+import com.nlhd.appperformance.Feature.Video.onChangeBottomSheet
 import com.nlhd.appperformance.R
 import com.nlhd.appperformance.ThuNghiem.TwoFingerScrollHelper
+import com.nlhd.appperformance.Utils.Follow
 import com.nlhd.appperformance.Utils.Navigation
 import com.nlhd.appperformance.Utils.ResultUI
 import com.nlhd.appperformance.Utils.TabSelected
@@ -99,6 +101,7 @@ class ForYouFragment(
     private var commentBottomSheet: CommentBottomSheet? = null
     private var currentCommentVideoId: String = "-1"
     private val ivSearchOverlay by lazy { binding.ivSearchOverlay }
+    private var isClickBottomSheetComment = false
 
     fun holder(position: Int) = (binding.viewPager.getChildAt(0) as RecyclerView).findViewHolderForAdapterPosition(position) as? VideoPagerAdapter.VideoViewHolder
     fun player(position: Int) = players[position]
@@ -131,6 +134,24 @@ class ForYouFragment(
 
         //Set idProfile
         mainViewModel.setIdProfile(adapter.videoByPosition(position)?.userId?.toInt() ?: -1)
+
+        //set state follow
+        val video = adapter.videoByPosition(position)
+        when (video?.canFollow) {
+            "1" -> {
+                if (video.isFollowing == "0") {
+                    mainViewModel.setFollowState(Follow.NOT_FOLLOW)
+                } else {
+                    mainViewModel.setFollowState(Follow.FOLLOWED)
+                }
+            }
+            else -> {
+                mainViewModel.setFollowState(Follow.MY_PROFILE)
+            }
+        }
+
+
+
     }
 
     /* Thay đổi màu alpha của layout*/
@@ -219,6 +240,8 @@ class ForYouFragment(
 
     private var isLock = false
 
+
+
     @SuppressLint("ClickableViewAccessibility")
     @OptIn(UnstableApi::class)
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -251,6 +274,8 @@ class ForYouFragment(
             defaultMediaSourceFactory,
             players = players,
             onClickComment = { videoId->
+                if (isClickBottomSheetComment) return@VideoPagerAdapter
+                isClickBottomSheetComment = true
                 //Nếu videoId hiện tại mà bằng với videoId trước đó thì mở bottomSheet
                 if (videoId == currentCommentVideoId.toInt()) {
                     commentBottomSheet?.show(
@@ -263,43 +288,24 @@ class ForYouFragment(
                         viewModel = commentViewModel,
                         videoId = videoId.toString(),
                         onChangeBottomSheet = { width, height, offsetY ->
-                            val currentPosition = viewModel.currentPosition.value ?: 0
-                            val holder = holder(currentPosition)
-                            val offset = offsetY   // [-1 .. 0]
-                            if (holder != null) {
-                                val aspectRatio = holder.binding.playerView.width.toFloat() / holder.binding.playerView.height.toFloat()
-                                val minScale = 0.16f + (aspectRatio * 0.8f)
-                                val progress = (1f + offset).coerceIn(0f, 1f)
-                                val scale = 1f - (1f - minScale) * progress
-                                val delta = height - height * scale
-
-                                holder.binding.playerView.apply {
-                                    pivotY = width / 3f
-                                    scaleX = scale
-                                    scaleY = scale
-                                    translationY = -delta / 2f + statusBarHeight * progress * 0.25f
-                                }
-
-                                if (offset != -1f) {
+                            val holder = holder(viewModel.currentPosition.value ?: 0) ?: return@CommentBottomSheet
+                            onChangeBottomSheet(
+                                width,
+                                height,
+                                offsetY,
+                                holder,
+                                statusBarHeight,
+                                onDoNotShow = {
+                                    ivSearchOverlay.visibility = View.GONE
                                     mainViewModel.showBarAction(false)
                                     layoutAlpha(holder, 0f)
                                     requireActivity().window.statusBarColor = ContextCompat.getColor(requireContext(), R.color.black)
                                     requireActivity().window.navigationBarColor = ContextCompat.getColor(requireContext(), R.color.white)
-                                    /*requireActivity().enableEdgeToEdge(
-                                        statusBarStyle = SystemBarStyle.dark(android.graphics.Color.BLACK)
-                                    )*/
+                                },
+                                onShowSearchIcon = {
+                                    ivSearchOverlay.visibility = View.VISIBLE
                                 }
-                            }
-
-                            val progress = (1f + offsetY).coerceIn(0f, 1f)
-
-                            // Show icon khi bottomSheet mở (progress > 0)
-                            if (progress > 0f && ivSearchOverlay.visibility != View.VISIBLE) {
-                                ivSearchOverlay.visibility = View.VISIBLE
-                                ivSearchOverlay.alpha = 0f
-                            }
-                            // Fade in/out theo progress
-                            ivSearchOverlay.alpha = 1f
+                            )
                         },
                         onDismiss = {
                             //Dismiss bottomSheet
@@ -314,6 +320,8 @@ class ForYouFragment(
                             mainViewModel.showBarAction(true)
                             if (holder == null) return@CommentBottomSheet
                             layoutAlpha(holder, 1f)
+
+                            isClickBottomSheetComment = false
 
                         },
                         onChangeComponent = {
@@ -358,6 +366,15 @@ class ForYouFragment(
                     R.anim.slide_in_right,
                     R.anim.slide_out_left
                 )
+            },
+            onClickFollow = { userId->
+                lifecycleScope.launch {
+                    viewModel.userState.collect { userPreference ->
+                        if (userPreference.isLoggedIn && userPreference.token.isNotEmpty()) {
+                            mainViewModel.follow(userPreference.token, userId.toString())
+                        }
+                    }
+                }
             }
         )
 
@@ -423,6 +440,27 @@ class ForYouFragment(
             }
         }
 
+        mainViewModel.isFollowing.observe(viewLifecycleOwner) {
+            when (it) {
+                is ResultUI.Error<*> -> {}
+                ResultUI.Idle -> {}
+                ResultUI.Loading -> {}
+                is ResultUI.Success<*> -> {
+                    val message = it.data as MessageResponse
+                    val holder = holder(viewModel.currentPosition.value ?: 0) ?: return@observe
+                    val video = adapter.videoByPosition(position)
+                    video?.isFollowing = if (message.message == "Follow thành công") 1.toString() else 0.toString()
+                    if (video?.isFollowing == 0.toString()) {
+                        holder.binding.flFollowing.visibility = View.VISIBLE
+                    } else {
+                        holder.binding.flFollowing.visibility = View.INVISIBLE
+                    }
+
+                    mainViewModel.setFollowIdle()
+                }
+            }
+        }
+
         viewModel.likeState.observe(viewLifecycleOwner) {
             when (it) {
                 is ResultUI.Error<*> -> {}
@@ -451,6 +489,7 @@ class ForYouFragment(
                 }
             }
         }
+
 
         /*var startY = 0f
         var lastDy = 0f
@@ -519,6 +558,20 @@ class ForYouFragment(
                     binding.viewPager.setCurrentItem(0, false)
                     initializePlayerForCurrentItem()
                     isRefreshing = false
+
+                    val video = adapter.videoByPosition(viewModel.currentPosition.value ?: 0)
+                    when (video?.canFollow) {
+                        "1" -> {
+                            if (video.isFollowing == "0") {
+                                mainViewModel.setFollowState(Follow.NOT_FOLLOW)
+                            } else {
+                                mainViewModel.setFollowState(Follow.FOLLOWED)
+                            }
+                        }
+                        else -> {
+                            mainViewModel.setFollowState(Follow.MY_PROFILE)
+                        }
+                    }
                 }
             }
 

@@ -6,19 +6,28 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.nlhd.appperformance.Domain.Entity.Video.MessageResponse
 import com.nlhd.appperformance.Domain.UseCase.UserDataStore.UserDataStoreUseCase
+import com.nlhd.appperformance.Domain.UseCase.Video.VideoUseCase
+import com.nlhd.appperformance.Utils.Follow
 import com.nlhd.appperformance.Utils.Navigation
+import com.nlhd.appperformance.Utils.ResultUI
+import com.nlhd.appperformance.Utils.ResultWrapper
 import com.nlhd.appperformance.Utils.TabSelected
 import com.nlhd.appperformance.Utils.tabs
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.take
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
 class MainViewModel @Inject constructor(
-
+    private val videoUseCase: VideoUseCase
 ): ViewModel() {
-
     private var _showBar = MutableLiveData(true)
     val showBar: LiveData<Boolean> = _showBar
     private var _isLandscape = MutableLiveData(false)
@@ -111,11 +120,32 @@ class MainViewModel @Inject constructor(
         _text.value = value
     }
 
-    //Create Player
-    private var _isCreatePlayer = MutableLiveData(false)
-    val isCreatePlayer: LiveData<Boolean> = _isCreatePlayer
-
-    fun setIsCreatePlayer(value: Boolean) {
-        _isCreatePlayer.value = value
+    //Following
+    private var _isFollowing = MutableLiveData<ResultUI<MessageResponse>>(ResultUI.Idle)
+    val isFollowing: LiveData<ResultUI<MessageResponse>> = _isFollowing
+    private var _followState = MutableLiveData<Follow>(Follow.NOT_FOLLOW)
+    val followState = _followState
+    fun setFollowState(state: Follow) {
+        _followState.value = state
     }
+    fun follow(token: String,userId: String) = viewModelScope.launch {
+        _isFollowing.value = ResultUI.Loading
+        videoUseCase.follow(token, userId).let { result->
+            when (result) {
+                is ResultWrapper.Error -> {
+                    _isFollowing.value = ResultUI.Error(result.exception)
+                    setFollowState(Follow.NOT_FOLLOW)
+                }
+                is ResultWrapper.Success<*> -> {
+                    _isFollowing.value = ResultUI.Success(result.value as MessageResponse)
+                    setFollowState(Follow.FOLLOWED)
+                }
+            }
+        }
+    }
+    fun setFollowIdle() {
+        _isFollowing.value = ResultUI.Idle
+    }
+
+
 }

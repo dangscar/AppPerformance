@@ -11,7 +11,7 @@ data class Video(
     val hashtags: String? = null,
     val id: Int,
     val isFavorite: String,
-    val isFollowing: String,
+    var isFollowing: String,
     var isLiked: String,
     var likesCount: String,
     val shares: String,

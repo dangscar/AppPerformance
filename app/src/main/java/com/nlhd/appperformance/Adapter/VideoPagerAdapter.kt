@@ -62,7 +62,8 @@ class VideoPagerAdapter(
     private val onClickComment: (Int) -> Unit,
     private val onClickLike: (Int, Int) -> Unit,
     private val onClickShare: () -> Unit,
-    private val onClickProfile: (Int) -> Unit
+    private val onClickProfile: (Int) -> Unit,
+    private val onClickFollow: (Int) -> Unit
 ) : PagingDataAdapter<Video,VideoPagerAdapter.VideoViewHolder>(DiffCallback) {
 
     companion object {
@@ -149,8 +150,8 @@ class VideoPagerAdapter(
     override fun onBindViewHolder(holder: VideoViewHolder, position: Int) {
         val video = getItem(position) ?: return
 
+        //Set up player
         createPlayer(position)
-
         val player = players[position] ?: return
         holder.binding.playerView.player = player
 
@@ -171,8 +172,12 @@ class VideoPagerAdapter(
                 holder.binding.flFollowing.visibility = View.INVISIBLE
             }
         }
+        holder.binding.flFollowing.setOnClickListener {
+            onClickFollow(video.user.id)
+        }
 
 
+        //Like
         updateLike(holder, video)
         holder.binding.llLike.setOnClickListener {
             onClickLike(video.id, position)
@@ -267,7 +272,6 @@ class VideoPagerAdapter(
     }
 
     fun createPlayer(current: Int) {
-        Log.d("AAA", "Create")
         /*if (players.size >= 3 && currentPosition != current) {
             releaseFarthestPlayer()
         }

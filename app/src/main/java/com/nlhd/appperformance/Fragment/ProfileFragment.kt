@@ -30,6 +30,7 @@ import com.nlhd.appperformance.Data.Model.Video.Profile
 import com.nlhd.appperformance.Domain.Entity.GetUser.User
 import com.nlhd.appperformance.Feature.LoginScreen.LoginBottomSheet
 import com.nlhd.appperformance.R
+import com.nlhd.appperformance.Utils.Follow
 import com.nlhd.appperformance.Utils.Navigation
 import com.nlhd.appperformance.Utils.ResultUI
 import com.nlhd.appperformance.ViewModel.MainViewModel
@@ -201,16 +202,34 @@ class ProfileFragment: Fragment(R.layout.fragment_profile) {
                 if (isCollapsed) {
                     binding.tvNameTopBar.animate()
                         .alpha(1f)
-                        .setDuration(10)
+                        .setDuration(150)
                         .start()
                 } else {
                     binding.tvNameTopBar.animate()
                         .alpha(0f)
-                        .setDuration(10)
+                        .setDuration(150)
                         .start()
                 }
             }
         )
+
+        //Follow
+        mainViewModel.followState.observe(viewLifecycleOwner){
+            when (it) {
+                Follow.NOT_FOLLOW -> {
+                    binding.btnFollow.visibility = View.VISIBLE
+                    binding.btnProfile.text = "Nhắn tin"
+                }
+                Follow.FOLLOWED -> {
+                    binding.btnFollow.visibility = View.GONE
+                    binding.btnProfile.text = "Nhắn tin"
+                }
+                Follow.MY_PROFILE -> {
+                    binding.btnFollow.visibility = View.GONE
+                    binding.btnProfile.text = "Sửa hồ sơ"
+                }
+            }
+        }
     }
 
     fun setText(user: User) {
@@ -233,11 +252,11 @@ class ProfileFragment: Fragment(R.layout.fragment_profile) {
     }
 
     fun setText() {
-        binding.tvName.text = "Unknown"
-        binding.tvUsername.text = "@username"
-        binding.tvFollowed.text = "0"
-        binding.tvFollower.text = "0"
-        binding.tvLike.text = "0"
+        binding.tvName.text = "Dang"
+        binding.tvUsername.text = "@Dangkt"
+        binding.tvFollowed.text = "-"
+        binding.tvFollower.text = "-"
+        binding.tvLike.text = "-"
     }
 
 

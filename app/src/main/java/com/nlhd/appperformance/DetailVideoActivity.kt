@@ -2,6 +2,7 @@ package com.nlhd.appperformance
 
 import android.graphics.Color
 import android.os.Bundle
+import android.util.Log
 import androidx.activity.OnBackPressedCallback
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
@@ -51,8 +52,6 @@ class DetailVideoActivity : AppCompatActivity() {
                 if (viewPager.currentItem > 0) {
                     viewPager.currentItem = 0
                 } else {
-                    val fragment = supportFragmentManager.findFragmentByTag("f0") as? DetailVideoFragment
-                    fragment?.releasePlayers()
                     if (players.isNotEmpty()) {
                         players.values.forEach { player ->
                             player.stop()
@@ -99,9 +98,24 @@ class DetailVideoActivity : AppCompatActivity() {
             if (it && viewPager.currentItem == 1) {
                 viewPager.currentItem = 0
                 viewModel.setBackPressed(false)
+                Log.d("AAA", "1")
             } else if (it && viewPager.currentItem == 0) {
                 onBackPressedDispatcher.onBackPressed()
                 viewModel.setBackPressed(false)
+                if (players.isNotEmpty()) {
+                    players.values.forEach { player ->
+                        player.stop()
+                        player.clearMediaItems()
+                        player.release()
+                    }
+                    players.clear()
+                }
+                finish()
+                overridePendingTransition(
+                    R.anim.slide_in_left,
+                    R.anim.slide_out_right
+                )
+
             }
         }
     }

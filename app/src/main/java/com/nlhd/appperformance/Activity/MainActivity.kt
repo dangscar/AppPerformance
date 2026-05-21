@@ -144,6 +144,7 @@ class MainActivity : AppCompatActivity() {
             } else if (it && viewPager.currentItem == 0) {
                 onBackPressedDispatcher.onBackPressed()
                 viewModel.setBackPressed(false)
+                moveTaskToBack(true)
             }
         }
 

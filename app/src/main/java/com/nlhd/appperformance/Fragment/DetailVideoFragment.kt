@@ -14,6 +14,7 @@ import android.widget.EditText
 import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TextView
+import androidx.activity.OnBackPressedCallback
 import androidx.annotation.OptIn
 import androidx.cardview.widget.CardView
 import androidx.core.content.ContextCompat
@@ -44,6 +45,7 @@ import com.nlhd.appperformance.BottomSheet.BottomSheetInputComment
 import com.nlhd.appperformance.BottomSheet.BottomSheetShare
 import com.nlhd.appperformance.BottomSheet.CommentBottomSheet
 import com.nlhd.appperformance.DetailVideoActivity
+import com.nlhd.appperformance.Feature.Video.onChangeBottomSheet
 import com.nlhd.appperformance.R
 import com.nlhd.appperformance.Utils.Navigation
 import com.nlhd.appperformance.Utils.TabSelected
@@ -256,33 +258,14 @@ class DetailVideoFragment : Fragment() {
                         viewModel = commentViewModel,
                         videoId = videoId.toString(),
                         onChangeBottomSheet = { width, height, offsetY ->
-                            viewPager.post {
-                                val currentPosition = viewModel.currentPosition.value ?: 0
-                                val holder = (viewPager.getChildAt(0) as RecyclerView).findViewHolderForAdapterPosition(currentPosition) as? VideoPagerAdapter.VideoViewHolder
-                                if (holder == null) return@post
-                                val density = holder.binding.playerView.resources.displayMetrics.density
-                                val offset = offsetY   // [-1 .. 0]
-
-                                val aspectRatio = holder.binding.playerView.width.toFloat() / holder.binding.playerView.height.toFloat()
-                                val maxScale = 1f
-                                val minScale = 0.16f + (aspectRatio * 0.8f)
-
-                                val screenHeight = resources.configuration.screenHeightDp
-                                val sheetHeight = height / density
-                                val sheetVisible = (sheetHeight / screenHeight)
-                                val progress = (1f + offset).coerceIn(0f, 1f)
-                                val scale = 1f - (1f - minScale) * progress
-
-                                holder.binding.playerView.apply {
-                                    pivotY = width / 3f
-                                    scaleX = scale
-                                    scaleY = scale
-                                    val delta = height - height * scale
-                                    translationY = -delta / 2f + statusBarHeight * progress * 0.25f
-                                    resizeMode = AspectRatioFrameLayout.RESIZE_MODE_FIT
-                                }
-
-                                if (offset != -1f) {
+                            val holder = holder(viewModel.currentPosition.value ?: 0) ?: return@CommentBottomSheet
+                            onChangeBottomSheet(
+                                width,
+                                height,
+                                offsetY,
+                                holder,
+                                statusBarHeight,
+                                onDoNotShow = {
                                     toolbar.alpha = 0f
                                     bottomComment.alpha = 0f
                                     holder.binding.apply {
@@ -292,8 +275,9 @@ class DetailVideoFragment : Fragment() {
                                     }
                                     activity?.window?.navigationBarColor = ContextCompat.getColor(requireContext(), R.color.white)
                                     activity?.window?.statusBarColor = Color.BLACK
-                                }
-                            }
+                                },
+                                onShowSearchIcon = {}
+                            )
                         },
                         onDismiss = {
                             val currentPosition = viewModel.currentPosition.value ?: 0
@@ -321,6 +305,9 @@ class DetailVideoFragment : Fragment() {
             onClickProfile = {
                 // Here we might want to tell the activity to switch to ProfileFragment
                 (activity as? DetailVideoActivity)?.switchToProfile()
+            },
+            onClickFollow = {
+
             }
         )
 
@@ -401,6 +388,7 @@ class DetailVideoFragment : Fragment() {
                 adapter.handlePlayerState(viewModel.currentPosition.value ?: 0)
             }
         }
+
     }
 
     @OptIn(UnstableApi::class)

@@ -160,27 +160,30 @@ class VideoStoreActivity : AppCompatActivity() {
                     val currentPosition = viewModel.currentPosition.value ?: 0
                     val holder = (viewPager.getChildAt(0) as RecyclerView).findViewHolderForAdapterPosition(currentPosition) as? VideoStorePagerAdapter.VideoViewHolder
                     if (holder == null) return@post
-                    val density = holder.binding.playerView.resources.displayMetrics.density
-                    val aspectRatio = holder.binding.playerView.width.toFloat() / holder.binding.playerView.height.toFloat()
                     val offset = offsetY   // [-1 .. 0]
-                    val maxScale = 1f
-                    val minScale = 0.16f + (aspectRatio * 0.8f)
+                    val aspectRatio = holder.binding.playerView.width.toFloat() / holder.binding.playerView.height.toFloat()
+                    val minScale = 0.16f + (aspectRatio * 0.68f)
+                    val progresses = (1f + offset).coerceIn(0f, 1f)
+                    val scale = 1f - (1f - minScale) * progresses
+                    val delta = height - height * scale
 
-                    val screenHeight= resources.configuration.screenHeightDp
-                    val sheetHeight = height / density
-                    val sheetVisible =   (sheetHeight / screenHeight)
-                    val targetScale = (maxScale - (sheetVisible.coerceAtMost(0.6f) / 0.6f) * (maxScale - minScale))
-                    val progress = (1f + offset).coerceIn(0f, 1f)
-                    val scale = 1f - (1f - minScale) * progress
-
+                    var translateY = -delta / 2f + statusBarHeight * progresses * 0.25f
+                    var pivotY = width/4f
+                    if (aspectRatio > 15/9f) {
+                        translateY = -translateY
+                        pivotY = width/1f
+                    } else if (aspectRatio >= 1f) {
+                        pivotY = width/1f
+                        translateY += -delta * 2
+                    } else if (aspectRatio > 9/16f) {
+                        pivotY = width/1f
+                        translateY += -delta * 1.5f * aspectRatio
+                    }
                     holder.binding.playerView.apply {
-                        pivotY = width / 3f
+                        this.pivotY = pivotY
                         scaleX = scale
                         scaleY = scale
-
-                        val delta = height - height * scale
-                        translationY = -delta / 2f + statusBarHeight * progress * 0.25f
-                        resizeMode = AspectRatioFrameLayout.RESIZE_MODE_FIT
+                        translationY = translateY
                     }
 
                     if (offset != -1f) {

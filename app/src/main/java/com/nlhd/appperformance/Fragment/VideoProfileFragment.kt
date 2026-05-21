@@ -17,6 +17,7 @@ import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.media3.common.util.Log
 import androidx.media3.common.util.UnstableApi
+import androidx.paging.LoadState
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.nlhd.appperformance.Adapter.VideoStorePagingAdapter
@@ -75,8 +76,28 @@ class VideoProfileFragment : Fragment() {
                 )
             }
         )
+
+        adapter.addLoadStateListener { loadStates ->
+            val isLoading = loadStates.refresh is LoadState.Loading
+            val isError = loadStates.refresh is LoadState.Error
+
+            binding.loadingView.visibility = if (isLoading) View.VISIBLE else View.GONE
+            binding.recyclerView.visibility = if (isLoading) View.GONE else View.VISIBLE
+            binding.llError.visibility = if (isError) View.VISIBLE else View.GONE
+            if (loadStates.refresh is LoadState.NotLoading) {
+                binding.recyclerView.visibility = View.VISIBLE
+                binding.loadingView.visibility = View.GONE
+                binding.llError.visibility = View.GONE
+            }
+
+        }
         binding.recyclerView.layoutManager = GridLayoutManager(requireContext(), 3)
         binding.recyclerView.adapter = adapter
+
+        binding.errorView.setOnClickListener {
+            adapter.retry()
+            Log.d("AAA", "Retry")
+        }
 
         viewLifecycleOwner.lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
