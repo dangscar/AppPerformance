@@ -17,6 +17,7 @@ import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.annotation.OptIn
+import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
 import androidx.core.content.res.ResourcesCompat
 import androidx.fragment.app.Fragment
@@ -173,8 +174,9 @@ class HomeFragment: Fragment(R.layout.fragment_home) {
                     val tabView = tabStrip.getChildAt(i)
                     val startPadding = if (i == 0) 22 else 1
                     val endPadding = if (i == tabStrip.childCount - 1) 22 else 1
-                    tabView.minimumWidth = 0
-                    tabView.setPadding(startPadding, 0, endPadding, 0)
+
+                    tabView.minimumWidth = 20.dpToPx()
+                    //tabView.setPadding(0, 0, endPadding, 0)
                 }
             }
 
@@ -212,7 +214,7 @@ class HomeFragment: Fragment(R.layout.fragment_home) {
                     val startPadding = if (i == 0) 22 else 1
                     val endPadding = if (i == tabStrip.childCount - 1) 22 else 1
                     tabView.minimumWidth = 0
-                    tabView.setPadding(startPadding, 0, endPadding, 0)
+                    //tabView.setPadding(startPadding, 0, endPadding, 0)
                 }
                 updateTabColor(tabLayout, tab.position)
 

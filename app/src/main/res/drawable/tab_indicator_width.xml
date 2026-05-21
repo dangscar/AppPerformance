@@ -1,16 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
-<inset xmlns:android="http://schemas.android.com/apk/res/android"
-    android:insetRight="16dp"
-    android:insetLeft="16dp">
-    <shape>
-        <solid android:color="@android:color/white"/>
-        <size
-            android:width="20dp"
-            android:height="1dp"/>
-        <corners android:radius="1dp"/>
-    </shape>
-</inset>
-
-
-
-
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:gravity="center">
+        <shape android:shape="rectangle">
+            <size android:width="24dp" android:height="2.5dp"/>
+            <solid android:color="@android:color/white"/>
+            <corners android:radius="10dp"/>
+        </shape>
+    </item>
+</layer-list>

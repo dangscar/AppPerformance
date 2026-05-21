@@ -50,8 +50,8 @@
                     android:layout_gravity="center"
                     android:background="@android:color/transparent"
                     app:tabMode="scrollable"
-                    app:tabGravity="fill"
-                    app:tabIndicatorFullWidth="false"
+                    app:tabGravity="center"
+                    app:tabIndicatorFullWidth="true"
                     android:fadingEdge="horizontal"
                     android:requiresFadingEdge="horizontal"
                     android:overScrollMode="never"
@@ -60,7 +60,9 @@
                     app:tabTextColor="@color/black"
                     app:tabSelectedTextColor="@color/black"
                     app:tabRippleColor="@android:color/transparent"
-                    app:tabIndicator="@drawable/tab_indicator_width"/>
+                    app:tabIndicator="@drawable/tab_indicator_width"
+                    app:tabPaddingStart="0dp"
+                    app:tabPaddingEnd="0dp"/>
 
             </com.nlhd.appperformance.DstInMaskLayout>
 
