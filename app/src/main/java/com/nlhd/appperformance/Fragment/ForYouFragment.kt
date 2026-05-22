@@ -85,8 +85,8 @@ class ForYouFragment(
     private val binding get() = _binding!!
     private lateinit var adapter: VideoPagerAdapter
 
-    private val viewModel: VideoViewModel by viewModels()
     private val commentViewModel: CommentViewModel by viewModels()
+    private val viewModel: VideoViewModel by viewModels()
     private val mainViewModel: MainViewModel by activityViewModels()
 
     @Inject
@@ -246,6 +246,7 @@ class ForYouFragment(
     @OptIn(UnstableApi::class)
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        commentViewModel.getPaddingKeyboard()
         view.doOnLayout {
             val insets = ViewCompat.getRootWindowInsets(view)
                 ?.getInsets(WindowInsetsCompat.Type.systemBars())
@@ -255,6 +256,9 @@ class ForYouFragment(
                 ivSearchOverlay.updateLayoutParams<ViewGroup.MarginLayoutParams> {
                     topMargin = it.top + 12.dpToPx()  // ✅ status bar + margin thêm
                     marginEnd = 14.dpToPx()
+                }
+                binding.ivAutoScroll.updateLayoutParams<ViewGroup.MarginLayoutParams> {
+                    topMargin = it.top + 50.dpToPx()  // ✅ status bar + margin thêm
                 }
             }
         }

@@ -308,7 +308,8 @@ class CommentBottomSheet(
             },
             onDone = {
                 viewModel.addComment(videoId, edtComment.text.toString())
-            }
+            },
+            commentViewModel = viewModel
         )
         bottomSheetInput.show(
             requireActivity().supportFragmentManager,

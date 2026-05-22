@@ -71,9 +71,8 @@ class DetailVideoFragment : Fragment() {
     private lateinit var playerView: PlayerView
     private lateinit var edtSearch: EditText
     private lateinit var edtComment: EditText
-
-    private val viewModel: SearchSuccessViewModel by viewModels()
     private val commentViewModel: CommentViewModel by viewModels()
+    private val viewModel: SearchSuccessViewModel by viewModels()
     private val mainViewModel: MainViewModel by activityViewModels()
 
     @Inject
@@ -87,7 +86,6 @@ class DetailVideoFragment : Fragment() {
     private var userId = "0"
 
     private lateinit var commentBottomSheet: CommentBottomSheet
-    private val bottomSheetInput = BottomSheetInputComment(text = "", onChangeText = {}, onDone = {})
 
     @OptIn(UnstableApi::class)
     fun holder(position: Int) = (viewPager.getChildAt(0) as RecyclerView).findViewHolderForAdapterPosition(position) as? VideoPagerAdapter.VideoViewHolder
@@ -178,6 +176,7 @@ class DetailVideoFragment : Fragment() {
     @OptIn(UnstableApi::class)
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        commentViewModel.getPaddingKeyboard()
         val isLandscape = resources.configuration.orientation == Configuration.ORIENTATION_LANDSCAPE
 
         toolbar = view.findViewById(R.id.topBar)
@@ -319,7 +318,6 @@ class DetailVideoFragment : Fragment() {
                 footer = LoadingAdapter { adapter.retry() }
             )
             viewPager.orientation = ViewPager2.ORIENTATION_VERTICAL
-            viewPager.offscreenPageLimit = 1
             adapter.resetAllPlayerExceptPos(viewModel.currentPosition.value ?: 0)
             viewPager.apply {
                 registerOnPageChangeCallback(registerOnPageChangeCallback)
@@ -365,7 +363,7 @@ class DetailVideoFragment : Fragment() {
         }
 
         bottomComment.setOnClickListener {
-            bottomSheetInput.show(childFragmentManager, BottomSheetInputComment::class.java.simpleName)
+            BottomSheetInputComment(text = "", onChangeText = {}, onDone = {}, commentViewModel = commentViewModel).show(childFragmentManager, BottomSheetInputComment::class.java.simpleName)
         }
 
         ivBack.setOnClickListener {
@@ -380,7 +378,7 @@ class DetailVideoFragment : Fragment() {
             Intent(requireContext(), SearchActivity::class.java).apply { startActivity(this) }
         }
         edtComment.setOnClickListener {
-            bottomSheetInput.show(childFragmentManager, BottomSheetInputComment::class.java.simpleName)
+            BottomSheetInputComment(text = "", onChangeText = {}, onDone = {}, commentViewModel = commentViewModel).show(childFragmentManager, BottomSheetInputComment::class.java.simpleName)
         }
 
         mainViewModel.navigation.observe(viewLifecycleOwner) {

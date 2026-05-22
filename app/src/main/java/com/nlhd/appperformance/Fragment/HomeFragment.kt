@@ -169,6 +169,7 @@ class HomeFragment: Fragment(R.layout.fragment_home) {
                         tab.customView = tv
             //Padding text tablayout
             tabLayout.post {
+                tabLayout.fullScroll(View.FOCUS_RIGHT)
                 val tabStrip = tabLayout.getChildAt(0) as ViewGroup
                 for (i in 0 until tabStrip.childCount) {
                     val tabView = tabStrip.getChildAt(i)

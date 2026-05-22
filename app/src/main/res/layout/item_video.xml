@@ -20,35 +20,11 @@
                 android:id="@+id/playerView"
                 app:use_controller="false"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
+                android:layout_height="match_parent"
                 android:layout_gravity="center"
                 android:scaleType="centerCrop"
                 android:background="@color/black"
                 app:surface_type="texture_view"/>
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:gravity="center"
-                android:layout_marginTop="8dp"
-                android:id="@+id/ll_fullscreen"
-                android:visibility="gone">
-                <ImageView
-                    android:id="@+id/exo_pause"
-                    android:layout_width="32dp"
-                    android:layout_height="32dp"
-                    android:layout_gravity="end"
-                    android:background="@drawable/bg_circle_gray"
-                    android:src="@drawable/floatscreen"
-                    android:padding="6dp"
-                    app:tint="@color/white" />
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Toàn màn hình"
-                    android:textColor="@android:color/white"
-                    android:textSize="12sp"
-                    android:fontFamily="@font/tiktoksans_semibold"/>
-            </LinearLayout>
         </LinearLayout>
 
         <ImageView

@@ -34,14 +34,14 @@
                 android:layout_height="26dp"
                 android:src="@drawable/live"
                 app:tint="#FFFFFF"
-                android:layout_marginStart="14dp"
-                android:layout_marginEnd="6dp"/>
+                android:layout_marginStart="14dp"/>
 
             <com.nlhd.appperformance.DstInMaskLayout
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
                 android:layout_weight="1"
-                >
+                android:paddingEnd="12dp"
+                android:paddingStart="12dp">
 
                 <com.google.android.material.tabs.TabLayout
                     android:id="@+id/tabLayout"
@@ -49,6 +49,7 @@
                     android:layout_height="wrap_content"
                     android:layout_gravity="center"
                     android:background="@android:color/transparent"
+
                     app:tabMode="scrollable"
                     app:tabGravity="center"
                     app:tabIndicatorFullWidth="true"
@@ -62,7 +63,8 @@
                     app:tabRippleColor="@android:color/transparent"
                     app:tabIndicator="@drawable/tab_indicator_width"
                     app:tabPaddingStart="0dp"
-                    app:tabPaddingEnd="0dp"/>
+                    app:tabPaddingEnd="0dp"
+                    />
 
             </com.nlhd.appperformance.DstInMaskLayout>
 
@@ -73,20 +75,8 @@
                 android:layout_height="26dp"
                 android:src="@drawable/ic_search"
                 app:tint="#CDEDECEC"
-                android:layout_marginEnd="14dp"
-                android:layout_marginStart="6dp"/>
+                android:layout_marginEnd="14dp"/>
         </LinearLayout>
-
-        <ImageView
-            android:id="@+id/exo_pause"
-            android:layout_width="32dp"
-            android:layout_height="32dp"
-            android:layout_gravity="end"
-            android:background="@drawable/bg_circle_gray"
-            android:src="@drawable/autoscroll"
-            android:padding="6dp"
-            app:tint="@color/white"
-            android:layout_marginEnd="12dp"/>
     </LinearLayout>
 
 

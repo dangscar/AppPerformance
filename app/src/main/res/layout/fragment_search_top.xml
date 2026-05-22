@@ -27,6 +27,13 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/rvFeed"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:paddingHorizontal="4dp"
+            android:clipToPadding="false"/>
+
         <com.airbnb.lottie.LottieAnimationView
             android:id="@+id/loadingView"
             android:layout_width="50dp"
@@ -43,12 +50,7 @@
             android:layout_height="match_parent"
             android:orientation="vertical"
             android:gravity="center"
-            android:visibility="gone">
-            <ImageView
-                android:layout_width="60dp"
-                android:layout_height="60dp"
-                android:src="@drawable/ic_refresh"
-                app:tint="@color/black" />
+            android:visibility="visible">
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -56,23 +58,22 @@
                 android:textColor="@color/black"
                 android:fontFamily="@font/tiktoksans_semibold"
                 android:textSize="16sp"
-                android:layout_marginTop="12dp"/>
+                android:layout_marginVertical="12dp"/>
             <Button
                 android:id="@+id/errorView"
-                android:layout_width="wrap_content"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:text="Vui lòng thử lại"
-                android:layout_marginTop="24dp"
+                android:layout_marginHorizontal="48dp"
+                android:textColor="@color/black"
+                android:paddingHorizontal="8dp"
                 android:background="@drawable/bg_border_button_ui_white"
-                android:textAllCaps="false"/>
+                android:visibility="visible"
+                android:fontFamily="@font/tiktoksans_semibold"
+                android:textAllCaps="false"
+                android:elevation="0dp"
+                />
         </LinearLayout>
-
-        <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/rvFeed"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:paddingHorizontal="4dp"
-            android:clipToPadding="false"/>
 
     </FrameLayout>
 </LinearLayout>

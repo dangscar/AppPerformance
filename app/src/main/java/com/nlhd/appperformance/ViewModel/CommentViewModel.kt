@@ -74,4 +74,26 @@ class CommentViewModel @Inject constructor(
     fun loadComment(videoId: String) {
         videoIdFlow.value = videoId
     }
+
+    //BottomSheet padding keyboard
+    private val _keyboardHeight = MutableLiveData<Int>()
+    val keyboardHeight get() = _keyboardHeight
+
+    init {
+        getPaddingKeyboard()
+    }
+
+    fun getPaddingKeyboard() = viewModelScope.launch {
+        userDataStoreUseCase.getUser().collect { userPreference ->
+            if (userPreference.keyboardPadding != 0) {
+                keyboardHeight.value = userPreference.keyboardPadding
+            }
+
+        }
+    }
+
+    fun savePaddingKeyBoard(padding: Int) = viewModelScope.launch {
+        keyboardHeight.value = padding
+        userDataStoreUseCase.saveKeyboardPadding(padding)
+    }
 }

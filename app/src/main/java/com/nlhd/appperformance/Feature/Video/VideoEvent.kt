@@ -37,10 +37,10 @@ fun onChangeBottomSheet(
         translateY += -delta * 1.5f * aspectRatio
     }
     holder.binding.playerView.apply {
-        this.pivotY = pivotY
+        this.pivotY = width/2f
         scaleX = scale
         scaleY = scale
-        translationY = translateY
+        translationY = -delta / 2f + statusBarHeight * progresses * 0.25f
     }
 
     if (offset != -1f) {

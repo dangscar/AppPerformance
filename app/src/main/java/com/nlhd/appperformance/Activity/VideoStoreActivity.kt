@@ -77,7 +77,6 @@ class VideoStoreActivity : AppCompatActivity() {
     fun Int.dpToPx(): Int {
         return (this * Resources.getSystem().displayMetrics.density).toInt()
     }
-    val bottomSheetInput = BottomSheetInputComment(text ="",onChangeText = {}, onDone = {})
     @SuppressLint("MissingInflatedId")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -376,10 +375,7 @@ class VideoStoreActivity : AppCompatActivity() {
                 supportFragmentManager,
                 CommentBottomSheet::class.java.simpleName
             )
-            bottomSheetInput.show(
-                supportFragmentManager,
-                BottomSheetInputComment::class.java.simpleName
-            )
+            BottomSheetInputComment(text = "", onChangeText = {}, onDone = {}, commentViewModel = commentViewModel).show(supportFragmentManager, BottomSheetInputComment::class.java.simpleName)
         }
 
         //Nút back
