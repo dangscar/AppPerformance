@@ -21,8 +21,7 @@ class UserDataStoreRepositoryImp(
             email = prefs[UserKeys.EMAIL] ?: "",
             avatarUrl = prefs[UserKeys.AVATAR_URL] ?: "",
             token = prefs[UserKeys.TOKEN] ?: "",
-            isLoggedIn = prefs[UserKeys.IS_LOGGED_IN] ?: false,
-            keyboardPadding = prefs[UserKeys.KEYBOARD_PADDING] ?: 0
+            isLoggedIn = prefs[UserKeys.IS_LOGGED_IN] ?: false
         )
     }
 
@@ -33,7 +32,6 @@ class UserDataStoreRepositoryImp(
             prefs[UserKeys.AVATAR_URL] = userPreference.avatarUrl
             prefs[UserKeys.TOKEN] = userPreference.token
             prefs[UserKeys.IS_LOGGED_IN] = userPreference.isLoggedIn
-            prefs[UserKeys.KEYBOARD_PADDING] = userPreference.keyboardPadding
         }
     }
 
@@ -46,11 +44,5 @@ class UserDataStoreRepositoryImp(
     override suspend fun isLoggedIn(): Boolean {
         val prefs = context.userDataStore.data.first()
         return !prefs[UserKeys.TOKEN].isNullOrEmpty()
-    }
-
-    override suspend fun saveKeyboardPadding(padding: Int) {
-        context.userDataStore.edit { prefs ->
-            prefs[UserKeys.KEYBOARD_PADDING] = padding
-        }
     }
 }

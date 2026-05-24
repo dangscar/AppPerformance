@@ -27,6 +27,7 @@ import com.nlhd.appperformance.Fragment.ProfileFragment
 import com.nlhd.appperformance.R
 import com.nlhd.appperformance.Utils.Navigation
 import com.nlhd.appperformance.Utils.TabSelected
+import com.nlhd.appperformance.ViewModel.GeneralViewModel
 import com.nlhd.appperformance.ViewModel.MainViewModel
 import dagger.hilt.android.AndroidEntryPoint
 
@@ -44,6 +45,7 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         val splashScreen = installSplashScreen()
         setContentView(R.layout.activity_main)
+
 
         splashScreen.setKeepOnScreenCondition { false }
 
@@ -81,7 +83,7 @@ class MainActivity : AppCompatActivity() {
             insets
         }
 
-        val recyclerView = viewPager.getChildAt(0) as RecyclerView
+        /*val recyclerView = viewPager.getChildAt(0) as RecyclerView
         recyclerView.addOnItemTouchListener(object : RecyclerView.OnItemTouchListener {
             private var startX = 0f
             private var startY = 0f
@@ -110,7 +112,7 @@ class MainActivity : AppCompatActivity() {
             }
             override fun onTouchEvent(rv: RecyclerView, e: MotionEvent) {}
             override fun onRequestDisallowInterceptTouchEvent(disallowIntercept: Boolean) {}
-        })
+        })*/
 
 
         viewPager.registerOnPageChangeCallback(object : ViewPager2.OnPageChangeCallback() {

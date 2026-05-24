@@ -7,6 +7,7 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.nlhd.appperformance.Domain.Entity.Video.MessageResponse
+import com.nlhd.appperformance.Domain.UseCase.Padding.PaddingDataStoreUseCase
 import com.nlhd.appperformance.Domain.UseCase.UserDataStore.UserDataStoreUseCase
 import com.nlhd.appperformance.Domain.UseCase.Video.VideoUseCase
 import com.nlhd.appperformance.Utils.Follow
@@ -26,7 +27,8 @@ import javax.inject.Inject
 
 @HiltViewModel
 class MainViewModel @Inject constructor(
-    private val videoUseCase: VideoUseCase
+    private val videoUseCase: VideoUseCase,
+    private val paddingDataStoreUseCase: PaddingDataStoreUseCase
 ): ViewModel() {
     private var _showBar = MutableLiveData(true)
     val showBar: LiveData<Boolean> = _showBar
@@ -138,7 +140,12 @@ class MainViewModel @Inject constructor(
                 }
                 is ResultWrapper.Success<*> -> {
                     _isFollowing.value = ResultUI.Success(result.value as MessageResponse)
-                    setFollowState(Follow.FOLLOWED)
+                    val message = (result.value as MessageResponse).message
+                    if (message == "Follow thành công") {
+                        setFollowState(Follow.FOLLOWED)
+                    } else {
+                        setFollowState(Follow.NOT_FOLLOW)
+                    }
                 }
             }
         }
@@ -147,5 +154,27 @@ class MainViewModel @Inject constructor(
         _isFollowing.value = ResultUI.Idle
     }
 
+    private var _paddingKeyboard = MutableLiveData<Int>(0)
+    val paddingKeyboard get() = _paddingKeyboard
 
+
+    fun getPaddingKeyboard() = viewModelScope.launch {
+        paddingDataStoreUseCase.getPadding().collect {
+            if (it != 0) {
+                _paddingKeyboard.value = it
+            }
+
+        }
+    }
+
+    fun savePaddingKeyboard(padding: Int) = viewModelScope.launch {
+        if (padding != 0) {
+            paddingDataStoreUseCase.savePadding(padding)
+            _paddingKeyboard.value = padding
+        }
+    }
+
+    init {
+        getPaddingKeyboard()
+    }
 }

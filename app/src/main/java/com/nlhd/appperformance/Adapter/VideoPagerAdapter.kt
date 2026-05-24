@@ -71,6 +71,7 @@ class VideoPagerAdapter(
             override fun areItemsTheSame(oldItem: Video, newItem: Video) = oldItem.id == newItem.id
             override fun areContentsTheSame(oldItem: Video, newItem: Video) = oldItem == newItem
         }
+        const val PAYLOAD_FOLLOW = "payload_follow"
     }
 
     inner class VideoViewHolder(val binding: ItemVideoBinding) : RecyclerView.ViewHolder(binding.root)
@@ -147,6 +148,26 @@ class VideoPagerAdapter(
         }
     }
 
+    private fun bindFollow(
+        holder: VideoViewHolder,
+        video: Video
+    ) {
+        when (video.canFollow) {
+            "1" -> {
+
+                holder.binding.flFollowing.visibility =
+                    if (video.isFollowing == "0") {
+                        View.VISIBLE
+                    } else {
+                        View.INVISIBLE
+                    }
+            }
+            else -> {
+                holder.binding.flFollowing.visibility = View.INVISIBLE
+            }
+        }
+    }
+
     override fun onBindViewHolder(holder: VideoViewHolder, position: Int) {
         val video = getItem(position) ?: return
 
@@ -160,18 +181,9 @@ class VideoPagerAdapter(
             onClickProfile(video.user.id)
         }
         Glide.with(holder.binding.ivAvatar).load(video.user.avatarUrl).error(R.drawable.asus).into(holder.binding.ivAvatar)
-        when (video.canFollow) {
-            "1" -> {
-                if (video.isFollowing == "0") {
-                    holder.binding.flFollowing.visibility = View.VISIBLE
-                } else {
-                    holder.binding.flFollowing.visibility = View.INVISIBLE
-                }
-            }
-            else -> {
-                holder.binding.flFollowing.visibility = View.INVISIBLE
-            }
-        }
+
+        //Follow
+        bindFollow(holder, video)
         holder.binding.flFollowing.setOnClickListener {
             onClickFollow(video.user.id)
         }
@@ -241,9 +253,35 @@ class VideoPagerAdapter(
         setupTimeBar(holder, players[position]!!)
     }
 
+    override fun onBindViewHolder(holder: VideoViewHolder, position: Int, payloads: List<Any?>) {
+        if (payloads.contains(PAYLOAD_FOLLOW)) {
+
+            val video = getItem(position) ?: return
+
+            bindFollow(holder, video)
+
+            return
+        }
+
+        super.onBindViewHolder(holder, position, payloads)
+
+    }
     fun videoByPosition(position: Int): Video? {
         val video = getItem(position) ?: return null
         return video
+    }
+
+    fun updateFollowByUserId(
+        userId: Int,
+        isFollowing: String
+    ) {
+
+        snapshot().items.forEachIndexed { index, video ->
+            if (video.user.id == userId) {
+                video.isFollowing = isFollowing
+                notifyItemChanged(index, PAYLOAD_FOLLOW)
+            }
+        }
     }
 
     fun updateLike(holder: VideoViewHolder, video: Video) {

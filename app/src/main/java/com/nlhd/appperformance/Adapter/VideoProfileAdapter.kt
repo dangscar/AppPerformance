@@ -7,6 +7,7 @@ import androidx.paging.PagingDataAdapter
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
+import com.nlhd.appperformance.Adapter.VideoPagerAdapter.Companion.PAYLOAD_FOLLOW
 import com.nlhd.appperformance.Domain.Entity.Video.Video
 import com.nlhd.appperformance.Domain.Entity.VideoStore
 import com.nlhd.appperformance.R
@@ -44,6 +45,22 @@ class VideoProfileAdapter(
         }
     }
 
+    fun updateAllFollowState(
+        isFollowing: String
+    ) {
+
+        snapshot().items.forEach { video ->
+
+            video.isFollowing = isFollowing
+        }
+
+        notifyItemRangeChanged(
+            0,
+            snapshot().items.size,
+            PAYLOAD_FOLLOW
+        )
+    }
+
     companion object {
         private val diffCallback = object : DiffUtil.ItemCallback<Video>() {
             override fun areItemsTheSame(
@@ -63,6 +80,7 @@ class VideoProfileAdapter(
         }
 
         const val VIEW_TYPE = 2000
+        private val PAYLOAD_FOLLOW = "payload_follow"
     }
     inner class VideoProfileViewHolder(val binding: ItemVideoStoreBinding): RecyclerView.ViewHolder(binding.root)
 }

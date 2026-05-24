@@ -375,7 +375,7 @@ class VideoStoreActivity : AppCompatActivity() {
                 supportFragmentManager,
                 CommentBottomSheet::class.java.simpleName
             )
-            BottomSheetInputComment(text = "", onChangeText = {}, onDone = {}, commentViewModel = commentViewModel).show(supportFragmentManager, BottomSheetInputComment::class.java.simpleName)
+            BottomSheetInputComment(text = "", onChangeText = {}, onDone = {}).show(supportFragmentManager, BottomSheetInputComment::class.java.simpleName)
         }
 
         //Nút back

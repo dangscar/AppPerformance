@@ -25,6 +25,7 @@ import com.nlhd.appperformance.R
 import com.nlhd.appperformance.Activity.VideoStoreActivity
 import com.nlhd.appperformance.Adapter.VideoProfileAdapter
 import com.nlhd.appperformance.DetailVideoActivity
+import com.nlhd.appperformance.Utils.Follow
 import com.nlhd.appperformance.Utils.Navigation
 import com.nlhd.appperformance.ViewModel.MainViewModel
 import com.nlhd.appperformance.ViewModel.VideoProfileViewModel
@@ -142,6 +143,20 @@ class VideoProfileFragment : Fragment() {
             if (it) {
                 scrollToTop()
                 mainViewModel.setScrollToTopRecyclerView(false)
+            }
+        }
+
+        mainViewModel.followState.observe(viewLifecycleOwner) {
+            when (it) {
+                Follow.NOT_FOLLOW -> {
+                    adapter.updateAllFollowState("0")
+                }
+                Follow.FOLLOWED -> {
+                    adapter.updateAllFollowState("1")
+                }
+                Follow.MY_PROFILE -> {
+
+                }
             }
         }
 

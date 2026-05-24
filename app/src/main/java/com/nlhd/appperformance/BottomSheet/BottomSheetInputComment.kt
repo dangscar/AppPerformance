@@ -38,6 +38,7 @@ import com.nlhd.appperformance.Adapter.EmojiAdapter
 import com.nlhd.appperformance.Feature.LoginScreen.LoginBottomSheet
 import com.nlhd.appperformance.R
 import com.nlhd.appperformance.ViewModel.CommentViewModel
+import com.nlhd.appperformance.ViewModel.GeneralViewModel
 import com.nlhd.appperformance.ViewModel.MainViewModel
 import com.nlhd.appperformance.ViewModel.ProfileViewModel
 import dagger.hilt.android.AndroidEntryPoint
@@ -49,15 +50,14 @@ class BottomSheetInputComment(
     private val imageUrl: String = "",
     private val text: String,
     private val onChangeText: (String) -> Unit,
-    private val onDone: () -> Unit,
-    private val commentViewModel: CommentViewModel
+    private val onDone: () -> Unit
 ): BottomSheetDialogFragment() {
     private lateinit var edtInputComment: EditText
     private lateinit var iv_avatar: ImageView
     private lateinit var rv_emoji: RecyclerView
     private lateinit var rv_icon: RecyclerView
     private lateinit var ll_actionInput: LinearLayout
-    //private val viewModel: MainViewModel by activityViewModels()
+    private val viewModel: MainViewModel by activityViewModels()
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -82,11 +82,8 @@ class BottomSheetInputComment(
                     val nav = insets.getInsets(WindowInsetsCompat.Type.navigationBars()).bottom
                     val keyboardHeight = ime - nav
 
-                    /*if (keyboardHeight > 0 && keyboardHeight != viewModel.text.value) {
-                        viewModel.setText(keyboardHeight)
-                    }*/
-                    if (keyboardHeight > 0 && keyboardHeight != commentViewModel.keyboardHeight.value) {
-                        commentViewModel.savePaddingKeyBoard(keyboardHeight)
+                    if (keyboardHeight > 0 && keyboardHeight != viewModel.paddingKeyboard.value) {
+                        viewModel.savePaddingKeyboard(keyboardHeight)
                     }
                     insets
                 }
@@ -97,11 +94,8 @@ class BottomSheetInputComment(
                     decorView.getWindowVisibleDisplayFrame(rect)
                     val keyboardHeight = decorView.height - rect.bottom
 
-                    /*if (keyboardHeight > 200 && keyboardHeight != viewModel.text.value) {
-                        viewModel.setText(keyboardHeight)
-                    }*/
-                    if (keyboardHeight > 200 && keyboardHeight != commentViewModel.keyboardHeight.value) {
-                        commentViewModel.savePaddingKeyBoard(keyboardHeight)
+                    if (keyboardHeight > 200 && keyboardHeight != viewModel.paddingKeyboard.value) {
+                        viewModel.savePaddingKeyboard(keyboardHeight)
                     }
                 }
             }
@@ -155,14 +149,8 @@ class BottomSheetInputComment(
         rv_icon = view.findViewById<RecyclerView>(R.id.rv_icon)
         ll_actionInput = view.findViewById<LinearLayout>(R.id.ll_actionInput)
 
-        /*viewModel.text.observe(viewLifecycleOwner) { text->
-            if (text > 0) {
-                rv_icon.updateLayoutParams {
-                    height = text
-                }
-            }
-        }*/
-        commentViewModel.keyboardHeight.observe(viewLifecycleOwner) { text->
+
+        viewModel.paddingKeyboard.observe(viewLifecycleOwner) { text->
             if (text > 0) {
                 rv_icon.updateLayoutParams {
                     height = text

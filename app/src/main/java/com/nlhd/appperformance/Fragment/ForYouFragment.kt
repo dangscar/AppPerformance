@@ -55,6 +55,7 @@ import com.nlhd.appperformance.Activity.ProfileActivity
 import com.nlhd.appperformance.Activity.SearchActivity
 import com.nlhd.appperformance.Adapter.LoadingAdapter
 import com.nlhd.appperformance.Adapter.VideoPagerAdapter
+import com.nlhd.appperformance.Adapter.VideoPagerAdapter.Companion.PAYLOAD_FOLLOW
 import com.nlhd.appperformance.BottomSheet.BottomSheetShare
 import com.nlhd.appperformance.BottomSheet.CommentBottomSheet
 import com.nlhd.appperformance.Domain.Entity.Video.MessageResponse
@@ -102,6 +103,10 @@ class ForYouFragment(
     private var currentCommentVideoId: String = "-1"
     private val ivSearchOverlay by lazy { binding.ivSearchOverlay }
     private var isClickBottomSheetComment = false
+    private var statusBarHeight = 0
+    private var currentOffset = 0f
+    private var currentPositionV = 0
+    private var isLock = false
 
     fun holder(position: Int) = (binding.viewPager.getChildAt(0) as RecyclerView).findViewHolderForAdapterPosition(position) as? VideoPagerAdapter.VideoViewHolder
     fun player(position: Int) = players[position]
@@ -109,7 +114,6 @@ class ForYouFragment(
         holder.binding.playerView.player = player
         adapter.setupTimeBar(holder, player)
     }
-
     fun setUpPlayer(position: Int) {
         if (!players.contains(position)) adapter.createPlayer(position)
         val holder = holder(position)
@@ -135,25 +139,21 @@ class ForYouFragment(
         //Set idProfile
         mainViewModel.setIdProfile(adapter.videoByPosition(position)?.userId?.toInt() ?: -1)
 
-        //set state follow
+        ///set state follow
         val video = adapter.videoByPosition(position)
         when (video?.canFollow) {
             "1" -> {
-                if (video.isFollowing == "0") {
+                if (video.isFollowing == "0") { //Chưa follow
                     mainViewModel.setFollowState(Follow.NOT_FOLLOW)
-                } else {
+                } else { //Đã follow
                     mainViewModel.setFollowState(Follow.FOLLOWED)
                 }
             }
-            else -> {
+            else -> { //Đối với profile
                 mainViewModel.setFollowState(Follow.MY_PROFILE)
             }
         }
-
-
-
     }
-
     /* Thay đổi màu alpha của layout*/
     fun layoutAlpha(holder: VideoPagerAdapter.VideoViewHolder, value: Float) {
         holder.binding.apply {
@@ -162,9 +162,32 @@ class ForYouFragment(
             llBottomAction.alpha = value
         }
     }
+    fun Int.dpToPx(): Int {
+        return (this * Resources.getSystem().displayMetrics.density).toInt()
+    }
+    fun inset(view: View) {
+        view.doOnLayout {
+            val insets = ViewCompat.getRootWindowInsets(view)
+                ?.getInsets(WindowInsetsCompat.Type.systemBars())
+
+            insets?.let {
+                statusBarHeight = it.top
+                ivSearchOverlay.updateLayoutParams<ViewGroup.MarginLayoutParams> {
+                    topMargin = it.top + 12.dpToPx()  // ✅ status bar + margin thêm
+                    marginEnd = 14.dpToPx()
+                }
+                binding.ivAutoScroll.updateLayoutParams<ViewGroup.MarginLayoutParams> {
+                    topMargin = it.top + 50.dpToPx()  // ✅ status bar + margin thêm
+                }
+            }
+        }
+    }
+    fun colorSystem(navigationColor: Int, statusBarColor: Int) {
+        requireActivity().window.navigationBarColor = navigationColor
+        requireActivity().window.statusBarColor = statusBarColor
+    }
     private val registerOnPageChangeCallback = object :
         ViewPager2.OnPageChangeCallback() {
-
         override fun onPageSelected(position: Int) {
             super.onPageSelected(position)
             if (position >= adapter.itemCount) return
@@ -188,7 +211,6 @@ class ForYouFragment(
                 holder.binding.seekBar.visibility = View.VISIBLE
             }
         }
-
         override fun onPageScrolled(
             position: Int,
             positionOffset: Float,
@@ -231,40 +253,12 @@ class ForYouFragment(
         return _binding!!.root
     }
 
-    fun Int.dpToPx(): Int {
-        return (this * Resources.getSystem().displayMetrics.density).toInt()
-    }
-    private var statusBarHeight = 0
-    private var currentOffset = 0f
-    private var currentPositionV = 0
-
-    private var isLock = false
-
-
-
     @SuppressLint("ClickableViewAccessibility")
     @OptIn(UnstableApi::class)
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        commentViewModel.getPaddingKeyboard()
-        view.doOnLayout {
-            val insets = ViewCompat.getRootWindowInsets(view)
-                ?.getInsets(WindowInsetsCompat.Type.systemBars())
-
-            insets?.let {
-                statusBarHeight = it.top
-                ivSearchOverlay.updateLayoutParams<ViewGroup.MarginLayoutParams> {
-                    topMargin = it.top + 12.dpToPx()  // ✅ status bar + margin thêm
-                    marginEnd = 14.dpToPx()
-                }
-                binding.ivAutoScroll.updateLayoutParams<ViewGroup.MarginLayoutParams> {
-                    topMargin = it.top + 50.dpToPx()  // ✅ status bar + margin thêm
-                }
-            }
-        }
-
-        requireActivity().window.navigationBarColor = ContextCompat.getColor(requireContext(), R.color.black)
-        requireActivity().window.statusBarColor = Color.TRANSPARENT
+        inset(view)
+        colorSystem(navigationColor = Color.BLACK, statusBarColor = Color.TRANSPARENT)
 
         btnPlay = binding.playerViewlc.findViewById(R.id.exo_play)
         btnPause = binding.playerViewlc.findViewById(R.id.exo_pause)
@@ -409,31 +403,7 @@ class ForYouFragment(
             }
             val recyclerView = binding.viewPager.getChildAt(0) as RecyclerView
             recyclerView.overScrollMode = View.OVER_SCROLL_NEVER
-//            binding.btnRefresh.setOnClickListener {
-//                adapter.refresh()
-//                adapter.releaseAllPlayers()
-//                binding.viewPager.setCurrentItem(0, false)
-//                binding.viewPager.post {
-//                    setUpPlayer(0)
-//                    Log.d("AAA", binding.viewPager.currentItem.toString())
-//                }
-//            }
-
         }
-
-        /*viewModel.isFollowing.observe(viewLifecycleOwner) {
-            when (it) {
-                is ResultUI.Error<*> -> {}
-                ResultUI.Idle -> {}
-                ResultUI.Loading -> {}
-                is ResultUI.Success<*> -> {
-                    val message = it.data as MessageResponse
-                    val holder = (binding.viewPager.getChildAt(0) as RecyclerView).findViewHolderForAdapterPosition(binding.viewPager.currentItem) as? VideoPagerAdapter.VideoViewHolder ?: return@observe
-                    holder.binding.flFollowing.visibility = if (message.message == "Đã follow") View.INVISIBLE else View.VISIBLE
-                    viewModel.updateStateFollowing()
-                }
-            }
-        }*/
 
 
         //Refresh trang
@@ -444,27 +414,40 @@ class ForYouFragment(
             }
         }
 
+        //Follow State
         mainViewModel.isFollowing.observe(viewLifecycleOwner) {
             when (it) {
-                is ResultUI.Error<*> -> {}
-                ResultUI.Idle -> {}
-                ResultUI.Loading -> {}
                 is ResultUI.Success<*> -> {
-                    val message = it.data as MessageResponse
-                    val holder = holder(viewModel.currentPosition.value ?: 0) ?: return@observe
-                    val video = adapter.videoByPosition(position)
-                    video?.isFollowing = if (message.message == "Follow thành công") 1.toString() else 0.toString()
-                    if (video?.isFollowing == 0.toString()) {
-                        holder.binding.flFollowing.visibility = View.VISIBLE
-                    } else {
-                        holder.binding.flFollowing.visibility = View.INVISIBLE
-                    }
 
+                    val message = it.data as MessageResponse
+
+                    val currentPos = viewModel.currentPosition.value ?: return@observe
+
+                    val video = adapter.videoByPosition(currentPos) ?: return@observe
+                    // update data
+                    video.isFollowing =
+                        if (message.message == "Follow thành công") {
+                            "1"
+                        } else {
+                            "0"
+                        }
+                    // update toàn bộ video cùng user
+                    adapter.updateFollowByUserId(
+                        userId = video.user.id,
+                        isFollowing = video.isFollowing
+                    )
+                    if (video.isFollowing == "0") {
+                        mainViewModel.setFollowState(Follow.NOT_FOLLOW)
+                    } else {
+                        mainViewModel.setFollowState(Follow.FOLLOWED)
+                    }
                     mainViewModel.setFollowIdle()
                 }
+                else -> {}
             }
         }
 
+        //Like State
         viewModel.likeState.observe(viewLifecycleOwner) {
             when (it) {
                 is ResultUI.Error<*> -> {}
@@ -718,4 +701,8 @@ class ForYouFragment(
             holderPrev.binding.playerView.player = players[currentPrev]
         }
     }
+
+
 }
+
+

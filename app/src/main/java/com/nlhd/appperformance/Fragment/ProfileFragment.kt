@@ -28,6 +28,7 @@ import com.google.android.material.tabs.TabLayoutMediator
 import com.nlhd.appperformance.Adapter.ProfilePagerAdapter
 import com.nlhd.appperformance.Data.Model.Video.Profile
 import com.nlhd.appperformance.Domain.Entity.GetUser.User
+import com.nlhd.appperformance.Domain.Entity.Video.MessageResponse
 import com.nlhd.appperformance.Feature.LoginScreen.LoginBottomSheet
 import com.nlhd.appperformance.R
 import com.nlhd.appperformance.Utils.Follow
@@ -218,10 +219,16 @@ class ProfileFragment: Fragment(R.layout.fragment_profile) {
             when (it) {
                 Follow.NOT_FOLLOW -> {
                     binding.btnFollow.visibility = View.VISIBLE
+                    binding.btnFollow.background = ContextCompat.getDrawable(requireContext(), R.drawable.bg_button_red)
+                    binding.btnFollow.setTextColor(ContextCompat.getColor(requireContext(), R.color.white))
+                    binding.btnFollow.text = "Follow"
                     binding.btnProfile.text = "Nhắn tin"
                 }
                 Follow.FOLLOWED -> {
-                    binding.btnFollow.visibility = View.GONE
+                    binding.btnFollow.visibility = View.VISIBLE
+                    binding.btnFollow.background = ContextCompat.getDrawable(requireContext(), R.drawable.bg_button_gray)
+                    binding.btnFollow.setTextColor(ContextCompat.getColor(requireContext(), R.color.black))
+                    binding.btnFollow.text = "Hủy Follow"
                     binding.btnProfile.text = "Nhắn tin"
                 }
                 Follow.MY_PROFILE -> {
@@ -230,6 +237,17 @@ class ProfileFragment: Fragment(R.layout.fragment_profile) {
                 }
             }
         }
+
+        binding.btnFollow.setOnClickListener {
+            lifecycleScope.launch {
+                viewModel.userState.collect { userPreference ->
+                    if (userPreference.isLoggedIn && userPreference.token.isNotEmpty()) {
+                        mainViewModel.follow(userPreference.token, mainViewModel.idProfile.value.toString())
+                    }
+                }
+            }
+        }
+
     }
 
     fun setText(user: User) {
@@ -244,8 +262,8 @@ class ProfileFragment: Fragment(R.layout.fragment_profile) {
     fun setProfile(profile: Profile) {
         binding.tvName.text = profile.name
         binding.tvUsername.text = profile.email
-        binding.tvFollowed.text = profile.followers_count.toString()
-        binding.tvFollower.text = profile.followings_count.toString()
+        binding.tvFollowed.text = profile.followings_count.toString()
+        binding.tvFollower.text = profile.followers_count.toString()
         binding.tvLike.text = profile.received_likes_count.toString()
         Glide.with(requireContext()).load(profile.avatar_url ?: R.drawable.asus).error(R.drawable.asus).into(binding.ivAvatar)
         binding.tvNameTopBar.text = profile.name

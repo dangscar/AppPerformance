@@ -45,9 +45,12 @@ import com.nlhd.appperformance.BottomSheet.BottomSheetInputComment
 import com.nlhd.appperformance.BottomSheet.BottomSheetShare
 import com.nlhd.appperformance.BottomSheet.CommentBottomSheet
 import com.nlhd.appperformance.DetailVideoActivity
+import com.nlhd.appperformance.Domain.Entity.Video.MessageResponse
 import com.nlhd.appperformance.Feature.Video.onChangeBottomSheet
 import com.nlhd.appperformance.R
+import com.nlhd.appperformance.Utils.Follow
 import com.nlhd.appperformance.Utils.Navigation
+import com.nlhd.appperformance.Utils.ResultUI
 import com.nlhd.appperformance.Utils.TabSelected
 import com.nlhd.appperformance.ViewModel.CommentViewModel
 import com.nlhd.appperformance.ViewModel.MainViewModel
@@ -122,6 +125,21 @@ class DetailVideoFragment : Fragment() {
 
         //Set idProfile
         mainViewModel.setIdProfile(adapter.videoByPosition(position)?.userId?.toInt() ?: -1)
+
+        ///set state follow
+        val video = adapter.videoByPosition(position)
+        when (video?.canFollow) {
+            "1" -> {
+                if (video.isFollowing == "0") { //Chưa follow
+                    mainViewModel.setFollowState(Follow.NOT_FOLLOW)
+                } else { //Đã follow
+                    mainViewModel.setFollowState(Follow.FOLLOWED)
+                }
+            }
+            else -> { //Đối với profile
+                mainViewModel.setFollowState(Follow.MY_PROFILE)
+            }
+        }
     }
 
     /* Thay đổi màu alpha của layout*/
@@ -176,7 +194,6 @@ class DetailVideoFragment : Fragment() {
     @OptIn(UnstableApi::class)
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        commentViewModel.getPaddingKeyboard()
         val isLandscape = resources.configuration.orientation == Configuration.ORIENTATION_LANDSCAPE
 
         toolbar = view.findViewById(R.id.topBar)
@@ -363,7 +380,7 @@ class DetailVideoFragment : Fragment() {
         }
 
         bottomComment.setOnClickListener {
-            BottomSheetInputComment(text = "", onChangeText = {}, onDone = {}, commentViewModel = commentViewModel).show(childFragmentManager, BottomSheetInputComment::class.java.simpleName)
+            BottomSheetInputComment(text = "", onChangeText = {}, onDone = {}).show(childFragmentManager, BottomSheetInputComment::class.java.simpleName)
         }
 
         ivBack.setOnClickListener {
@@ -378,12 +395,45 @@ class DetailVideoFragment : Fragment() {
             Intent(requireContext(), SearchActivity::class.java).apply { startActivity(this) }
         }
         edtComment.setOnClickListener {
-            BottomSheetInputComment(text = "", onChangeText = {}, onDone = {}, commentViewModel = commentViewModel).show(childFragmentManager, BottomSheetInputComment::class.java.simpleName)
+            BottomSheetInputComment(text = "", onChangeText = {}, onDone = {}).show(childFragmentManager, BottomSheetInputComment::class.java.simpleName)
         }
 
         mainViewModel.navigation.observe(viewLifecycleOwner) {
             if (it == Navigation.Home && viewModel.currentPosition.value == viewPager.currentItem) {
                 adapter.handlePlayerState(viewModel.currentPosition.value ?: 0)
+            }
+        }
+
+        //Follow State
+        mainViewModel.isFollowing.observe(viewLifecycleOwner) {
+            when (it) {
+                is ResultUI.Success<*> -> {
+
+                    val message = it.data as MessageResponse
+
+                    val currentPos = viewModel.currentPosition.value ?: return@observe
+
+                    val video = adapter.videoByPosition(currentPos) ?: return@observe
+                    // update data
+                    video.isFollowing =
+                        if (message.message == "Follow thành công") {
+                            "1"
+                        } else {
+                            "0"
+                        }
+                    // update toàn bộ video cùng user
+                    adapter.updateFollowByUserId(
+                        userId = video.user.id,
+                        isFollowing = video.isFollowing
+                    )
+                    if (video.isFollowing == "0") {
+                        mainViewModel.setFollowState(Follow.NOT_FOLLOW)
+                    } else {
+                        mainViewModel.setFollowState(Follow.FOLLOWED)
+                    }
+                    mainViewModel.setFollowIdle()
+                }
+                else -> {}
             }
         }
 
@@ -409,6 +459,7 @@ class DetailVideoFragment : Fragment() {
                     viewModel.videosProfile(userId, timeProfile).collectLatest { pagingData ->
                         adapter.submitData(pagingData)
                     }
+
                 }
             }
             else -> {

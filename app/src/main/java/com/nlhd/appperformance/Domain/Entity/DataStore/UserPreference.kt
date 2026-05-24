@@ -5,6 +5,5 @@ data class UserPreference(
     val email: String = "",
     val avatarUrl: String = "",
     val token: String = "",
-    val isLoggedIn: Boolean = true,
-    val keyboardPadding: Int = 0
+    val isLoggedIn: Boolean = true
 )

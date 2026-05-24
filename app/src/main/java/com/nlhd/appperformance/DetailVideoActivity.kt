@@ -14,6 +14,7 @@ import androidx.viewpager2.widget.ViewPager2
 import com.nlhd.appperformance.Fragment.DetailVideoFragment
 import com.nlhd.appperformance.Fragment.ProfileFragment
 import com.nlhd.appperformance.Utils.Navigation
+import com.nlhd.appperformance.ViewModel.GeneralViewModel
 import com.nlhd.appperformance.ViewModel.MainViewModel
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
