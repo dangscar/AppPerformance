@@ -71,6 +71,8 @@ class VideoProfileFragment : Fragment() {
                 intent.putExtra("type", "profile")
                 intent.putExtra("userId", mainViewModel.idProfile.value.toString())
                 intent.putExtra("timestamp", viewModel.timestamp.value)
+                intent.putExtra("token", viewModel.token.value)
+                intent.putExtra("isUserInputEnable", false)
                 startActivity(intent)
                 requireActivity().overridePendingTransition(
                     R.anim.zoom_in, R.anim.zoom_out
@@ -105,15 +107,16 @@ class VideoProfileFragment : Fragment() {
 
                 combine(
                     mainViewModel.idProfile.asFlow(),
-                    mainViewModel.navigation.asFlow()
-                ) { id, navigation ->
-                    Pair(id, navigation)
+                    mainViewModel.navigation.asFlow(),
+                    viewModel.getUser()
+                ) { id, navigation, user ->
+                    Triple(id, navigation, user)
                 }
-                    .filter { (_, navigation) ->
+                    .filter { (_, navigation,_) ->
                         navigation == Navigation.User
                     }
                     .distinctUntilChanged()
-                    .onEach { (id, _) ->
+                    .onEach { (id, _,_) ->
 
                         if (id != idProfile) {
                             viewModel.clearProfileFlow(
@@ -124,11 +127,12 @@ class VideoProfileFragment : Fragment() {
                             idProfile = id
                         }
                     }
-                    .flatMapLatest { (id, _) ->
-
+                    .flatMapLatest { (id, _, user) ->
+                        viewModel.setToken(user.token)
                         viewModel.videoProfile(
                             id.toString(),
-                            viewModel.timestamp.value!!
+                            viewModel.timestamp.value!!,
+                            user.token
                         )
                     }
                     .collectLatest { pagingData ->
@@ -175,6 +179,7 @@ class VideoProfileFragment : Fragment() {
     override fun onDestroy() {
         super.onDestroy()
         _binding = null
+        viewModel.clearProfileFlow(mainViewModel.idProfile.value.toString(), viewModel.timestamp.value ?: 0)
 
     }
 }

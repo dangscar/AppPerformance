@@ -11,4 +11,7 @@ class ExploreViewModel @Inject constructor(
     private val videoUseCase: VideoUseCase
 ): ViewModel() {
     val videos = videoUseCase.getVideosExplore()
+
+    private var _timestamp = MutableLiveData(System.currentTimeMillis())
+    val timestamp: MutableLiveData<Long> = _timestamp
 }

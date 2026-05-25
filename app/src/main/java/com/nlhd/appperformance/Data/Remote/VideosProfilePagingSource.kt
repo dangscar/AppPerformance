@@ -18,6 +18,7 @@ import io.ktor.http.contentType
 class VideosProfilePagingSource(
     private val ktor: HttpClient,
     private val userId: String,
+    private val token: String
 ): PagingSource<Int, Video>() {
     override fun getRefreshKey(state: PagingState<Int, Video>): Int? {
         return state.anchorPosition?.let {
@@ -31,6 +32,7 @@ class VideosProfilePagingSource(
         return try {
             val responseDto = ktor.get(Utils.BASE_URL+"/api/video/profile/allVideo/${userId}?page=$page") {
                 contentType(ContentType.Application.Json)
+                header("Authorization", "Bearer $token")
             }.body<VideoResponseDto>()
             val response = responseDto.toDomain(responseDto)
             val endOfPageReached = response.videos.isEmpty()

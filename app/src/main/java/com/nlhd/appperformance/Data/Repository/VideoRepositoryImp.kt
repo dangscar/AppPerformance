@@ -290,7 +290,7 @@ class VideoRepositoryImp(
     }
 
 
-    override fun getVideosProfile(userId: String, timestamp: Long): Flow<PagingData<Video>> {
+    override fun getVideosProfile(userId: String, timestamp: Long, token: String): Flow<PagingData<Video>> {
         val uniqueKey = "${userId}_$timestamp"
         val profileVideos = profileFlow.getOrPut(uniqueKey) {
             Pager(
@@ -299,16 +299,18 @@ class VideoRepositoryImp(
                     prefetchDistance = 1
                 ),
                 pagingSourceFactory = {
-                    VideosProfilePagingSource(ktor, userId.toString())
+                    VideosProfilePagingSource(ktor, userId, token)
                 }
             ).flow.cachedIn(appScope)
         }
+        Log.d("AAA", "getVideosProfile: $profileFlow")
         return profileVideos
     }
 
     override fun clearProfileFlow(userId: String, timestamp: Long) {
         val uniqueKey = "${userId}_$timestamp"
         profileFlow.remove(uniqueKey)
+        Log.d("AAA", "clearProfileFlow: $profileFlow")
     }
 
     override suspend fun follow(

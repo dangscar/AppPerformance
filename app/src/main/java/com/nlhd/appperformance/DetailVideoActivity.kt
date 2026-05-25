@@ -99,7 +99,6 @@ class DetailVideoActivity : AppCompatActivity() {
             if (it && viewPager.currentItem == 1) {
                 viewPager.currentItem = 0
                 viewModel.setBackPressed(false)
-                Log.d("AAA", "1")
             } else if (it && viewPager.currentItem == 0) {
                 onBackPressedDispatcher.onBackPressed()
                 viewModel.setBackPressed(false)
@@ -119,9 +118,13 @@ class DetailVideoActivity : AppCompatActivity() {
 
             }
         }
+
+        val isUserInputEnable = intent.getBooleanExtra("isUserInputEnable", true)
+        viewPager.isUserInputEnabled = isUserInputEnable
     }
 
     fun switchToProfile() {
         viewPager.currentItem = 1
     }
+
 }

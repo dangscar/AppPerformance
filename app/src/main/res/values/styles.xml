@@ -49,10 +49,10 @@
         <item name="android:fontFamily">@font/tiktoksans_regular</item>
     </style>
 
-    <style name="BottomSheetNoScrim" parent="Theme.Design.Light.BottomSheetDialog">
+
+    <style name="BottomSheetNoScrim" parent="Widget.MaterialComponents.BottomSheet.Modal">
         <item name="android:backgroundDimEnabled">false</item>
         <item name="android:windowIsFloating">false</item>
-        <item name="android:windowAnimationStyle">@null</item>
     </style>
 
     <style name="BottomNavStyle" parent="Widget.MaterialComponents.BottomNavigationView">

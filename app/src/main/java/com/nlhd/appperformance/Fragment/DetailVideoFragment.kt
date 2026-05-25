@@ -85,8 +85,7 @@ class DetailVideoFragment : Fragment() {
     lateinit var defaultMediaSourceFactory: DefaultMediaSourceFactory
     private var currentCommentVideoId: String = "-1"
     private var statusBarHeight = 0
-    private var timeProfile = 0L
-    private var userId = "0"
+
 
     private lateinit var commentBottomSheet: CommentBottomSheet
 
@@ -320,6 +319,8 @@ class DetailVideoFragment : Fragment() {
             },
             onClickProfile = {
                 // Here we might want to tell the activity to switch to ProfileFragment
+                val isUserInputEnable = activity?.intent?.getBooleanExtra("isUserInputEnable", true)
+                if (isUserInputEnable == false) return@VideoPagerAdapter
                 (activity as? DetailVideoActivity)?.switchToProfile()
             },
             onClickFollow = {
@@ -453,13 +454,13 @@ class DetailVideoFragment : Fragment() {
                 }
             }
             "profile" -> {
-                timeProfile = activity?.intent?.getLongExtra("timestamp", 0L) ?: 0L
-                userId = activity?.intent?.getStringExtra("userId") ?: "0"
+                val timeProfile = activity?.intent?.getLongExtra("timestamp", 0L) ?: 0L
+                val userId = activity?.intent?.getStringExtra("userId") ?: "0"
+                val token = activity?.intent?.getStringExtra("token") ?: ""
                 lifecycleScope.launch {
-                    viewModel.videosProfile(userId, timeProfile).collectLatest { pagingData ->
+                    viewModel.videosProfile(userId, timeProfile, token).collectLatest { pagingData ->
                         adapter.submitData(pagingData)
                     }
-
                 }
             }
             else -> {
@@ -524,5 +525,6 @@ class DetailVideoFragment : Fragment() {
             adapter.releaseAllPlayers()
         }
     }
+
 
 }

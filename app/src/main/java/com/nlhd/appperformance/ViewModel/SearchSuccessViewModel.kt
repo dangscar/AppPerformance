@@ -1,15 +1,19 @@
 package com.nlhd.appperformance.ViewModel
 
+import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import com.nlhd.appperformance.Domain.UseCase.UserDataStore.UserDataStoreUseCase
 import com.nlhd.appperformance.Domain.UseCase.Video.VideoUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.flow.flatMapLatest
 import javax.inject.Inject
 
 @HiltViewModel
 class SearchSuccessViewModel @Inject constructor(
-    private val videoUseCase: VideoUseCase
+    private val videoUseCase: VideoUseCase,
+    private val userDataStoreUseCase: UserDataStoreUseCase
 ): ViewModel() {
     fun videos(query: String, timestamp: Long) = videoUseCase.searchVideos(query, timestamp)
     
@@ -43,6 +47,11 @@ class SearchSuccessViewModel @Inject constructor(
         }
     }
 
-    fun videosProfile(userId: String, timestamp: Long) = videoUseCase.getVideoProfile(userId, timestamp)
+    fun videosProfile(userId: String, timestamp: Long, token: String) = videoUseCase.getVideoProfile(
+        userId = userId,
+        timestamp = timestamp,
+        token = token
+    )
+
     fun clearVideosProfile(userId: String, timestamp: Long) = videoUseCase.clearProfileFlow(userId, timestamp)
 }

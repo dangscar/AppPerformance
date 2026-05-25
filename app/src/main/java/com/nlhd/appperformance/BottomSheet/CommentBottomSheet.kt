@@ -28,6 +28,7 @@ import androidx.cardview.widget.CardView
 import androidx.core.content.ContextCompat
 import androidx.core.view.doOnNextLayout
 import androidx.fragment.app.viewModels
+import androidx.interpolator.view.animation.FastOutLinearInInterpolator
 import androidx.interpolator.view.animation.FastOutSlowInInterpolator
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
@@ -71,7 +72,6 @@ class CommentBottomSheet(
     private lateinit var ivClose: ImageView
     private lateinit var llBottomInput: LinearLayout
     private var isOnSlide: Boolean = false
-//    private var isOpening: Boolean = false
     private lateinit var behavior: BottomSheetBehavior<View>
     private lateinit var loadingView: LottieAnimationView
 
@@ -201,7 +201,6 @@ class CommentBottomSheet(
                 }
                 start()
             }
-            //isOpening = true
         }
 
 
@@ -241,7 +240,6 @@ class CommentBottomSheet(
         observeData()
         commentPagerAdapter.addLoadStateListener { loadStates ->
             val isLoading = loadStates.refresh is LoadState.Loading
-            val isError = loadStates.refresh is LoadState.Error
             val isNotLoading = loadStates.refresh is LoadState.NotLoading
             loadingView.visibility = if (isLoading) View.VISIBLE else View.GONE
             recyclerView.visibility = if (isLoading) View.GONE else View.VISIBLE
@@ -347,7 +345,7 @@ class CommentBottomSheet(
                     if (isOnSlide) isOnSlide = false
                 }
                 BottomSheetBehavior.STATE_SETTLING -> {
-
+                    
                 }
                 BottomSheetBehavior.STATE_DRAGGING -> {
                 }
@@ -403,7 +401,6 @@ class CommentBottomSheet(
         }
 
         isOnSlide = false
-        //isOpening = false
     }
 
     private fun releaseAnimator() {

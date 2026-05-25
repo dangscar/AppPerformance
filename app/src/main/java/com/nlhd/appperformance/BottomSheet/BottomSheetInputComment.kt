@@ -15,6 +15,7 @@ import android.widget.EditText
 import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.RelativeLayout
+import androidx.activity.OnBackPressedCallback
 import androidx.core.content.ContextCompat
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowCompat
@@ -58,6 +59,7 @@ class BottomSheetInputComment(
     private lateinit var rv_icon: RecyclerView
     private lateinit var ll_actionInput: LinearLayout
     private val viewModel: MainViewModel by activityViewModels()
+    var isKeyboardVisible = false
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -84,6 +86,15 @@ class BottomSheetInputComment(
 
                     if (keyboardHeight > 0 && keyboardHeight != viewModel.paddingKeyboard.value) {
                         viewModel.savePaddingKeyboard(keyboardHeight)
+                    }
+                    val isKeyboardVisible =
+                        insets.isVisible(WindowInsetsCompat.Type.ime())
+
+                    if (!isKeyboardVisible && this.isKeyboardVisible) {
+                        this.isKeyboardVisible = false
+                        dismiss()
+                    } else {
+                        this.isKeyboardVisible = true
                     }
                     insets
                 }
@@ -200,7 +211,6 @@ class BottomSheetInputComment(
             LinearLayoutManager(requireContext(), LinearLayoutManager.HORIZONTAL, false)
 
         rv_emoji.adapter = adapter
-
 
     }
 
