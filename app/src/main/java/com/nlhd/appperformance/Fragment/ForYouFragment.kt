@@ -643,7 +643,7 @@ class ForYouFragment(
         }
 
         mainViewModel.navigation.observe(viewLifecycleOwner) {
-            if (it == Navigation.Profile || it == Navigation.User) {
+            if (it != Navigation.Home) {
                 val position = viewModel.currentPosition.value ?: 0
                 adapter.pause(position)
             } else {

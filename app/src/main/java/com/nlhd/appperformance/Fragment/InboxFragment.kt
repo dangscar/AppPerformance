@@ -4,17 +4,21 @@ import android.os.Bundle
 import android.view.View
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.activityViewModels
 import androidx.recyclerview.widget.RecyclerView
 import com.nlhd.appperformance.Adapter.InboxMessageAdapter
 import com.nlhd.appperformance.Adapter.InboxMessageItem
 import com.nlhd.appperformance.Adapter.StoryAdapter
 import com.nlhd.appperformance.Adapter.StoryItem
 import com.nlhd.appperformance.R
+import com.nlhd.appperformance.Utils.Navigation
+import com.nlhd.appperformance.ViewModel.MainViewModel
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
 class InboxFragment : Fragment(R.layout.fragment_inbox) {
 
+    private val mainViewModel: MainViewModel by activityViewModels()
     private lateinit var rvStories: RecyclerView
     private lateinit var rvInbox: RecyclerView
 
@@ -58,5 +62,10 @@ class InboxFragment : Fragment(R.layout.fragment_inbox) {
             InboxMessageItem("Yêu cầu tin nhắn", "Bạn nhận được 2 yêu cầu", R.drawable.ic_chat, showArrow = true)
         )
         rvInbox.adapter = InboxMessageAdapter(messages)
+    }
+
+    override fun onResume() {
+        super.onResume()
+        mainViewModel.setNavigation(Navigation.Inbox)
     }
 }

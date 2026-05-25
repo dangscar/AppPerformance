@@ -12,6 +12,7 @@ import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.doOnLayout
 import androidx.core.view.updateLayoutParams
+import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.viewModels
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.viewpager2.adapter.FragmentStateAdapter
@@ -42,7 +43,7 @@ private const val ARG_PARAM2 = "param2"
 @AndroidEntryPoint
 class ProfileUpFragment : Fragment() {
 
-    private val mainViewModel: MainViewModel by viewModels()
+    private val mainViewModel: MainViewModel by activityViewModels()
     private var _binding: FragmentProfileUpBinding? = null
     private val binding get() = _binding!!
 
@@ -77,7 +78,7 @@ class ProfileUpFragment : Fragment() {
         requireActivity().window.statusBarColor = Color.WHITE
         requireActivity().window.navigationBarColor = ContextCompat.getColor(requireContext(), R.color.white)
 
-        val adapter = object : FragmentStateAdapter(this) {
+        val adapter = object : FragmentStateAdapter(requireActivity()) {
             override fun getItemCount(): Int = 5
             override fun createFragment(position: Int): Fragment {
                 return when (position) {
@@ -100,5 +101,10 @@ class ProfileUpFragment : Fragment() {
             }
         }.attach()
 
+    }
+
+    override fun onResume() {
+        super.onResume()
+        mainViewModel.setNavigation(Navigation.Profile)
     }
 }

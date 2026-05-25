@@ -12,6 +12,7 @@ import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.doOnLayout
 import androidx.core.view.updateLayoutParams
+import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.viewModels
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.google.android.material.tabs.TabLayoutMediator
@@ -40,7 +41,7 @@ private const val ARG_PARAM2 = "param2"
 @AndroidEntryPoint
 class ShopFragment : Fragment() {
 
-    private val mainViewModel: MainViewModel by viewModels()
+    private val mainViewModel: MainViewModel by activityViewModels()
     private var _binding: FragmentShopBinding? = null
     private val binding get() = _binding!!
     private lateinit var productPagerAdapter: ProductPagerAdapter
@@ -71,7 +72,6 @@ class ShopFragment : Fragment() {
             }
         }
 
-        mainViewModel.setNavigation(Navigation.Profile)
         requireActivity().window.statusBarColor = Color.WHITE
         requireActivity().window.navigationBarColor = ContextCompat.getColor(requireContext(), R.color.white)
         productPagerAdapter = ProductPagerAdapter(requireActivity())
@@ -109,5 +109,10 @@ class ShopFragment : Fragment() {
             }
         }.attach()
 
+    }
+
+    override fun onResume() {
+        super.onResume()
+        mainViewModel.setNavigation(Navigation.Shop)
     }
 }
