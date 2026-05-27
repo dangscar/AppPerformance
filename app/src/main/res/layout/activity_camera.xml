@@ -254,11 +254,7 @@
                 android:background="@drawable/bg_capture_border"
                 android:padding="4dp">
 
-                <!-- Nút trong -->
-                <View
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:background="@drawable/bg_capture_center"/>
+
 
             </FrameLayout>
 

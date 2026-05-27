@@ -1,10 +1,15 @@
 package com.nlhd.appperformance.Activity
 
 import android.Manifest
+import android.content.ContentUris
+import android.content.Intent
 import android.content.pm.PackageManager
+import android.net.Uri
 import android.os.Bundle
+import android.provider.MediaStore
 import android.util.Log
 import android.widget.Toast
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.camera.core.CameraSelector
 import androidx.camera.core.ImageCapture
@@ -12,15 +17,40 @@ import androidx.camera.core.Preview
 import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
+import com.bumptech.glide.Glide
 import com.nlhd.appperformance.databinding.ActivityCameraBinding
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
+import androidx.core.net.toUri
 
 class CameraActivity : AppCompatActivity() {
     private lateinit var binding: ActivityCameraBinding
     private var imageCapture: ImageCapture? = null
     private lateinit var cameraExecutor: ExecutorService
     private var lensFacing = CameraSelector.LENS_FACING_BACK
+
+    private val pickVideo =
+        registerForActivityResult(ActivityResultContracts.GetContent()) { uri: Uri? ->
+            uri?.let {
+                val pickerUri = uri.toString().toUri()
+                val mediaStoreUri = convertPickerUriToMediaStoreUri(pickerUri)
+                val intent = Intent(this, EditVideoActivity::class.java)
+                intent.putExtra("VIDEO_URI", mediaStoreUri.toString())
+                startActivity(intent)
+            }
+        }
+
+    fun convertPickerUriToMediaStoreUri(uri: Uri): Uri? {
+        val lastSegment = uri.lastPathSegment ?: return null
+
+        // lastSegment = "1000011718"
+        val mediaId = lastSegment.toLongOrNull() ?: return null
+
+        return ContentUris.withAppendedId(
+            MediaStore.Video.Media.EXTERNAL_CONTENT_URI,
+            mediaId
+        )
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -56,6 +86,10 @@ class CameraActivity : AppCompatActivity() {
 
         binding.btnCapture.setOnClickListener {
             takePhoto()
+        }
+
+        binding.btnUpload.setOnClickListener {
+            pickVideo.launch("video/*")
         }
     }
 

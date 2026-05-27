@@ -23,6 +23,12 @@
         android:usesCleartextTraffic="true">
         
         <activity
+            android:name=".Activity.EditVideoActivity"
+            android:exported="false"
+            android:screenOrientation="portrait"
+            android:theme="@style/Theme.AppCompat.NoActionBar" />
+            
+        <activity
             android:name=".Activity.CameraActivity"
             android:exported="false"
             android:screenOrientation="portrait"
