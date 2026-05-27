@@ -4,10 +4,15 @@ import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import com.nlhd.appperformance.Domain.Entity.DataStore.UserPreference
 import com.nlhd.appperformance.Domain.UseCase.UserDataStore.UserDataStoreUseCase
 import com.nlhd.appperformance.Domain.UseCase.Video.VideoUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
@@ -54,4 +59,16 @@ class SearchSuccessViewModel @Inject constructor(
     )
 
     fun clearVideosProfile(userId: String, timestamp: Long) = videoUseCase.clearProfileFlow(userId, timestamp)
+    private var _user = MutableLiveData<UserPreference>()
+    val user: LiveData<UserPreference> = _user
+    val userState = userDataStoreUseCase.getUser().stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000),
+        UserPreference())
+
+    fun getUser() {
+        viewModelScope.launch {
+            userDataStoreUseCase.getUser().collect {
+                _user.value = it
+            }
+        }
+    }
 }

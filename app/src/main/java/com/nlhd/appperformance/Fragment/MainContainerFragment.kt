@@ -36,6 +36,7 @@ import com.nlhd.appperformance.databinding.FragmentMainContainerBinding
 import dagger.hilt.android.AndroidEntryPoint
 import androidx.core.graphics.toColorInt
 import androidx.core.widget.ImageViewCompat
+import com.nlhd.appperformance.Utils.TabSelected
 
 @AndroidEntryPoint
 class MainContainerFragment : Fragment() {
@@ -139,6 +140,7 @@ class MainContainerFragment : Fragment() {
         viewModel.navigation.observe(viewLifecycleOwner) {
             when (it) {
                 Navigation.Home -> {
+                    if (viewModel.tabSelected.value == TabSelected.Explore) return@observe
                     setBottomBarStyle(
                         background = Color.BLACK,
                         homeColor = Color.WHITE,
@@ -202,6 +204,7 @@ class MainContainerFragment : Fragment() {
 
         viewModel.colorBottomNav.observe(viewLifecycleOwner) {
             val selected = if (it == Color.BLACK) "#FFFFFF" else "#000000"
+            Log.d("AAA", "onViewCreated: $selected")
             val colors = ColorStateList(
                 arrayOf(
                     intArrayOf(android.R.attr.state_checked),

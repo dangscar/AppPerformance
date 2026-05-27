@@ -53,14 +53,14 @@ class DetailVideoActivity : AppCompatActivity() {
                 if (viewPager.currentItem > 0) {
                     viewPager.currentItem = 0
                 } else {
-                    if (players.isNotEmpty()) {
+                    /*if (players.isNotEmpty()) {
                         players.values.forEach { player ->
                             player.stop()
                             player.clearMediaItems()
                             player.release()
                         }
                         players.clear()
-                    }
+                    }*/
                     finish()
                     overridePendingTransition(
                         R.anim.slide_in_left,

@@ -73,7 +73,7 @@ class DetailVideoFragment : Fragment() {
     private lateinit var errorButton: Button
     private lateinit var playerView: PlayerView
     private lateinit var edtSearch: EditText
-    private lateinit var edtComment: EditText
+    lateinit var edtComment: EditText
     private val commentViewModel: CommentViewModel by viewModels()
     private val viewModel: SearchSuccessViewModel by viewModels()
     private val mainViewModel: MainViewModel by activityViewModels()
@@ -85,6 +85,9 @@ class DetailVideoFragment : Fragment() {
     lateinit var defaultMediaSourceFactory: DefaultMediaSourceFactory
     private var currentCommentVideoId: String = "-1"
     private var statusBarHeight = 0
+
+    private var videoCurrentId = "-1"
+    private var isSuccess = false
 
 
     private lateinit var commentBottomSheet: CommentBottomSheet
@@ -139,6 +142,9 @@ class DetailVideoFragment : Fragment() {
                 mainViewModel.setFollowState(Follow.MY_PROFILE)
             }
         }
+
+        videoCurrentId = video?.id.toString()
+
     }
 
     /* Thay đổi màu alpha của layout*/
@@ -193,6 +199,7 @@ class DetailVideoFragment : Fragment() {
     @OptIn(UnstableApi::class)
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        viewModel.getUser()
         val isLandscape = resources.configuration.orientation == Configuration.ORIENTATION_LANDSCAPE
 
         toolbar = view.findViewById(R.id.topBar)
@@ -209,18 +216,6 @@ class DetailVideoFragment : Fragment() {
         val btnPlay = playerView.findViewById<ImageView>(R.id.exo_play)
         val btnPause = playerView.findViewById<ImageView>(R.id.exo_pause)
         val tv_titlePv = playerView.findViewById<TextView>(R.id.tv_titlePv)
-
-//        ViewCompat.setOnApplyWindowInsetsListener(view.findViewById(R.id.main)) { v, insets ->
-//            val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
-//            statusBarHeight = systemBars.top
-//            toolbar.updateLayoutParams<ViewGroup.MarginLayoutParams> {
-//                topMargin = systemBars.top
-//            }
-//            bottomComment.updateLayoutParams<ViewGroup.MarginLayoutParams> {
-//                bottomMargin = systemBars.bottom
-//            }
-//            insets
-//        }
 
         view.doOnLayout {
             val insets = ViewCompat.getRootWindowInsets(view)
@@ -262,12 +257,13 @@ class DetailVideoFragment : Fragment() {
             defaultMediaSourceFactory,
             players,
             onClickComment = { videoId ->
-                if (videoId == currentCommentVideoId.toInt()) {
+                if (videoId == currentCommentVideoId.toInt() && !isSuccess) {
                     commentBottomSheet.show(
                         childFragmentManager,
                         CommentBottomSheet::class.java.simpleName
                     )
                 } else {
+                    isSuccess = false
                     currentCommentVideoId = videoId.toString()
                     commentBottomSheet = CommentBottomSheet(
                         viewModel = commentViewModel,
@@ -381,13 +377,20 @@ class DetailVideoFragment : Fragment() {
         }
 
         bottomComment.setOnClickListener {
-            BottomSheetInputComment(text = "", onChangeText = {}, onDone = {}).show(childFragmentManager, BottomSheetInputComment::class.java.simpleName)
+            BottomSheetInputComment(
+                imageUrl = viewModel.user.value?.avatarUrl ?: "",
+                text = edtComment.text.toString(),
+                onChangeText = {edtComment.setText(it)},
+                onDone = {
+                    commentViewModel.addComment(videoCurrentId, edtComment.text.toString())
+                }
+            ).show(childFragmentManager, BottomSheetInputComment::class.java.simpleName)
         }
 
         ivBack.setOnClickListener {
-            if (::adapter.isInitialized) {
+            /*if (::adapter.isInitialized) {
                 adapter.releaseAllPlayers()
-            }
+            }*/
             activity?.finish()
             activity?.overridePendingTransition(R.anim.slide_in_left, R.anim.slide_out_right)
         }
@@ -396,7 +399,14 @@ class DetailVideoFragment : Fragment() {
             Intent(requireContext(), SearchActivity::class.java).apply { startActivity(this) }
         }
         edtComment.setOnClickListener {
-            BottomSheetInputComment(text = "", onChangeText = {}, onDone = {}).show(childFragmentManager, BottomSheetInputComment::class.java.simpleName)
+            BottomSheetInputComment(
+                imageUrl = viewModel.user.value?.avatarUrl ?: "",
+                text = edtComment.text.toString(),
+                onChangeText = {edtComment.setText(it)},
+                onDone = {
+                    commentViewModel.addComment(videoCurrentId, edtComment.text.toString())
+                }
+            ).show(childFragmentManager, BottomSheetInputComment::class.java.simpleName)
         }
 
         mainViewModel.navigation.observe(viewLifecycleOwner) {
@@ -438,6 +448,22 @@ class DetailVideoFragment : Fragment() {
             }
         }
 
+        //AddCommentState
+        commentViewModel.addCommentState.observe(viewLifecycleOwner) {
+            when (it) {
+                is ResultUI.Error<*> -> {
+                }
+                ResultUI.Idle -> {
+                }
+                ResultUI.Loading -> {
+                }
+                is ResultUI.Success<*> -> {
+                    edtComment.setText("")
+                    commentViewModel.setAddCommentState(ResultUI.Idle)
+                    isSuccess = true
+                }
+            }
+        }
     }
 
     @OptIn(UnstableApi::class)

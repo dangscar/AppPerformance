@@ -34,7 +34,7 @@ class LoadingAdapter(
         loadState: LoadState
     ) {
 
-        holder.progressBar.visibility = if (loadState is LoadState.Loading)  View.VISIBLE else View.GONE
+        //holder.progressBar.visibility = if (loadState is LoadState.Loading)  View.VISIBLE else View.GONE
         holder.btnRetry.visibility = if (loadState is LoadState.Error)  View.VISIBLE else View.GONE
         holder.btnRetry.setOnClickListener {
             retry()

@@ -43,6 +43,7 @@ import com.nlhd.appperformance.ViewModel.MainViewModel
 import com.nlhd.appperformance.ViewModel.VideoViewModel
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 import kotlin.getValue
@@ -74,7 +75,8 @@ class FollowingFragment : Fragment() {
     private val mainViewModel: MainViewModel by activityViewModels()
     private var isOnPageSelected = false
 
-    var players: MutableMap<Int, ExoPlayer> = mutableMapOf()
+    @Inject
+    lateinit var players: MutableMap<Int, ExoPlayer>
 
     @Inject
     lateinit var defaultMediaSourceFactory: DefaultMediaSourceFactory
@@ -350,7 +352,12 @@ class FollowingFragment : Fragment() {
         }
 
         mainViewModel.navigation.observe(viewLifecycleOwner) {
-            if (it == Navigation.Profile) {
+            if (it != Navigation.Home) {
+                adapter.pause(viewModel.currentPosition.value ?: 0)
+            }
+        }
+        mainViewModel.tabSelected.observe(viewLifecycleOwner) {
+            if (it != TabSelected.Following) {
                 adapter.pause(viewModel.currentPosition.value ?: 0)
             }
         }
@@ -370,12 +377,27 @@ class FollowingFragment : Fragment() {
     @OptIn(UnstableApi::class)
     override fun onResume() {
         super.onResume()
+        if (players.isNotEmpty()) {
+            players.values.forEach { player->
+                player.pause()
+            }
+        }
         if (!isLoaded) {
             observeViewModel()
             isLoaded = true
         }
         val isLandscape = resources.configuration.orientation == Configuration.ORIENTATION_LANDSCAPE
         if (isLandscape) return
+
+        if (players.isNotEmpty()) {
+            players.values.forEach { player ->
+                player.stop()
+                player.clearMediaItems()
+                player.release()
+            }
+            players.clear()
+        }
+
         val currentPosition = viewModel.currentPosition.value ?: 0
         if (adapter.itemCount > 0) {
             adapter.createPlayer(currentPosition)

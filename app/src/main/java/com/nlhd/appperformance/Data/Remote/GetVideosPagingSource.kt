@@ -65,7 +65,7 @@ class GetVideosPagingSource(
                 )
             }
         } catch (e: Exception) {
-            Log.d("AAA", e.message.toString())
+            //Log.d("AAA", e.message.toString())
             LoadResult.Error(e)
         }
     }

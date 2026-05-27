@@ -107,6 +107,7 @@ class ForYouFragment(
     private var currentOffset = 0f
     private var currentPositionV = 0
     private var isLock = false
+    private var isRefresh = true
 
     fun holder(position: Int) = (binding.viewPager.getChildAt(0) as RecyclerView).findViewHolderForAdapterPosition(position) as? VideoPagerAdapter.VideoViewHolder
     fun player(position: Int) = players[position]
@@ -153,6 +154,7 @@ class ForYouFragment(
                 mainViewModel.setFollowState(Follow.MY_PROFILE)
             }
         }
+
     }
     /* Thay đổi màu alpha của layout*/
     fun layoutAlpha(holder: VideoPagerAdapter.VideoViewHolder, value: Float) {
@@ -217,7 +219,7 @@ class ForYouFragment(
             positionOffsetPixels: Int
         ) {
             super.onPageScrolled(position, positionOffset, positionOffsetPixels)
-            currentOffset = positionOffset
+            /*currentOffset = positionOffset
             currentPositionV = position
 
             val recyclerView = binding.viewPager.getChildAt(0) as RecyclerView
@@ -240,6 +242,27 @@ class ForYouFragment(
             }
             else {
                 isLock = true
+            }*/
+            val lastPosition = adapter.itemCount - 1
+
+            if (position >= lastPosition && positionOffset > 0.1f) {
+
+                isLock = true
+                if (isRefresh) {
+                    adapter.retry()
+                    isRefresh = false
+                }
+
+
+                // Tự kéo về item cuối
+                binding.viewPager.post({
+                    binding.viewPager.setCurrentItem(lastPosition, true)
+
+                })
+
+            } else {
+                isLock = false
+                isRefresh = true
             }
 
         }
@@ -389,7 +412,7 @@ class ForYouFragment(
                 binding.viewPager.visibility = if (isLoading) View.GONE else View.VISIBLE
                 binding.llError.visibility = if (isError) View.VISIBLE else View.GONE
                 if (loadStates.refresh is LoadState.NotLoading) {
-
+                    isRefresh = true
                 }
             }
             binding.viewPager.adapter = adapter.withLoadStateFooter(
@@ -403,6 +426,11 @@ class ForYouFragment(
             }
             val recyclerView = binding.viewPager.getChildAt(0) as RecyclerView
             recyclerView.overScrollMode = View.OVER_SCROLL_NEVER
+            /*recyclerView.onFlingListener = object : RecyclerView.OnFlingListener() {
+                override fun onFling(velocityX: Int, velocityY: Int): Boolean {
+                    return true // chặn fling
+                }
+            }*/
         }
 
 
@@ -478,7 +506,7 @@ class ForYouFragment(
         }
 
 
-        /*var startY = 0f
+        var startY = 0f
         var lastDy = 0f
 
         binding.viewPager.getChildAt(0).setOnTouchListener { _, event ->
@@ -503,11 +531,11 @@ class ForYouFragment(
                     when {
 
                         isSwipeUp -> {
-                            Log.d("AAA", "VUỐT LÊN")
+                            //Log.d("AAA", "VUỐT LÊN")
                         }
 
                         isSwipeDown -> {
-                            Log.d("AAA", "VUỐT XUỐNG")
+                            //Log.d("AAA", "VUỐT XUỐNG")
                         }
                     }
 
@@ -527,7 +555,7 @@ class ForYouFragment(
             }
 
             false
-        }*/
+        }
     }
 
     var isRefreshing = false
