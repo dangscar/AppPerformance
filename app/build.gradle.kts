@@ -105,4 +105,11 @@ dependencies {
 
     //SplashScreen
     implementation("androidx.core:core-splashscreen:1.2.0")
+
+    // CameraX
+    val camerax_version = "1.4.1"
+    implementation("androidx.camera:camera-core:${camerax_version}")
+    implementation("androidx.camera:camera-camera2:${camerax_version}")
+    implementation("androidx.camera:camera-lifecycle:${camerax_version}")
+    implementation("androidx.camera:camera-view:${camerax_version}")
 }

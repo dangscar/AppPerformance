@@ -1,0 +1,296 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@android:color/black"
+    tools:context=".Activity.CameraActivity">
+
+    <androidx.camera.view.PreviewView
+        android:id="@+id/viewFinder"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"/>
+
+    <!-- Top Toolbar -->
+    <ImageButton
+        android:id="@+id/btnClose"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="16dp"
+        android:background="?attr/selectableItemBackgroundBorderless"
+        android:padding="8dp"
+        android:scaleType="fitCenter"
+        android:src="@drawable/ic_close"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:tint="@android:color/white" />
+
+    <LinearLayout
+        android:id="@+id/btnSound"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:background="@drawable/bg_rectangle_border"
+        android:backgroundTint="#80000000"
+        android:gravity="center"
+        android:orientation="horizontal"
+        android:padding="12dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <ImageView
+            android:layout_width="16dp"
+            android:layout_height="16dp"
+            android:src="@drawable/ic_music"
+            app:tint="@android:color/white" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:text="Âm thanh"
+            android:textColor="@android:color/white"
+            android:textSize="14sp"
+            android:fontFamily="@font/tiktoksans_semibold"/>
+    </LinearLayout>
+
+    <!-- Right Sidebar Tools -->
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:layout_marginEnd="8dp"
+        android:gravity="center"
+        android:orientation="vertical"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <Button
+            android:id="@+id/btnFlip"
+            style="@style/Widget.MaterialComponents.Button.TextButton"
+            android:layout_width="60dp"
+            android:layout_height="wrap_content"
+            android:text="Lật"
+            android:textColor="@android:color/white"
+            android:textSize="10sp"
+            app:icon="@drawable/ic_refresh"
+            app:iconGravity="top"
+            app:iconPadding="0dp"
+            app:iconSize="24dp"
+            app:iconTint="@android:color/white"
+            android:fontFamily="@font/tiktoksans_regular"/>
+
+        <Button
+            android:id="@+id/btnFlash"
+            style="@style/Widget.MaterialComponents.Button.TextButton"
+            android:layout_width="60dp"
+            android:layout_height="wrap_content"
+            android:text="Tắt"
+            android:textColor="@android:color/white"
+            android:textSize="10sp"
+            app:icon="@drawable/ic_more"
+            app:iconGravity="top"
+            app:iconPadding="0dp"
+            app:iconSize="24dp"
+            app:iconTint="@android:color/white"
+            android:fontFamily="@font/tiktoksans_regular"/>
+
+        <Button
+            android:id="@+id/btnTimer"
+            style="@style/Widget.MaterialComponents.Button.TextButton"
+            android:layout_width="60dp"
+            android:layout_height="wrap_content"
+            android:text="Hẹn giờ"
+            android:textColor="@android:color/white"
+            android:textSize="10sp"
+            app:icon="@drawable/time"
+            app:iconGravity="top"
+            app:iconPadding="0dp"
+            app:iconSize="24dp"
+            app:iconTint="@android:color/white"
+            android:fontFamily="@font/tiktoksans_regular"/>
+
+        <Button
+            android:id="@+id/btnSpeed"
+            style="@style/Widget.MaterialComponents.Button.TextButton"
+            android:layout_width="60dp"
+            android:layout_height="wrap_content"
+            android:text="Tốc độ"
+            android:textColor="@android:color/white"
+            android:textSize="10sp"
+            app:icon="@drawable/ic_play"
+            app:iconGravity="top"
+            app:iconPadding="0dp"
+            app:iconSize="24dp"
+            app:iconTint="@android:color/white" />
+
+        <Button
+            android:id="@+id/btnFilters"
+            style="@style/Widget.MaterialComponents.Button.TextButton"
+            android:layout_width="60dp"
+            android:layout_height="wrap_content"
+            android:text="Bộ lọc"
+            android:textColor="@android:color/white"
+            android:textSize="10sp"
+            app:icon="@drawable/ic_image"
+            app:iconGravity="top"
+            app:iconPadding="0dp"
+            app:iconSize="24dp"
+            app:iconTint="@android:color/white"
+            android:fontFamily="@font/tiktoksans_regular"/>
+
+        <Button
+            android:id="@+id/btnBeautify"
+            style="@style/Widget.MaterialComponents.Button.TextButton"
+            android:layout_width="60dp"
+            android:layout_height="wrap_content"
+            android:text="Làm đẹp"
+            android:textColor="@android:color/white"
+            android:textSize="10sp"
+            app:icon="@drawable/ic_more"
+            app:iconGravity="top"
+            app:iconPadding="0dp"
+            app:iconSize="24dp"
+            app:iconTint="@android:color/white"
+            android:fontFamily="@font/tiktoksans_regular"/>
+
+    </LinearLayout>
+
+    <!-- Bottom Controls -->
+    <LinearLayout
+        android:id="@+id/modeContainer"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="24dp"
+        android:gravity="center"
+        android:orientation="horizontal"
+        app:layout_constraintBottom_toTopOf="@+id/captureContainer">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="20dp"
+            android:text="60 giây"
+            android:textColor="@android:color/white"
+            android:textSize="14sp"
+            android:textStyle="bold"
+            android:fontFamily="@font/tiktoksans_semibold"/>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="20dp"
+            android:text="15 giây"
+            android:textColor="@android:color/white"
+            android:textSize="14sp"
+            android:textStyle="bold"
+            android:fontFamily="@font/tiktoksans_semibold"/>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@drawable/bg_rectangle_border"
+            android:backgroundTint="@android:color/white"
+            android:paddingHorizontal="12dp"
+            android:paddingVertical="4dp"
+            android:text="Ảnh"
+            android:textColor="@android:color/black"
+            android:textSize="14sp"
+            android:textStyle="bold"
+            android:fontFamily="@font/tiktoksans_semibold"/>
+    </LinearLayout>
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/captureContainer"
+        android:layout_width="match_parent"
+        android:layout_height="100dp"
+        android:layout_marginBottom="32dp"
+        app:layout_constraintBottom_toBottomOf="parent">
+
+        <LinearLayout
+            android:id="@+id/btnEffects"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:orientation="vertical"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toStartOf="@+id/btnCapture"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent">
+
+            <ImageView
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:src="@drawable/ic_view" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:text="Hiệu ứng"
+                android:textColor="@android:color/white"
+                android:textSize="10sp"
+                android:fontFamily="@font/tiktoksans_regular"/>
+        </LinearLayout>
+
+        <FrameLayout
+            android:id="@+id/btnCapture"
+            android:layout_width="90dp"
+            android:layout_height="90dp"
+            android:background="@drawable/bg_capture_outer"
+            android:padding="4dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" >
+
+            <!-- Viền đen -->
+            <FrameLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:background="@drawable/bg_capture_border"
+                android:padding="4dp">
+
+                <!-- Nút trong -->
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:background="@drawable/bg_capture_center"/>
+
+            </FrameLayout>
+
+        </FrameLayout>
+
+        <LinearLayout
+            android:id="@+id/btnUpload"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:orientation="vertical"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toEndOf="@+id/btnCapture"
+            app:layout_constraintTop_toTopOf="parent">
+
+            <ImageView
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:src="@drawable/ic_image"
+                app:tint="@color/white"/>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:text="Tải lên"
+                android:textColor="@android:color/white"
+                android:textSize="10sp"
+                android:fontFamily="@font/tiktoksans_regular"/>
+        </LinearLayout>
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+</androidx.constraintlayout.widget.ConstraintLayout>

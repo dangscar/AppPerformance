@@ -50,7 +50,7 @@
     </style>
 
 
-    <style name="BottomSheetNoScrim" parent="Widget.MaterialComponents.BottomSheet.Modal">
+    <style name="BottomSheetNoScrim" parent="Theme.Design.Light.BottomSheetDialog">
         <item name="android:backgroundDimEnabled">false</item>
         <item name="android:windowIsFloating">false</item>
     </style>

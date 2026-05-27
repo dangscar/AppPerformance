@@ -36,6 +36,7 @@ import com.nlhd.appperformance.databinding.FragmentMainContainerBinding
 import dagger.hilt.android.AndroidEntryPoint
 import androidx.core.graphics.toColorInt
 import androidx.core.widget.ImageViewCompat
+import com.nlhd.appperformance.Activity.CameraActivity
 import com.nlhd.appperformance.Utils.TabSelected
 
 @AndroidEntryPoint
@@ -149,7 +150,7 @@ class MainContainerFragment : Fragment() {
                         profileColor = "#888888".toColorInt()
                     )
                     binding.iconHome.setImageResource(R.drawable.home)
-                    binding.iconStore.setImageResource(R.drawable.ic_explore)
+                    binding.iconStore.setImageResource(R.drawable.shop)
                     binding.iconInbox.setImageResource(R.drawable.inbox)
                     binding.iconProfile.setImageResource(R.drawable.ic_profile)
                     binding.fabAdd.setImageResource(R.drawable.ic_addwhite)
@@ -163,7 +164,7 @@ class MainContainerFragment : Fragment() {
                         profileColor = "#888888".toColorInt()
                     )
                     binding.iconHome.setImageResource(R.drawable.home_white)
-                    binding.iconStore.setImageResource(R.drawable.ic_explore)
+                    binding.iconStore.setImageResource(R.drawable.shop)
                     binding.iconInbox.setImageResource(R.drawable.inbox)
                     binding.iconProfile.setImageResource(R.drawable.ic_profile)
                     binding.fabAdd.setImageResource(R.drawable.addblack_new)
@@ -177,7 +178,7 @@ class MainContainerFragment : Fragment() {
                         profileColor = Color.BLACK
                     )
                     binding.iconHome.setImageResource(R.drawable.home_white)
-                    binding.iconStore.setImageResource(R.drawable.ic_explore)
+                    binding.iconStore.setImageResource(R.drawable.shop)
                     binding.iconInbox.setImageResource(R.drawable.inbox)
                     binding.iconProfile.setImageResource(R.drawable.ic_profile)
                     binding.fabAdd.setImageResource(R.drawable.addblack_new)
@@ -191,7 +192,7 @@ class MainContainerFragment : Fragment() {
                         profileColor = "#888888".toColorInt()
                     )
                     binding.iconHome.setImageResource(R.drawable.home_white)
-                    binding.iconStore.setImageResource(R.drawable.ic_explore)
+                    binding.iconStore.setImageResource(R.drawable.shop)
                     binding.iconInbox.setImageResource(R.drawable.inboxwhite)
                     binding.iconProfile.setImageResource(R.drawable.ic_profile)
                     binding.fabAdd.setImageResource(R.drawable.addblack_new)
@@ -407,7 +408,8 @@ class MainContainerFragment : Fragment() {
         }*/
 
         binding.fabAdd.setOnClickListener {
-            val intent = Intent(requireContext(), UploadVideoActivity::class.java)
+            //val intent = Intent(requireContext(), UploadVideoActivity::class.java)
+            val intent = Intent(requireContext(), CameraActivity::class.java)
             startActivity(intent)
         }
 
