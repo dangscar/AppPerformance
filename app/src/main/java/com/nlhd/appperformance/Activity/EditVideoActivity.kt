@@ -4,7 +4,11 @@ import android.annotation.SuppressLint
 import android.content.ContentValues
 import android.graphics.Bitmap
 import android.graphics.Rect
+import android.media.AudioManager
 import android.media.MediaMetadataRetriever
+import android.media.audiofx.BassBoost
+import android.media.audiofx.Equalizer
+import android.media.audiofx.LoudnessEnhancer
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
@@ -24,6 +28,7 @@ import androidx.lifecycle.lifecycleScope
 import androidx.media3.common.MediaItem
 import androidx.media3.common.Player
 import androidx.media3.common.util.UnstableApi
+import androidx.media3.effect.Brightness
 import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.transformer.Composition
 import androidx.media3.transformer.EditedMediaItem
@@ -344,20 +349,128 @@ class EditVideoActivity : AppCompatActivity() {
 
     @OptIn(UnstableApi::class)
     private fun setupPlayer() {
+
         player = ExoPlayer.Builder(this).build()
+
         binding.playerView.player = player
-        
-        // Loop video
+
         player?.repeatMode = Player.REPEAT_MODE_ALL
 
+        /*
+         * AUDIO EFFECT
+         */
+        player?.addListener(object : Player.Listener {
+
+            override fun onAudioSessionIdChanged(
+                audioSessionId: Int
+            ) {
+
+                if (audioSessionId == AudioManager.ERROR) {
+                    return
+                }
+
+                try {
+
+
+                    /*
+                     * EQUALIZER
+                     */
+                    equalizer =
+                        Equalizer(0, audioSessionId).apply {
+
+                            enabled = true
+
+                            for (i in 0 until numberOfBands) {
+
+                                val freq =
+                                    getCenterFreq(i.toShort()) / 1000
+
+                                when {
+
+                                    freq < 200 -> {
+
+                                        // bass
+                                        setBandLevel(
+                                            i.toShort(),
+                                            2000.toShort()
+                                        )
+                                        Log.d("AAA", "<200")
+                                    }
+
+                                    freq in 200..2000 -> {
+
+                                        // vocal
+                                        setBandLevel(
+                                            i.toShort(),
+                                            800.toShort()
+                                        )
+                                        Log.d("AAA", "200..2000")
+                                    }
+
+                                    else -> {
+
+                                        // treble
+                                        setBandLevel(
+                                            i.toShort(),
+                                            0.toShort()
+                                        )
+                                        Log.d("AAA", "else")
+                                    }
+                                }
+                            }
+                        }
+
+                    /*
+                     * BASS BOOST
+                     */
+                    bassBoost =
+                        BassBoost(0, audioSessionId).apply {
+
+                            setStrength(1000.toShort())
+
+                            enabled = true
+                        }
+
+                    /*
+                     * LOUDNESS
+                     */
+                    loudnessEnhancer =
+                        LoudnessEnhancer(audioSessionId).apply {
+
+                            setTargetGain(50)
+
+                            enabled = true
+                        }
+                    Log.d("AAA", "Yes")
+
+                } catch (e: Exception) {
+                    Log.d("AAA", e.message.toString())
+                    e.printStackTrace()
+                }
+            }
+        })
+
+        /*
+         * VIDEO EFFECT
+         */
+        /*val brightnessEffect = Brightness(0.15f)
+
+        player?.setVideoEffects(
+            listOf(brightnessEffect)
+        )*/
+
+        /*
+         * MEDIA
+         */
         videoUri?.let {
+
             val mediaItem = MediaItem.fromUri(it)
+
             player?.setMediaItem(mediaItem)
+
             player?.prepare()
+
             player?.play()
-        } ?: run {
-            // Placeholder nếu không có video truyền vào để demo giao diện
-            Toast.makeText(this, "Không tìm thấy video để chỉnh sửa", Toast.LENGTH_SHORT).show()
         }
     }
 
@@ -502,6 +615,12 @@ class EditVideoActivity : AppCompatActivity() {
         binding.playHead.x = playHeadX
     }
 
+    private var equalizer: Equalizer? = null
+
+    private var bassBoost: BassBoost? = null
+
+    private var loudnessEnhancer: LoudnessEnhancer? = null
+
     @OptIn(UnstableApi::class)
     private fun trimVideo(
         inputUri: Uri,
@@ -609,5 +728,12 @@ class EditVideoActivity : AppCompatActivity() {
         super.onDestroy()
         player?.release()
         player = null
+        equalizer?.release()
+        equalizer = null
+        bassBoost?.release()
+        bassBoost = null
+        loudnessEnhancer?.release()
+        loudnessEnhancer = null
+
     }
 }
