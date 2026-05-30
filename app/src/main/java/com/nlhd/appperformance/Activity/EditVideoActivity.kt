@@ -21,6 +21,7 @@ import android.view.MotionEvent
 import android.view.TouchDelegate
 import android.view.View
 import android.widget.Toast
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.OptIn
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
@@ -28,13 +29,20 @@ import androidx.lifecycle.lifecycleScope
 import androidx.media3.common.MediaItem
 import androidx.media3.common.Player
 import androidx.media3.common.util.UnstableApi
+import androidx.media3.datasource.DefaultDataSource
 import androidx.media3.effect.Brightness
 import androidx.media3.exoplayer.ExoPlayer
+import androidx.media3.exoplayer.source.ClippingMediaSource
+import androidx.media3.exoplayer.source.MediaSource
+import androidx.media3.exoplayer.source.MergingMediaSource
+import androidx.media3.exoplayer.source.ProgressiveMediaSource
 import androidx.media3.transformer.Composition
 import androidx.media3.transformer.EditedMediaItem
 import androidx.media3.transformer.ExportException
 import androidx.media3.transformer.ExportResult
 import androidx.media3.transformer.Transformer
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.LinearLayoutManager.HORIZONTAL
 import com.nlhd.appperformance.Adapter.ThumbnailAdapter
 import com.nlhd.appperformance.databinding.ActivityEditVideoBinding
 import kotlinx.coroutines.Dispatchers
@@ -44,10 +52,12 @@ import org.slf4j.MDC.put
 import java.io.File
 import java.io.FileInputStream
 import kotlin.apply
+import com.nlhd.appperformance.R
 
 class EditVideoActivity : AppCompatActivity() {
     private lateinit var binding: ActivityEditVideoBinding
     private var player: ExoPlayer? = null
+    private var audioUri: Uri? = null
     private var videoUri: Uri? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -61,6 +71,12 @@ class EditVideoActivity : AppCompatActivity() {
             videoUri = Uri.parse(uriString)
         }
 
+        binding.rvThumbnails.layoutManager = object : LinearLayoutManager(this, HORIZONTAL, false) {
+                override fun canScrollHorizontally(): Boolean {
+                    return false
+                }
+            }
+
         setupPlayer()
         setupUI()
         videoUri?.let { uri ->
@@ -68,33 +84,11 @@ class EditVideoActivity : AppCompatActivity() {
         }
         startProgress()
     }
-
-    fun View.expandTouchArea(size: Int) {
-
-        val parentView = parent as View
-
-        parentView.post {
-
-            val rect = Rect()
-            getHitRect(rect)
-
-            rect.top -= size
-            rect.bottom += size
-            rect.left -= size
-            rect.right += size
-
-            parentView.touchDelegate =
-                TouchDelegate(rect, this)
-        }
-    }
-
     @SuppressLint("ClickableViewAccessibility")
     private fun setupUI() {
-
         binding.btnCancel.setOnClickListener {
             finish()
         }
-
         binding.btnSave.setOnClickListener {
             Toast.makeText(this, "Đang lưu video...", Toast.LENGTH_SHORT).show()
             // Logic lưu video sau khi chỉnh sửa sẽ ở đây
@@ -120,13 +114,13 @@ class EditVideoActivity : AppCompatActivity() {
 
             Log.d("AAA", "startTime = $startTime")
             Log.d("AAA", "endTime = $endTime")
-
             /*trimVideo(
                 videoUri!!,
                 startTime,
                 endTime
             )*/
-
+            updatePlayerTrim(startTime, endTime)
+            resetTrimUI()
         }
 
         binding.playerView.setOnClickListener {
@@ -134,14 +128,16 @@ class EditVideoActivity : AppCompatActivity() {
                 if (it.isPlaying) {
                     it.pause()
                     binding.ivPlayPause.visibility = View.VISIBLE
+                    binding.btnPlaySmall.setImageResource(R.drawable.ic_play)
                 } else {
                     it.play()
                     binding.ivPlayPause.visibility = View.GONE
+                    binding.btnPlaySmall.setImageResource(R.drawable.ic_pause)
                 }
             }
         }
 
-        binding.leftHandle.setOnTouchListener { v, event ->
+        binding.leftHandle.setOnTouchListener { _, event ->
 
             when (event.action) {
 
@@ -152,12 +148,12 @@ class EditVideoActivity : AppCompatActivity() {
 
                     var newX = event.rawX - location[0]
 
-                    // giới hạn min
+                    // MIN
                     if (newX < 0f) {
                         newX = 0f
                     }
 
-                    // giới hạn max
+                    // MAX
                     val maxX =
                         binding.trimmerContainer.width -
                                 binding.leftHandle.width
@@ -166,7 +162,7 @@ class EditVideoActivity : AppCompatActivity() {
                         newX = maxX.toFloat()
                     }
 
-                    // không vượt rightHandle
+                    // KHÔNG vượt rightHandle
                     val maxLeftX =
                         binding.rightHandle.x -
                                 binding.leftHandle.width
@@ -175,9 +171,41 @@ class EditVideoActivity : AppCompatActivity() {
                         newX = maxLeftX
                     }
 
+                    /*
+                     * UPDATE HANDLE
+                     */
                     binding.leftHandle.x = newX
-                    binding.overlayLeft.layoutParams.width = binding.leftHandle.x.toInt()
+
+                    binding.overlayLeft.layoutParams.width =
+                        binding.leftHandle.x.toInt()
+
                     binding.trimFrame.requestLayout()
+
+                    /*
+                     * SEEK PLAYER
+                     */
+                    val duration = player?.duration ?: 0L
+
+                    val percent =
+                        binding.leftHandle.x /
+                                binding.trimmerContainer.width.toFloat()
+
+                    val seekTo =
+                        (duration * percent).toLong()
+
+                    player?.seekTo(seekTo)
+
+                    /*
+                     * MOVE PLAYHEAD
+                     */
+                    binding.playHead.x =
+                        binding.leftHandle.x +
+                                binding.leftHandle.width
+
+                    /*
+                     * UPDATE UI TIME
+                     */
+                    updateDurationUI(seekTo)
                 }
             }
 
@@ -276,6 +304,7 @@ class EditVideoActivity : AppCompatActivity() {
                     val seekTo = startTime + ((endTime - startTime) * percent)
 
                     player?.seekTo(seekTo.toLong())
+                    updateDurationUI(seekTo.toLong())
                 }
             }
 
@@ -339,11 +368,82 @@ class EditVideoActivity : AppCompatActivity() {
                                     ((endTime - startTime) * percent)
 
                         player?.seekTo(seekTo.toLong())
+                        updateDurationUI(seekTo.toLong())
                     }
                 }
             }
 
             true
+        }
+
+        binding.rvThumbnails.setOnTouchListener { _, event ->
+
+            when (event.action) {
+
+                MotionEvent.ACTION_DOWN,
+                MotionEvent.ACTION_MOVE -> {
+
+                    val touchX = event.x
+
+                    // vùng trim
+                    val minX =
+                        binding.leftHandle.x +
+                                binding.leftHandle.width
+
+                    val maxX =
+                        binding.rightHandle.x
+
+                    // giới hạn touch trong vùng trim
+                    val constrainedX =
+                        touchX.coerceIn(minX, maxX)
+
+                    // move playhead
+                    binding.playHead.x = constrainedX
+
+                    /*
+                     * SEEK PLAYER
+                     */
+
+                    val duration = player?.duration ?: 0L
+
+                    if (duration > 0) {
+
+                        // thời gian trim
+                        val startPercent =
+                            binding.leftHandle.x /
+                                    binding.trimmerContainer.width.toFloat()
+
+                        val endPercent =
+                            (binding.rightHandle.x + binding.rightHandle.width) /
+                                    binding.trimmerContainer.width.toFloat()
+
+                        val startTime =
+                            duration * startPercent
+
+                        val endTime =
+                            duration * endPercent
+
+                        // % trong vùng trim
+                        val percent =
+                            (constrainedX - minX) / (maxX - minX)
+
+                        // map x -> time
+                        val seekTo =
+                            startTime +
+                                    ((endTime - startTime) * percent)
+
+                        player?.seekTo(seekTo.toLong())
+                        updateDurationUI(seekTo.toLong())
+                    }
+                }
+            }
+
+            true
+        }
+
+        binding.btnAudioTool.setOnClickListener {
+
+            pickAudioLauncher.launch("audio/*")
         }
     }
 
@@ -360,7 +460,14 @@ class EditVideoActivity : AppCompatActivity() {
          * AUDIO EFFECT
          */
         player?.addListener(object : Player.Listener {
-
+            override fun onPlayWhenReadyChanged(playWhenReady: Boolean, reason: Int) {
+                super.onPlayWhenReadyChanged(playWhenReady, reason)
+                if (playWhenReady) {
+                    binding.btnPlaySmall.setImageResource(R.drawable.ic_pause)
+                } else {
+                    binding.btnPlaySmall.setImageResource(R.drawable.ic_play)
+                }
+            }
             override fun onAudioSessionIdChanged(
                 audioSessionId: Int
             ) {
@@ -392,12 +499,12 @@ class EditVideoActivity : AppCompatActivity() {
                                         // bass
                                         setBandLevel(
                                             i.toShort(),
-                                            2000.toShort()
+                                            1900.toShort()
                                         )
                                         Log.d("AAA", "<200")
                                     }
 
-                                    freq in 200..2000 -> {
+                                    freq in 200..1200 -> {
 
                                         // vocal
                                         setBandLevel(
@@ -437,7 +544,7 @@ class EditVideoActivity : AppCompatActivity() {
                     loudnessEnhancer =
                         LoudnessEnhancer(audioSessionId).apply {
 
-                            setTargetGain(50)
+                            setTargetGain(1800)
 
                             enabled = true
                         }
@@ -474,8 +581,103 @@ class EditVideoActivity : AppCompatActivity() {
         }
     }
 
-    private fun generateThumbnails(videoUri: Uri) {
+    private fun updateDurationUI(currentTime: Long) {
 
+        val duration = player?.duration ?: return
+
+        val containerWidth = binding.trimmerContainer.width.toFloat()
+
+        val startPercent =
+            binding.leftHandle.x / containerWidth
+
+        val endPercent =
+            (binding.rightHandle.x + binding.rightHandle.width) / containerWidth
+
+        val startTime = (duration * startPercent).toLong()
+        val endTime = (duration * endPercent).toLong()
+
+        val trimDuration = endTime - startTime
+
+        val playHeadTime = currentTime - startTime
+
+        binding.tvCurrentTime.text = formatTime(playHeadTime)
+        binding.tvTotalTrimTime.text = formatTime(trimDuration)
+    }
+    private fun updatePlayerTrim(
+        startMs: Long,
+        endMs: Long,
+    ) {
+
+        val uri = videoUri ?: return
+
+        val mediaItem =
+            MediaItem.Builder()
+                .setUri(uri)
+                .setClippingConfiguration(
+                    MediaItem.ClippingConfiguration.Builder()
+                        .setStartPositionMs(startMs)
+                        .setEndPositionMs(endMs)
+                        .build()
+                )
+                .build()
+
+        player?.apply {
+
+            setMediaItem(mediaItem)
+
+            prepare()
+
+            play()
+        }
+    }
+
+    private fun resetTrimUI() {
+
+        binding.trimmerContainer.post {
+
+            /*
+             * LEFT HANDLE
+             */
+            binding.leftHandle.x = 0f
+
+            /*
+             * RIGHT HANDLE
+             */
+            binding.rightHandle.x =
+                binding.trimmerContainer.width -
+                        binding.rightHandle.width.toFloat()
+
+            /*
+             * PLAYHEAD
+             */
+            binding.playHead.x =
+                binding.leftHandle.width.toFloat()
+
+            /*
+             * OVERLAY
+             */
+            binding.overlayLeft.layoutParams.width = 0
+
+            binding.overlayRight.layoutParams.width = 0
+
+            binding.overlayLeft.requestLayout()
+            binding.overlayRight.requestLayout()
+
+            /*
+             * DURATION UI
+             */
+            updateDurationUI(0L)
+        }
+    }
+
+    private fun formatTime(ms: Long): String {
+        val totalSec = ms / 1000
+        val min = totalSec / 60
+        val sec = totalSec % 60
+        return String.format("%02d:%02d", min, sec)
+    }
+
+    private fun generateThumbnails(videoUri: Uri) {
         binding.trimmerContainer.post {
 
             lifecycleScope.launch(Dispatchers.IO) {
@@ -569,52 +771,13 @@ class EditVideoActivity : AppCompatActivity() {
 
                         binding.playHead.x = playHeadX.coerceIn(startX, endX)
                     }
+                    updateDurationUI(current)
                 }
 
                 handler.postDelayed(this, 16)
             }
         })
     }
-
-    private fun updatePlayHead() {
-
-        val duration = player?.duration ?: 0L
-
-        if (duration <= 0) return
-
-        val current = player?.currentPosition ?: 0L
-
-        val percent =
-            current.toFloat() / duration
-
-        // vùng timeline có thể chạy
-        val startX =
-            binding.leftHandle.x +
-                    binding.leftHandle.width
-
-        val endX =
-            binding.rightHandle.x
-
-        val availableWidth =
-            endX - startX
-
-        // playhead position
-        var playHeadX =
-            startX + (availableWidth * percent)
-
-        // giới hạn trái
-        if (playHeadX < startX) {
-            playHeadX = startX
-        }
-
-        // giới hạn phải
-        if (playHeadX > endX) {
-            playHeadX = endX
-        }
-
-        binding.playHead.x = playHeadX
-    }
-
     private var equalizer: Equalizer? = null
 
     private var bassBoost: BassBoost? = null
@@ -719,6 +882,169 @@ class EditVideoActivity : AppCompatActivity() {
         Log.d("AAA", "Saved to Downloads")
     }
 
+    private val pickAudioLauncher =
+        registerForActivityResult(
+            ActivityResultContracts.GetContent()
+        ) { uri ->
+
+            uri?.let {
+
+                addAudioToPlayer(it)
+            }
+        }
+
+    @OptIn(UnstableApi::class)
+    private fun addAudioToPlayer(uri: Uri) {
+
+        audioUri = uri
+
+        val video = videoUri ?: return
+
+        val currentPosition =
+            player?.currentPosition ?: 0L
+
+        val isPlaying =
+            player?.isPlaying ?: false
+
+        val dataSourceFactory =
+            DefaultDataSource.Factory(this)
+
+        /*
+         * VIDEO SOURCE
+         */
+        val videoSource: MediaSource =
+            ProgressiveMediaSource.Factory(dataSourceFactory)
+                .createMediaSource(
+                    MediaItem.fromUri(video)
+                )
+
+        /*
+         * AUDIO SOURCE
+         */
+        val audioSource: MediaSource =
+            ProgressiveMediaSource.Factory(dataSourceFactory)
+                .createMediaSource(
+                    MediaItem.fromUri(uri)
+                )
+
+        /*
+         * MERGE VIDEO + AUDIO
+         */
+        val mergedSource =
+            MergingMediaSource(
+                videoSource,
+                audioSource
+            )
+
+        player?.apply {
+
+            stop()
+
+            clearMediaItems()
+
+            setMediaSource(mergedSource)
+
+            prepare()
+
+            seekTo(currentPosition)
+
+            if (isPlaying) {
+                play()
+            }
+        }
+
+        player?.volume = 1f
+
+        Toast.makeText(
+            this,
+            "Đã thêm nhạc",
+            Toast.LENGTH_SHORT
+        ).show()
+    }
+
+    @OptIn(UnstableApi::class)
+    private fun addAudioToPlayer(
+        uri: Uri,
+        audioStartMs: Long,
+        audioEndMs: Long
+    ) {
+
+        audioUri = uri
+
+        val video = videoUri ?: return
+
+        val currentPosition =
+            player?.currentPosition ?: 0L
+
+        val isPlaying =
+            player?.isPlaying ?: false
+
+        val dataSourceFactory =
+            DefaultDataSource.Factory(this)
+
+        /*
+         * VIDEO SOURCE
+         */
+        val videoSource: MediaSource =
+            ProgressiveMediaSource.Factory(dataSourceFactory)
+                .createMediaSource(
+                    MediaItem.fromUri(video)
+                )
+
+        /*
+         * AUDIO SOURCE
+         */
+        val rawAudioSource =
+            ProgressiveMediaSource.Factory(dataSourceFactory)
+                .createMediaSource(
+                    MediaItem.fromUri(uri)
+                )
+
+        /*
+         * CLIP AUDIO
+         */
+        val clippedAudioSource =
+            ClippingMediaSource(
+                rawAudioSource,
+                audioStartMs * 1000, // us
+                audioEndMs * 1000
+            )
+
+        /*
+         * MERGE VIDEO + AUDIO
+         */
+        val mergedSource =
+            MergingMediaSource(
+                videoSource,
+                clippedAudioSource
+            )
+
+        player?.apply {
+
+            stop()
+
+            clearMediaItems()
+
+            setMediaSource(mergedSource)
+
+            prepare()
+
+            seekTo(currentPosition)
+
+            if (isPlaying) {
+                play()
+            }
+        }
+
+        Toast.makeText(
+            this,
+            "Đã thêm nhạc",
+            Toast.LENGTH_SHORT
+        ).show()
+    }
+
+
+
     override fun onStop() {
         super.onStop()
         player?.pause()
@@ -734,6 +1060,5 @@ class EditVideoActivity : AppCompatActivity() {
         bassBoost = null
         loudnessEnhancer?.release()
         loudnessEnhancer = null
-
     }
 }
