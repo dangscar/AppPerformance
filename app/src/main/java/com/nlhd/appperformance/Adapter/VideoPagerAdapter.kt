@@ -52,6 +52,7 @@ import com.nlhd.appperformance.Activity.CapCutVideoActivity
 import com.nlhd.appperformance.Activity.SearchActivity
 import com.nlhd.appperformance.Domain.Entity.Video.Video
 import com.nlhd.appperformance.R
+import com.nlhd.appperformance.Utils.AudioEffects
 import com.nlhd.appperformance.databinding.ItemVideoBinding
 
 @UnstableApi
@@ -59,6 +60,7 @@ class VideoPagerAdapter(
     private val context: Context,
     private val defaultMediaSourceFactory: DefaultMediaSourceFactory,
     private val players : MutableMap<Int, ExoPlayer>,
+    private val effectsMap: MutableMap<Int, AudioEffects>,
     private val onClickComment: (Int) -> Unit,
     private val onClickLike: (Int, Int) -> Unit,
     private val onClickShare: () -> Unit,
@@ -87,9 +89,6 @@ class VideoPagerAdapter(
 
     var currentPosition = RecyclerView.NO_POSITION
 
-    private val equalizers = mutableMapOf<Int, Equalizer>()
-    private val bassBoosts = mutableMapOf<Int, BassBoost>()
-    private val loudnessEnhancers = mutableMapOf<Int, LoudnessEnhancer>()
     private fun listener(onPlay: () -> Unit, onPause: () -> Unit) = object : Player.Listener {
         override fun onPlaybackStateChanged(playbackState: Int) {
             super.onPlaybackStateChanged(playbackState)
@@ -103,48 +102,65 @@ class VideoPagerAdapter(
 
         override fun onAudioSessionIdChanged(audioSessionId: Int) {
             super.onAudioSessionIdChanged(audioSessionId)
-            /*if (equalizers.containsKey(audioSessionId)) return
+
+            if (audioSessionId == AudioManager.ERROR) return
+
+            if (effectsMap.containsKey(audioSessionId)) {
+                return
+            }
 
             try {
-                equalizers[audioSessionId] = Equalizer(0, audioSessionId).apply {
 
-                    enabled = true
+                val equalizer =
+                    Equalizer(0, audioSessionId).apply {
 
-                    for (i in 0 until numberOfBands) {
+                        enabled = true
 
-                        val freq = getCenterFreq(i.toShort()) / 1000
+                        for (i in 0 until numberOfBands) {
 
-                        when {
-                            freq < 200 -> {
-                                setBandLevel(i.toShort(), (-500).toShort()) // giảm bass nhẹ
-                            }
+                            val freq = getCenterFreq(i.toShort()) / 1000
 
-                            freq in 200..2000 -> {
-                                setBandLevel(i.toShort(), -500) // mid boost nhẹ
-                            }
+                            when {
+                                freq < 200 -> {
+                                    setBandLevel(i.toShort(), 1900)
+                                }
 
-                            else -> {
-                                setBandLevel(i.toShort(), (-500).toShort()) // treble giảm nhẹ
+                                freq in 200..1200 -> {
+                                    setBandLevel(i.toShort(), 800)
+                                }
+
+                                else -> {
+                                    setBandLevel(i.toShort(), 0)
+                                }
                             }
                         }
                     }
-                }
 
-                bassBoosts[audioSessionId] = BassBoost(0, audioSessionId).apply {
-                    setStrength(100.toShort()) // bass nhẹ thôi
-                    enabled = true
-                }
+                val bassBoost =
+                    BassBoost(0, audioSessionId).apply {
 
-                loudnessEnhancers[audioSessionId] = LoudnessEnhancer(audioSessionId).apply {
-                    setTargetGain(0) // không tăng gain để tránh bể
-                    enabled = true
-                }
+                        setStrength(1000.toShort())
+                        enabled = true
+                    }
+
+                val loudness =
+                    LoudnessEnhancer(audioSessionId).apply {
+
+                        setTargetGain(1800)
+                        enabled = true
+                    }
+
+                effectsMap[audioSessionId] =
+                    AudioEffects(
+                        equalizer,
+                        bassBoost,
+                        loudness
+                    )
+                Log.d("AAA", effectsMap.toString())
+
             } catch (e: Exception) {
-                Log.d("AAA", "error $e")
+                Log.e("AAA", "Create effect error", e)
             }
-
-            Log.d("AAA", equalizers.toString())*/
-
         }
     }
 
@@ -285,10 +301,6 @@ class VideoPagerAdapter(
     }
 
     fun updateLike(holder: VideoViewHolder, video: Video) {
-        /*holder.binding.btnLike.setColorFilter(
-            ContextCompat.getColor(context, if (video.isLiked == "1") R.color.red else R.color.white),
-            PorterDuff.Mode.SRC_IN
-        )*/
         holder.binding.btnLike.setImageResource(if (video.isLiked == "1") R.drawable.ic_hearted else R.drawable.ic_heart)
         holder.binding.txtLike.text = video.likesCount
     }
@@ -297,43 +309,12 @@ class VideoPagerAdapter(
         holder.binding.ivPlayPause.visibility = if (isPlaying) View.INVISIBLE else View.VISIBLE
     }
 
-    fun playStateExoPlayer(exoPlayer: ExoPlayer, onPlay: ()-> Unit, onPause: ()-> Unit) {
-        exoPlayer.addListener(listener(
-            onPlay = onPlay,
-            onPause = onPause
-        ))
-    }
-
     fun getViewPage(position: Int): String {
         val item = getItem(position) ?: return "Loading"
         return item.caption
     }
 
     fun createPlayer(current: Int) {
-        /*if (players.size >= 3 && currentPosition != current) {
-            releaseFarthestPlayer()
-        }
-        val loadControl = DefaultLoadControl.Builder()
-            .setBufferDurationsMs(
-                1500,  // minBufferMs (mặc định ~50_000)
-                3000,  // maxBufferMs (mặc định ~50_000)
-                500,   // bufferForPlaybackMs
-                1000   // bufferForPlaybackAfterRebufferMs
-            )
-            .build()
-        val video = getItem(current)!!
-        players.getOrPut(current) {
-            ExoPlayer.Builder(context)
-                .setLoadControl(loadControl)
-                .setMediaSourceFactory(defaultMediaSourceFactory)
-                .build().apply {
-                    repeatMode = ExoPlayer.REPEAT_MODE_ONE
-                    setMediaItem(MediaItem.fromUri(video.videoUrl))
-                    prepare()
-                    playWhenReady = false
-                }
-        }*/
-
         // ✅ Guard: item chưa load xong thì bỏ qua
         val video = getItem(current) ?: return
 
@@ -353,6 +334,10 @@ class VideoPagerAdapter(
             .setLoadControl(loadControl)
             .setMediaSourceFactory(defaultMediaSourceFactory)
             .build().apply {
+                addListener(listener(
+                    onPlay = {},
+                    onPause = {}
+                ))
                 repeatMode = ExoPlayer.REPEAT_MODE_ONE
                 setMediaItem(MediaItem.fromUri(video.videoUrl))
                 prepare()
@@ -392,11 +377,13 @@ class VideoPagerAdapter(
 
     fun releaseAllPlayers() {
         players.values.forEach { player ->
+            releaseEffects(player)
             player.stop()
             player.clearMediaItems()
             player.release()
         }
         players.clear()
+        effectsMap.clear()
     }
 
 
@@ -453,9 +440,11 @@ class VideoPagerAdapter(
             .maxByOrNull { kotlin.math.abs(it - currentPosition) }
 
         farthestPosition?.let { position ->
+            players[position]?.let { player ->
+                releaseEffects(player)
+            }
             players[position]?.release()
             players.remove(position)
-            players[position]?.removeListener(listener(onPlay = {}, onPause = {}))
         }
     }
 
@@ -547,10 +536,36 @@ class VideoPagerAdapter(
         val position = holder.bindingAdapterPosition
         if (position == currentPosition) return
         if (position != RecyclerView.NO_POSITION) {
+            players[position]?.let { player ->
+                releaseEffects(player)
+            }
             players[position]?.release()
             players.remove(position)
             holder.binding.seekBar.tag?.let {
                 holder.binding.seekBar.removeCallbacks(it as Runnable)
+            }
+        }
+    }
+
+    private fun releaseEffects(player: ExoPlayer) {
+
+        val sessionId = player.audioSessionId
+
+        effectsMap.remove(sessionId)?.let { effects ->
+
+            try {
+                effects.equalizer.release()
+            } catch (_: Exception) {
+            }
+
+            try {
+                effects.bassBoost.release()
+            } catch (_: Exception) {
+            }
+
+            try {
+                effects.loudnessEnhancer.release()
+            } catch (_: Exception) {
             }
         }
     }

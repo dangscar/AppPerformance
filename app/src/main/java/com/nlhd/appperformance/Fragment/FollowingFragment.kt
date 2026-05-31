@@ -35,6 +35,7 @@ import com.nlhd.appperformance.BottomSheet.CommentBottomSheet
 import com.nlhd.appperformance.Domain.Entity.Video.MessageResponse
 import com.nlhd.appperformance.Feature.LoginScreen.LoginBottomSheet
 import com.nlhd.appperformance.R
+import com.nlhd.appperformance.Utils.AudioEffects
 import com.nlhd.appperformance.Utils.Navigation
 import com.nlhd.appperformance.Utils.ResultUI
 import com.nlhd.appperformance.Utils.TabSelected
@@ -77,6 +78,9 @@ class FollowingFragment : Fragment() {
 
     @Inject
     lateinit var players: MutableMap<Int, ExoPlayer>
+
+    @Inject
+    lateinit var effectsMap : MutableMap<Int, AudioEffects>
 
     @Inject
     lateinit var defaultMediaSourceFactory: DefaultMediaSourceFactory
@@ -212,6 +216,7 @@ class FollowingFragment : Fragment() {
             this.requireContext(),
             defaultMediaSourceFactory,
             players = players,
+            effectsMap = effectsMap,
             onClickComment = {
                 commentBottomSheet.show(
                     requireActivity().supportFragmentManager,
@@ -366,11 +371,36 @@ class FollowingFragment : Fragment() {
     override fun onPause() {
         super.onPause()
         players.values.forEach { player ->
+            releaseEffects(player)
             player.stop()
             player.clearMediaItems()
             player.release()
         }
         players.clear()
+        effectsMap.clear()
+    }
+
+    private fun releaseEffects(player: ExoPlayer) {
+
+        val sessionId = player.audioSessionId
+
+        effectsMap.remove(sessionId)?.let { effects ->
+
+            try {
+                effects.equalizer.release()
+            } catch (_: Exception) {
+            }
+
+            try {
+                effects.bassBoost.release()
+            } catch (_: Exception) {
+            }
+
+            try {
+                effects.loudnessEnhancer.release()
+            } catch (_: Exception) {
+            }
+        }
     }
 
 
@@ -391,11 +421,13 @@ class FollowingFragment : Fragment() {
 
         if (players.isNotEmpty()) {
             players.values.forEach { player ->
+                releaseEffects(player)
                 player.stop()
                 player.clearMediaItems()
                 player.release()
             }
             players.clear()
+            effectsMap.clear()
         }
 
         val currentPosition = viewModel.currentPosition.value ?: 0

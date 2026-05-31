@@ -48,6 +48,7 @@ import com.nlhd.appperformance.DetailVideoActivity
 import com.nlhd.appperformance.Domain.Entity.Video.MessageResponse
 import com.nlhd.appperformance.Feature.Video.onChangeBottomSheet
 import com.nlhd.appperformance.R
+import com.nlhd.appperformance.Utils.AudioEffects
 import com.nlhd.appperformance.Utils.Follow
 import com.nlhd.appperformance.Utils.Navigation
 import com.nlhd.appperformance.Utils.ResultUI
@@ -80,6 +81,9 @@ class DetailVideoFragment : Fragment() {
 
     @Inject
     lateinit var players: MutableMap<Int, ExoPlayer>
+
+    @Inject
+    lateinit var effectsMap : MutableMap<Int, AudioEffects>
 
     @Inject
     lateinit var defaultMediaSourceFactory: DefaultMediaSourceFactory
@@ -237,11 +241,13 @@ class DetailVideoFragment : Fragment() {
 
         if (viewModel.isCurrentItem.value == false) {
             players.values.forEach { player ->
+                releaseEffects(player)
                 player.stop()
                 player.clearMediaItems()
                 player.release()
             }
             players.clear()
+            effectsMap.clear()
         }
 
         viewPager.post {
@@ -256,6 +262,7 @@ class DetailVideoFragment : Fragment() {
             requireContext(),
             defaultMediaSourceFactory,
             players,
+            effectsMap = effectsMap,
             onClickComment = { videoId ->
                 if (videoId == currentCommentVideoId.toInt() && !isSuccess) {
                     commentBottomSheet.show(
@@ -549,6 +556,29 @@ class DetailVideoFragment : Fragment() {
     fun releasePlayers() {
         if (::adapter.isInitialized) {
             adapter.releaseAllPlayers()
+        }
+    }
+
+    private fun releaseEffects(player: ExoPlayer) {
+
+        val sessionId = player.audioSessionId
+
+        effectsMap.remove(sessionId)?.let { effects ->
+
+            try {
+                effects.equalizer.release()
+            } catch (_: Exception) {
+            }
+
+            try {
+                effects.bassBoost.release()
+            } catch (_: Exception) {
+            }
+
+            try {
+                effects.loudnessEnhancer.release()
+            } catch (_: Exception) {
+            }
         }
     }
 

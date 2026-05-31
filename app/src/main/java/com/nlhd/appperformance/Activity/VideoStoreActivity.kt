@@ -41,6 +41,7 @@ import com.nlhd.appperformance.Adapter.VideoStorePagerAdapter
 import com.nlhd.appperformance.BottomSheet.BottomSheetInputComment
 import com.nlhd.appperformance.BottomSheet.CommentBottomSheet
 import com.nlhd.appperformance.R
+import com.nlhd.appperformance.Utils.AudioEffects
 import com.nlhd.appperformance.ViewModel.CommentViewModel
 import com.nlhd.appperformance.ViewModel.VideoStoreViewModel
 import dagger.hilt.android.AndroidEntryPoint
@@ -66,6 +67,8 @@ class VideoStoreActivity : AppCompatActivity() {
 
     @Inject
     lateinit var players: MutableMap<Int, ExoPlayer>
+    @Inject
+    lateinit var effectsMap: MutableMap<Int, AudioEffects>
 
     @Inject
     lateinit var defaultMediaSourceFactory: DefaultMediaSourceFactory
@@ -135,11 +138,13 @@ class VideoStoreActivity : AppCompatActivity() {
 
         if (viewModel.isCurrentItem.value == false) {
             players.values.forEach { player ->
+                releaseEffects(player)
                 player.stop()
                 player.clearMediaItems()
                 player.release()
             }
             players.clear()
+            effectsMap.clear()
         }
 
         //Khi vào list video
@@ -179,10 +184,10 @@ class VideoStoreActivity : AppCompatActivity() {
                         translateY += -delta * 1.5f * aspectRatio
                     }
                     holder.binding.playerView.apply {
-                        this.pivotY = pivotY
+                        this.pivotY = width/2f
                         scaleX = scale
                         scaleY = scale
-                        translationY = translateY
+                        translationY = -delta / 2f + statusBarHeight * progresses * 0.25f
                     }
 
                     if (offset != -1f) {
@@ -220,6 +225,7 @@ class VideoStoreActivity : AppCompatActivity() {
             this,
             defaultMediaSourceFactory,
             players = players,
+            effectsMap = effectsMap,
             onClickComment = {
                 commentBottomSheet.show(
                     supportFragmentManager,
@@ -432,4 +438,26 @@ class VideoStoreActivity : AppCompatActivity() {
         adapter.play(currentPosition)
     }
 
+    private fun releaseEffects(player: ExoPlayer) {
+
+        val sessionId = player.audioSessionId
+
+        effectsMap.remove(sessionId)?.let { effects ->
+
+            try {
+                effects.equalizer.release()
+            } catch (_: Exception) {
+            }
+
+            try {
+                effects.bassBoost.release()
+            } catch (_: Exception) {
+            }
+
+            try {
+                effects.loudnessEnhancer.release()
+            } catch (_: Exception) {
+            }
+        }
+    }
 }

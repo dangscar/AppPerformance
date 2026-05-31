@@ -25,6 +25,7 @@ import com.nlhd.appperformance.Domain.UseCase.Video.Like
 import com.nlhd.appperformance.Domain.UseCase.Video.SearchVideos
 import com.nlhd.appperformance.Domain.UseCase.Video.UploadVideo
 import com.nlhd.appperformance.Domain.UseCase.Video.VideoUseCase
+import com.nlhd.appperformance.Utils.AudioEffects
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -126,6 +127,12 @@ object AppModule {
     @Provides
     @Singleton
     fun providePlayerMap(): MutableMap<Int, ExoPlayer> {
+        return mutableMapOf()
+    }
+
+    @Provides
+    @Singleton
+    fun provideEffectMap(): MutableMap<Int, AudioEffects> {
         return mutableMapOf()
     }
 }

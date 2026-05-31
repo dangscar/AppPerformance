@@ -185,9 +185,9 @@ class CommentBottomSheet(
             behavior.peekHeight = height
             behavior.state = BottomSheetBehavior.STATE_EXPANDED
             behavior.skipCollapsed = true
-            behavior.isHideable = true
-            behavior.significantVelocityThreshold = 50
-            behavior.hideFriction = -1f
+            //behavior.isHideable = true
+           /* behavior.significantVelocityThreshold = 50
+            behavior.hideFriction = -1f*/
         }
         bottomSheetGeneral.doOnNextLayout {
             val width = bottomSheet.measuredWidth

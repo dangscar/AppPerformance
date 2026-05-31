@@ -16,18 +16,29 @@ import android.os.Environment
 import android.os.Handler
 import android.os.Looper
 import android.provider.MediaStore
+import android.text.InputType
 import android.util.Log
 import android.view.MotionEvent
 import android.view.TouchDelegate
 import android.view.View
+import android.widget.EditText
+import android.widget.LinearLayout
+import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.OptIn
 import androidx.annotation.RequiresApi
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
+import androidx.media3.common.C
 import androidx.media3.common.MediaItem
+import androidx.media3.common.PlaybackException
 import androidx.media3.common.Player
+import androidx.media3.common.TrackGroup
+import androidx.media3.common.TrackSelectionOverride
+import androidx.media3.common.TrackSelectionParameters
+import androidx.media3.common.Tracks
 import androidx.media3.common.util.UnstableApi
 import androidx.media3.datasource.DefaultDataSource
 import androidx.media3.effect.Brightness
@@ -53,12 +64,21 @@ import java.io.File
 import java.io.FileInputStream
 import kotlin.apply
 import com.nlhd.appperformance.R
+import com.nlhd.appperformance.Utils.AudioEffects
+import dagger.hilt.android.AndroidEntryPoint
+import javax.inject.Inject
 
+@AndroidEntryPoint
 class EditVideoActivity : AppCompatActivity() {
     private lateinit var binding: ActivityEditVideoBinding
     private var player: ExoPlayer? = null
     private var audioUri: Uri? = null
     private var videoUri: Uri? = null
+
+    @Inject
+    lateinit var effectsMap: MutableMap<Int, AudioEffects>
+    @Inject
+    lateinit var players: MutableMap<Int, ExoPlayer>
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -70,6 +90,13 @@ class EditVideoActivity : AppCompatActivity() {
         if (uriString != null) {
             videoUri = Uri.parse(uriString)
         }
+        releaseAllEffects()
+        players.values.forEach { player ->
+            player.stop()
+            player.clearMediaItems()
+            player.release()
+        }
+        players.clear()
 
         binding.rvThumbnails.layoutManager = object : LinearLayoutManager(this, HORIZONTAL, false) {
                 override fun canScrollHorizontally(): Boolean {
@@ -119,8 +146,8 @@ class EditVideoActivity : AppCompatActivity() {
                 startTime,
                 endTime
             )*/
-            updatePlayerTrim(startTime, endTime)
-            resetTrimUI()
+            //updatePlayerTrim(startTime, endTime)
+            //resetTrimUI()
         }
 
         binding.playerView.setOnClickListener {
@@ -888,8 +915,7 @@ class EditVideoActivity : AppCompatActivity() {
         ) { uri ->
 
             uri?.let {
-
-                addAudioToPlayer(it)
+                addAudioToPlayer(uri)
             }
         }
 
@@ -900,149 +926,167 @@ class EditVideoActivity : AppCompatActivity() {
 
         val video = videoUri ?: return
 
-        val currentPosition =
-            player?.currentPosition ?: 0L
+        val currentPosition = player?.currentPosition ?: 0L
+        val isPlaying = player?.isPlaying ?: false
 
-        val isPlaying =
-            player?.isPlaying ?: false
-
-        val dataSourceFactory =
-            DefaultDataSource.Factory(this)
+        val dataSourceFactory = DefaultDataSource.Factory(this)
 
         /*
-         * VIDEO SOURCE
+         * VIDEO SOURCE — strip audio bằng DefaultTrackSelector
          */
         val videoSource: MediaSource =
             ProgressiveMediaSource.Factory(dataSourceFactory)
-                .createMediaSource(
-                    MediaItem.fromUri(video)
-                )
+                .createMediaSource(MediaItem.fromUri(video))
 
         /*
          * AUDIO SOURCE
          */
-        val audioSource: MediaSource =
+        val audioItem = MediaItem.Builder()
+            .setUri(uri)
+            .setClippingConfiguration(
+                MediaItem.ClippingConfiguration.Builder()
+                    .setStartPositionMs(0L)
+                    .setEndPositionMs(5000L)
+                    .build()
+            )
+            .build()
+
+
+        val audioSource =
             ProgressiveMediaSource.Factory(dataSourceFactory)
-                .createMediaSource(
-                    MediaItem.fromUri(uri)
-                )
+                .createMediaSource(audioItem)
 
         /*
-         * MERGE VIDEO + AUDIO
+         * MERGE
          */
-        val mergedSource =
-            MergingMediaSource(
-                videoSource,
-                audioSource
-            )
+        val mergedSource = MergingMediaSource(videoSource, audioSource)
 
         player?.apply {
-
             stop()
-
             clearMediaItems()
-
             setMediaSource(mergedSource)
-
             prepare()
-
             seekTo(currentPosition)
-
-            if (isPlaying) {
-                play()
-            }
+            if (isPlaying) play()
         }
 
-        player?.volume = 1f
-
-        Toast.makeText(
-            this,
-            "Đã thêm nhạc",
-            Toast.LENGTH_SHORT
-        ).show()
+        /*
+         * FORCE chọn audio từ audioSource (group index 1)
+         * và disable audio track trong videoSource (group index 0)
+         */
+        forceSelectAudioTrack()
     }
 
     @OptIn(UnstableApi::class)
-    private fun addAudioToPlayer(
-        uri: Uri,
-        audioStartMs: Long,
-        audioEndMs: Long
-    ) {
+    private fun forceSelectAudioTrack() {
+        player?.addListener(object : Player.Listener {
 
-        audioUri = uri
+            override fun onTracksChanged(tracks: Tracks) {
 
-        val video = videoUri ?: return
+                val audioGroups = tracks.groups.filter {
+                    it.type == C.TRACK_TYPE_AUDIO
+                }
 
-        val currentPosition =
-            player?.currentPosition ?: 0L
+                Log.d("TRACKS", "Audio groups found: ${audioGroups.size}")
 
-        val isPlaying =
-            player?.isPlaying ?: false
+                if (audioGroups.size < 2) return  // Chưa load đủ track, chờ
 
-        val dataSourceFactory =
-            DefaultDataSource.Factory(this)
+                // audioGroups[0] = audio từ videoSource (nếu có)
+                // audioGroups[1] = audio từ audioSource (file nhạc)
 
-        /*
-         * VIDEO SOURCE
-         */
-        val videoSource: MediaSource =
-            ProgressiveMediaSource.Factory(dataSourceFactory)
-                .createMediaSource(
-                    MediaItem.fromUri(video)
-                )
+                val overrides = mutableMapOf<TrackGroup, TrackSelectionOverride>()
 
-        /*
-         * AUDIO SOURCE
-         */
-        val rawAudioSource =
-            ProgressiveMediaSource.Factory(dataSourceFactory)
-                .createMediaSource(
-                    MediaItem.fromUri(uri)
-                )
+                // Disable audio group đầu tiên (từ video)
+                overrides[audioGroups[0].mediaTrackGroup] =
+                    TrackSelectionOverride(
+                        audioGroups[0].mediaTrackGroup,
+                        emptyList()  // emptyList = disabled
+                    )
 
-        /*
-         * CLIP AUDIO
-         */
-        val clippedAudioSource =
-            ClippingMediaSource(
-                rawAudioSource,
-                audioStartMs * 1000, // us
-                audioEndMs * 1000
-            )
+                // Force select audio group thứ hai (file nhạc)
+                overrides[audioGroups[1].mediaTrackGroup] =
+                    TrackSelectionOverride(
+                        audioGroups[1].mediaTrackGroup,
+                        listOf(0)   // chọn track index 0
+                    )
 
-        /*
-         * MERGE VIDEO + AUDIO
-         */
-        val mergedSource =
-            MergingMediaSource(
-                videoSource,
-                clippedAudioSource
-            )
+                player?.trackSelectionParameters =
+                    player!!.trackSelectionParameters
+                        .buildUpon()
+                        .setOverrideConditionsForTrackGroup(overrides)
+                        .build()
 
-        player?.apply {
-
-            stop()
-
-            clearMediaItems()
-
-            setMediaSource(mergedSource)
-
-            prepare()
-
-            seekTo(currentPosition)
-
-            if (isPlaying) {
-                play()
+                // Remove listener sau khi đã set xong
+                player?.removeListener(this)
             }
-        }
-
-        Toast.makeText(
-            this,
-            "Đã thêm nhạc",
-            Toast.LENGTH_SHORT
-        ).show()
+        })
     }
 
+    // Extension function tiện dụng
+    @OptIn(UnstableApi::class)
+    private fun TrackSelectionParameters.Builder.setOverrideConditionsForTrackGroup(
+        overrides: Map<TrackGroup, TrackSelectionOverride>
+    ): TrackSelectionParameters.Builder {
+        overrides.forEach { (_, override) ->
+            addOverride(override)
+        }
+        return this
+    }
+
+    /*private fun showAudioTimingDialog(uri: Uri) {
+
+        var startMs = 0L
+        var endMs = C.TIME_UNSET
+
+        val layout = LinearLayout(this).apply {
+            orientation = LinearLayout.VERTICAL
+            setPadding(48, 32, 48, 0)
+        }
+
+        val startInput = EditText(this).apply {
+            hint = "Start (ms), mặc định = 0"
+            inputType = InputType.TYPE_CLASS_NUMBER
+        }
+
+        val endInput = EditText(this).apply {
+            hint = "End (ms), để trống = phát hết"
+            inputType = InputType.TYPE_CLASS_NUMBER
+        }
+
+        layout.addView(TextView(this).apply { text = "⏱ Thời gian bắt đầu" })
+        layout.addView(startInput)
+        layout.addView(TextView(this).apply {
+            text = "⏹ Thời gian kết thúc"
+            setPadding(0, 16, 0, 0)
+        })
+        layout.addView(endInput)
+
+        AlertDialog.Builder(this)
+            .setTitle("Cắt audio")
+            .setView(layout)
+            .setPositiveButton("Xác nhận") { _, _ ->
+
+                startMs = startInput.text.toString()
+                    .toLongOrNull() ?: 0L
+
+                endMs = endInput.text.toString()
+                    .toLongOrNull() ?: C.TIME_UNSET
+
+                // Validate
+                if (endMs != C.TIME_UNSET && endMs <= startMs) {
+                    Toast.makeText(
+                        this,
+                        "End phải lớn hơn Start",
+                        Toast.LENGTH_SHORT
+                    ).show()
+                    return@setPositiveButton
+                }
+
+                addAudioToPlayer(uri, startMs, endMs)
+            }
+            .setNegativeButton("Hủy", null)
+            .show()
+    }*/
 
 
     override fun onStop() {
@@ -1060,5 +1104,28 @@ class EditVideoActivity : AppCompatActivity() {
         bassBoost = null
         loudnessEnhancer?.release()
         loudnessEnhancer = null
+    }
+
+    private fun releaseAllEffects() {
+
+        effectsMap.values.forEach { effects ->
+
+            try {
+                effects.equalizer.release()
+            } catch (_: Exception) {
+            }
+
+            try {
+                effects.bassBoost.release()
+            } catch (_: Exception) {
+            }
+
+            try {
+                effects.loudnessEnhancer.release()
+            } catch (_: Exception) {
+            }
+        }
+
+        effectsMap.clear()
     }
 }

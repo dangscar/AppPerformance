@@ -2,6 +2,10 @@ package com.nlhd.appperformance.Adapter
 
 import android.content.Context
 import android.content.Intent
+import android.media.AudioManager
+import android.media.audiofx.BassBoost
+import android.media.audiofx.Equalizer
+import android.media.audiofx.LoudnessEnhancer
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.MotionEvent
@@ -23,6 +27,7 @@ import com.bumptech.glide.Glide
 import com.nlhd.appperformance.Activity.CapCutVideoActivity
 import com.nlhd.appperformance.Domain.Entity.VideoStore
 import com.nlhd.appperformance.R
+import com.nlhd.appperformance.Utils.AudioEffects
 import com.nlhd.appperformance.databinding.ItemVideoBinding
 import kotlin.math.abs
 
@@ -31,6 +36,7 @@ class VideoStorePagerAdapter(
     private val context: Context,
     private val defaultMediaSourceFactory: DefaultMediaSourceFactory,
     private val players : MutableMap<Int, ExoPlayer>,
+    private val effectsMap: MutableMap<Int, AudioEffects>,
     private val onClickComment: (Int) -> Unit
 ) : PagingDataAdapter<VideoStore, VideoStorePagerAdapter.VideoViewHolder>(DiffCallback) {
 
@@ -61,14 +67,76 @@ class VideoStorePagerAdapter(
                 onPause()
             }
         }
+        override fun onAudioSessionIdChanged(audioSessionId: Int) {
+            super.onAudioSessionIdChanged(audioSessionId)
+
+            if (audioSessionId == AudioManager.ERROR) return
+
+            if (effectsMap.containsKey(audioSessionId)) {
+                return
+            }
+
+            try {
+
+                val equalizer =
+                    Equalizer(0, audioSessionId).apply {
+
+                        enabled = true
+
+                        for (i in 0 until numberOfBands) {
+
+                            val freq = getCenterFreq(i.toShort()) / 1000
+
+                            when {
+                                freq < 200 -> {
+                                    setBandLevel(i.toShort(), 1900)
+                                }
+
+                                freq in 200..1200 -> {
+                                    setBandLevel(i.toShort(), 800)
+                                }
+
+                                else -> {
+                                    setBandLevel(i.toShort(), 0)
+                                }
+                            }
+                        }
+                    }
+
+                val bassBoost =
+                    BassBoost(0, audioSessionId).apply {
+
+                        setStrength(1000.toShort())
+                        enabled = true
+                    }
+
+                val loudness =
+                    LoudnessEnhancer(audioSessionId).apply {
+
+                        setTargetGain(1800)
+                        enabled = true
+                    }
+
+                effectsMap[audioSessionId] =
+                    AudioEffects(
+                        equalizer,
+                        bassBoost,
+                        loudness
+                    )
+                Log.d("AAA", effectsMap.toString())
+
+            } catch (e: Exception) {
+                Log.e("AAA", "Create effect error", e)
+            }
+        }
     }
 
-    fun playStateExoPlayer(exoPlayer: ExoPlayer, onPlay: ()-> Unit, onPause: ()-> Unit) {
+    /*fun playStateExoPlayer(exoPlayer: ExoPlayer, onPlay: ()-> Unit, onPause: ()-> Unit) {
         exoPlayer.addListener(listener(
             onPlay = onPlay,
             onPause = onPause
         ))
-    }
+    }*/
 
     var currentPosition = RecyclerView.NO_POSITION
 
@@ -134,13 +202,6 @@ class VideoStorePagerAdapter(
         }
 
         setupTimeBar(holder, players[position]!!)
-        val player = players[position] ?: return
-        playStateExoPlayer(player,
-            onPlay = {
-
-            }, onPause = {
-
-            })
     }
 
     fun getViewPage(position: Int): String {
@@ -178,6 +239,10 @@ class VideoStorePagerAdapter(
             ExoPlayer.Builder(context)
                 .setLoadControl(loadControl)
                 .build().apply {
+                    addListener(listener(
+                        onPlay = {},
+                        onPause = {}
+                    ))
                     repeatMode = ExoPlayer.REPEAT_MODE_ONE
                     setMediaItem(MediaItem.fromUri(video.uri))
                     prepare()
@@ -216,11 +281,13 @@ class VideoStorePagerAdapter(
 
     fun releaseAllPlayers() {
         players.values.forEach { player ->
+            releaseEffects(player)
             player.stop()
             player.clearMediaItems()
             player.release()
         }
         players.clear()
+        effectsMap.clear()
     }
 
     fun handlePlayerState(current: Int) {
@@ -285,6 +352,9 @@ class VideoStorePagerAdapter(
             .maxByOrNull { abs(it - currentPosition) }
 
         farthestPosition?.let { position ->
+            players[position]?.let { player ->
+                releaseEffects(player)
+            }
             players[position]?.release()
             players.remove(position)
         }
@@ -334,10 +404,36 @@ class VideoStorePagerAdapter(
         val position = holder.bindingAdapterPosition
         if (position == currentPosition) return
         if (position != RecyclerView.NO_POSITION) {
+            players[position]?.let { player ->
+                releaseEffects(player)
+            }
             players[position]?.release()
             players.remove(position)
             holder.binding.seekBar.tag?.let {
                 holder.binding.seekBar.removeCallbacks(it as Runnable)
+            }
+        }
+    }
+
+    private fun releaseEffects(player: ExoPlayer) {
+
+        val sessionId = player.audioSessionId
+
+        effectsMap.remove(sessionId)?.let { effects ->
+
+            try {
+                effects.equalizer.release()
+            } catch (_: Exception) {
+            }
+
+            try {
+                effects.bassBoost.release()
+            } catch (_: Exception) {
+            }
+
+            try {
+                effects.loudnessEnhancer.release()
+            } catch (_: Exception) {
             }
         }
     }

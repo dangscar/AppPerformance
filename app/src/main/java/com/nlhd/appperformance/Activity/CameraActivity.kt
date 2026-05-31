@@ -91,6 +91,11 @@ class CameraActivity : AppCompatActivity() {
         binding.btnUpload.setOnClickListener {
             pickVideo.launch("video/*")
         }
+
+        binding.btnEffects.setOnClickListener {
+            val intent = Intent(this, UploadVideoActivity::class.java)
+            startActivity(intent)
+        }
     }
 
     private fun startCamera() {

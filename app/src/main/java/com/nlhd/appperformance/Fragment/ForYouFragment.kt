@@ -62,6 +62,7 @@ import com.nlhd.appperformance.Domain.Entity.Video.MessageResponse
 import com.nlhd.appperformance.Feature.Video.onChangeBottomSheet
 import com.nlhd.appperformance.R
 import com.nlhd.appperformance.ThuNghiem.TwoFingerScrollHelper
+import com.nlhd.appperformance.Utils.AudioEffects
 import com.nlhd.appperformance.Utils.Follow
 import com.nlhd.appperformance.Utils.Navigation
 import com.nlhd.appperformance.Utils.ResultUI
@@ -92,6 +93,8 @@ class ForYouFragment(
 
     @Inject
     lateinit var players: MutableMap<Int, ExoPlayer>
+    @Inject
+    lateinit var effectsMap : MutableMap<Int, AudioEffects>
 
     @Inject
     lateinit var defaultMediaSourceFactory: DefaultMediaSourceFactory
@@ -99,10 +102,17 @@ class ForYouFragment(
     private lateinit var btnPlay: ImageView
     private lateinit var btnPause: ImageView
 
+    /*
+        BottomSheetComment
+    */
     private var commentBottomSheet: CommentBottomSheet? = null
     private var currentCommentVideoId: String = "-1"
-    private val ivSearchOverlay by lazy { binding.ivSearchOverlay }
     private var isClickBottomSheetComment = false
+
+    /*
+        ImageSearch
+     */
+    private val ivSearchOverlay by lazy { binding.ivSearchOverlay }
     private var statusBarHeight = 0
     private var currentOffset = 0f
     private var currentPositionV = 0
@@ -294,6 +304,7 @@ class ForYouFragment(
             requireContext(),
             defaultMediaSourceFactory,
             players = players,
+            effectsMap = effectsMap,
             onClickComment = { videoId->
                 if (isClickBottomSheetComment) return@VideoPagerAdapter
                 isClickBottomSheetComment = true
@@ -595,11 +606,36 @@ class ForYouFragment(
 
     private fun releaseAllPlayers() {
         players.values.forEach { player ->
+            releaseEffects(player)
             player.stop()
             player.clearMediaItems()
             player.release()
         }
         players.clear()
+        effectsMap.clear()
+    }
+
+    private fun releaseEffects(player: ExoPlayer) {
+
+        val sessionId = player.audioSessionId
+
+        effectsMap.remove(sessionId)?.let { effects ->
+
+            try {
+                effects.equalizer.release()
+            } catch (_: Exception) {
+            }
+
+            try {
+                effects.bassBoost.release()
+            } catch (_: Exception) {
+            }
+
+            try {
+                effects.loudnessEnhancer.release()
+            } catch (_: Exception) {
+            }
+        }
     }
 
     private fun initializePlayerForCurrentItem() {
