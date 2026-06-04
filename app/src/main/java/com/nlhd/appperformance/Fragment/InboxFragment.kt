@@ -1,8 +1,14 @@
 package com.nlhd.appperformance.Fragment
 
 import android.os.Bundle
+import android.view.LayoutInflater
 import android.view.View
+import android.view.ViewGroup
 import androidx.core.content.ContextCompat
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsCompat
+import androidx.core.view.doOnLayout
+import androidx.core.view.updateLayoutParams
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.recyclerview.widget.RecyclerView
@@ -13,23 +19,42 @@ import com.nlhd.appperformance.Adapter.StoryItem
 import com.nlhd.appperformance.R
 import com.nlhd.appperformance.Utils.Navigation
 import com.nlhd.appperformance.ViewModel.MainViewModel
+import com.nlhd.appperformance.databinding.FragmentInboxBinding
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
-class InboxFragment : Fragment(R.layout.fragment_inbox) {
+class InboxFragment : Fragment() {
+
+    private lateinit var _binding: FragmentInboxBinding
+    private val binding get() = _binding
 
     private val mainViewModel: MainViewModel by activityViewModels()
-    private lateinit var rvStories: RecyclerView
-    private lateinit var rvInbox: RecyclerView
+
+    override fun onCreateView(
+        inflater: LayoutInflater,
+        container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View? {
+        _binding = FragmentInboxBinding.inflate(inflater, container, false)
+        return binding.root
+    }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
         requireActivity().window.navigationBarColor = ContextCompat.getColor(requireContext(), R.color.white)
-        rvStories = view.findViewById(R.id.rvStories)
-        rvInbox = view.findViewById(R.id.rvInbox)
 
-        setupStories()
+        view.doOnLayout {
+            val insets = ViewCompat.getRootWindowInsets(view)
+                ?.getInsets(WindowInsetsCompat.Type.systemBars())
+
+            insets?.let {
+                binding.topBar.updateLayoutParams<ViewGroup.MarginLayoutParams> {
+                    topMargin = it.top
+                }
+            }
+        }
+        //setupStories()
         setupInbox()
     }
 
@@ -42,26 +67,28 @@ class InboxFragment : Fragment(R.layout.fragment_inbox) {
             StoryItem("User 5", R.drawable.asus),
             StoryItem("User 6", R.drawable.asus)
         )
-        rvStories.adapter = StoryAdapter(stories)
+        binding.rvStories.adapter = StoryAdapter(stories)
     }
 
     private fun setupInbox() {
         val messages = listOf(
-            InboxMessageItem("Những Follower mới", "Nhật Anh Nè đã bắt đầu follow bạn.", R.drawable.friend),
-            InboxMessageItem("Hoạt động", "2 người đã xem hồ sơ của bạn.", R.drawable.ic_heart),
-            InboxMessageItem("Minh Huy", "Hoạt động 2 giờ trước", R.drawable.asus, showCamera = true),
-            InboxMessageItem("Thông báo hệ thống", "LIVE: Mở khóa phiên L... · 2 ngày trước", R.drawable.ic_inbox, isUnread = true),
-            InboxMessageItem("Dư Điển", "giúp mình một tym vs ạ🥰 · 9 tháng 3", R.drawable.asus, showCamera = true),
-            InboxMessageItem("Nhật Anh Nè", "Hãy chào Nhật Anh Nè", R.drawable.asus, showCamera = true),
-            InboxMessageItem("ngonnguyen621", "Hãy chào ngonnguyen621", R.drawable.asus, showCamera = true),
-            InboxMessageItem("Yêu cầu tin nhắn", "Bạn nhận được 2 yêu cầu", R.drawable.ic_chat, showArrow = true),
-            InboxMessageItem("Thông báo hệ thống", "LIVE: Mở khóa phiên L... · 2 ngày trước", R.drawable.ic_inbox, isUnread = true),
-            InboxMessageItem("Dư Điển", "giúp mình một tym vs ạ🥰 · 9 tháng 3", R.drawable.asus, showCamera = true),
-            InboxMessageItem("Nhật Anh Nè", "Hãy chào Nhật Anh Nè", R.drawable.asus, showCamera = true),
-            InboxMessageItem("ngonnguyen621", "Hãy chào ngonnguyen621", R.drawable.asus, showCamera = true),
-            InboxMessageItem("Yêu cầu tin nhắn", "Bạn nhận được 2 yêu cầu", R.drawable.ic_chat, showArrow = true)
+            InboxMessageItem("Hoạt động", "Soo🎀 đã chấp thuận yêu cầu follow ...",
+                R.drawable.facebook, showArrow = true),
+            InboxMessageItem("Những Follower mới", "Soo🎀 đã bắt đầu follow bạn.",
+                R.drawable.coin, showArrow = true),
+            InboxMessageItem("Đối tác nổi bật", "Hãy khám phá đối tác mới nh... · 2 ngày",
+                R.drawable.x, showArrow = true, badgeCount = 2),
+            InboxMessageItem("Minh Huy", "Bạn đã gửi một nhãn dán · 1 tuần",
+                R.drawable.pin, isOnline = true),
+            InboxMessageItem("Heli", "Bạn đã gửi một nhãn dán · 1 tuần", R.drawable.`in`, isOnline = true),
+            InboxMessageItem("Thông báo hệ thống", "Đã cập nhật kết quả báo cáo · 1 tuần",
+                R.drawable.facebook, showArrow = true),
+            InboxMessageItem("Ánh", "đã gửi một nhãn dán · 05-05", R.drawable.coin),
+            InboxMessageItem("Dư Điển", "giúp mình một tym vs ạ🥰 · 03-09", R.drawable.x),
+            InboxMessageItem("Nhật Anh Nè", "Hãy chào Nhật Anh Nè · 01-23", R.drawable.pin),
+            InboxMessageItem("ngonnguyen621", "Hãy chào ngonnguyen621 · 01-18", R.drawable.`in`, isOnline = true)
         )
-        rvInbox.adapter = InboxMessageAdapter(messages)
+        binding.rvInbox.adapter = InboxMessageAdapter(messages)
     }
 
     override fun onResume() {

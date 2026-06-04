@@ -9,6 +9,7 @@ import android.util.Log
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
+import android.widget.EditText
 import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TextView
@@ -57,6 +58,7 @@ class VideoStoreActivity : AppCompatActivity() {
     private lateinit var searchContainer: LinearLayout
     private lateinit var ivBack: ImageView
     private lateinit var bottomComment: CardView
+    private lateinit var edtComment: EditText
     private lateinit var toolbar: MaterialToolbar
     private lateinit var loadingView: LottieAnimationView
     private lateinit var errorButton: Button
@@ -113,6 +115,7 @@ class VideoStoreActivity : AppCompatActivity() {
         loadingView = findViewById(R.id.loadingView)
         errorButton = findViewById(R.id.errorView)
         playerView = findViewById(R.id.playerViewStore)
+        edtComment = findViewById(R.id.edtComment)
 
         val btnPlay = playerView.findViewById<ImageView>(R.id.exo_play)
         val btnPause = playerView.findViewById<ImageView>(R.id.exo_pause)
@@ -377,11 +380,10 @@ class VideoStoreActivity : AppCompatActivity() {
 
         //Click bottomSheetComment
         bottomComment.setOnClickListener {
-            commentBottomSheet.show(
-                supportFragmentManager,
-                CommentBottomSheet::class.java.simpleName
-            )
-            BottomSheetInputComment(text = "", onChangeText = {}, onDone = {}).show(supportFragmentManager, BottomSheetInputComment::class.java.simpleName)
+            BottomSheetInputComment(text = "", onChangeText = {}, onDone = {}, imageUrl = "http://192.168.1.168/Shop/public/images/user.jpeg").show(supportFragmentManager, BottomSheetInputComment::class.java.simpleName)
+        }
+        edtComment.setOnClickListener {
+            BottomSheetInputComment(text = "", onChangeText = {}, onDone = {}, imageUrl = "http://192.168.1.168/Shop/public/images/user.jpeg").show(supportFragmentManager, BottomSheetInputComment::class.java.simpleName)
         }
 
         //Nút back

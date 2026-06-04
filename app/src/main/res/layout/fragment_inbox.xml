@@ -11,13 +11,14 @@
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="56dp"
-        android:paddingHorizontal="16dp">
+        android:paddingHorizontal="16dp"
+        android:id="@+id/topBar">
 
         <ImageView
-            android:id="@+id/ivAddFriends"
+            android:id="@+id/ivAdd"
             android:layout_width="28dp"
             android:layout_height="28dp"
-            android:src="@drawable/friend"
+            android:src="@drawable/ic_add"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
@@ -44,10 +45,10 @@
                 android:fontFamily="@font/tiktoksans_bold"/>
 
             <ImageView
-                android:layout_width="8dp"
-                android:layout_height="8dp"
-                android:layout_marginStart="4dp"
-                android:src="@drawable/dot"
+                android:layout_width="10dp"
+                android:layout_height="10dp"
+                android:layout_marginStart="6dp"
+                android:src="@drawable/bg_circle"
                 app:tint="#4CAF50" />
         </LinearLayout>
 

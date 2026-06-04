@@ -4,29 +4,47 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:paddingVertical="8dp"
-    android:paddingHorizontal="16dp">
+    android:paddingVertical="10dp"
+    android:paddingHorizontal="16dp"
+    android:background="?attr/selectableItemBackground">
 
-    <com.google.android.material.imageview.ShapeableImageView
-        android:id="@+id/ivAvatar"
-        android:layout_width="56dp"
-        android:layout_height="56dp"
-        android:scaleType="centerCrop"
-        android:src="@drawable/asus"
+    <FrameLayout
+        android:id="@+id/flAvatarContainer"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:shapeAppearanceOverlay="@style/CircleImage" />
+        app:layout_constraintTop_toTopOf="parent">
+
+        <com.google.android.material.imageview.ShapeableImageView
+            android:id="@+id/ivAvatar"
+            android:layout_width="56dp"
+            android:layout_height="56dp"
+            android:scaleType="centerCrop"
+            android:src="@drawable/asus"
+            app:shapeAppearanceOverlay="@style/CircleImage" />
+
+        <View
+            android:id="@+id/vOnlineStatus"
+            android:layout_width="14dp"
+            android:layout_height="14dp"
+            android:layout_gravity="bottom|end"
+            android:layout_marginEnd="2dp"
+            android:layout_marginBottom="2dp"
+            android:background="@drawable/bg_circle"
+            android:backgroundTint="#4CAF50"
+            android:visibility="gone" />
+    </FrameLayout>
 
     <LinearLayout
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginStart="12dp"
-        android:layout_marginEnd="8dp"
+        android:layout_marginStart="16dp"
+        android:layout_marginEnd="12dp"
         android:orientation="vertical"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toStartOf="@+id/ivAction"
-        app:layout_constraintStart_toEndOf="@+id/ivAvatar"
+        app:layout_constraintEnd_toStartOf="@+id/barrierAction"
+        app:layout_constraintStart_toEndOf="@+id/flAvatarContainer"
         app:layout_constraintTop_toTopOf="parent">
 
         <TextView
@@ -35,9 +53,9 @@
             android:layout_height="wrap_content"
             android:text="Minh Huy"
             android:textColor="@color/black"
-            android:textSize="14sp"
-            android:textStyle="bold"
-            android:fontFamily="@font/tiktoksans_bold"/>
+            android:textSize="15sp"
+            android:fontFamily="@font/tiktoksans_regular"
+            android:layout_marginBottom="2dp"/>
 
         <TextView
             android:id="@+id/tvDescription"
@@ -46,31 +64,51 @@
             android:ellipsize="end"
             android:maxLines="1"
             android:text="Hoạt động 2 giờ trước"
-            android:textColor="#757575"
-            android:textSize="12sp"
+            android:textColor="#86878B"
+            android:textSize="13sp"
             android:fontFamily="@font/tiktoksans_regular"/>
 
     </LinearLayout>
 
+    <androidx.constraintlayout.widget.Barrier
+        android:id="@+id/barrierAction"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:barrierDirection="start"
+        app:constraint_referenced_ids="ivAction,tvBadge" />
+
     <ImageView
         android:id="@+id/ivAction"
-        android:layout_width="24dp"
-        android:layout_height="24dp"
-        android:src="@drawable/ic_camera"
+        android:layout_width="20dp"
+        android:layout_height="20dp"
+        android:src="@drawable/ic_arrow_forward"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:tint="#757575" />
+        app:tint="#BDBDBD"
+        android:visibility="gone" />
 
-    <View
-        android:id="@+id/vUnreadIndicator"
-        android:layout_width="8dp"
-        android:layout_height="8dp"
+    <TextView
+        android:id="@+id/tvBadge"
+        android:layout_width="18dp"
+        android:layout_height="18dp"
         android:background="@drawable/bg_circle"
-        android:backgroundTint="#FF4D67"
+        android:backgroundTint="#FF2D55"
+        android:gravity="center"
+        android:text="2"
+        android:textColor="@color/white"
+        android:textSize="10sp"
+        android:textStyle="bold"
         android:visibility="gone"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
+
+    <!-- Legacy support for older adapter code if any -->
+    <View
+        android:id="@+id/vUnreadIndicator"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:visibility="gone" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
