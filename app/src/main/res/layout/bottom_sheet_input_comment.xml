@@ -62,7 +62,6 @@
                     android:textColor="#000000"
                     android:textColorHint="#B3858282"
                     android:textCursorDrawable="@drawable/cursor"
-                    android:singleLine="true"
                     android:ellipsize="end"
                     android:scrollHorizontally="true"
 
@@ -70,7 +69,8 @@
                     android:focusableInTouchMode="true"
                     android:cursorVisible="true"
                     android:fontFamily="@font/tiktoksans_regular"
-                    android:imeOptions="actionDone"/>
+                    android:singleLine="false"
+                    android:imeOptions="flagNoEnterAction"/>
 
             </LinearLayout>
 

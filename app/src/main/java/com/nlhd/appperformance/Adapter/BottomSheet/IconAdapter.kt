@@ -8,7 +8,8 @@ import androidx.recyclerview.widget.RecyclerView
 import com.nlhd.appperformance.R
 
 class IconAdapter(
-    private val list: List<String>
+    private val list: List<String>,
+    private val onClick: (String) -> Unit
 ) : RecyclerView.Adapter<IconAdapter.ViewHolder>() {
 
     inner class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
@@ -33,5 +34,9 @@ class IconAdapter(
         position: Int
     ) {
         holder.tvEmoji.text = list[position]
+        holder.tvEmoji.setOnClickListener {
+            onClick(list[position])
+        }
+
     }
 }

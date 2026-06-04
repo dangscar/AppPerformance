@@ -358,6 +358,8 @@ class DetailVideoFragment : Fragment() {
             searchContainer.setOnClickListener {
                 Intent(requireContext(), SearchActivity::class.java).apply { startActivity(this) }
             }
+
+
         } else {
             val currentPosition = viewModel.currentPosition.value ?: 0
             val player = players[currentPosition]

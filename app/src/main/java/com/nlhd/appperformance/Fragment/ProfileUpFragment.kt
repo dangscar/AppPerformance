@@ -14,8 +14,10 @@ import androidx.core.view.doOnLayout
 import androidx.core.view.updateLayoutParams
 import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.viewModels
+import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.viewpager2.adapter.FragmentStateAdapter
+import com.bumptech.glide.Glide
 import com.google.android.material.tabs.TabLayoutMediator
 import com.nlhd.appperformance.Adapter.IconTextLayout.CategoryItem
 import com.nlhd.appperformance.Adapter.IconTextLayout.ItemCategoryAdapter
@@ -23,11 +25,15 @@ import com.nlhd.appperformance.Adapter.ProfilePagerAdapter
 import com.nlhd.appperformance.Adapter.Shop.FlashSaleAdapter
 import com.nlhd.appperformance.Adapter.Shop.Product
 import com.nlhd.appperformance.Adapter.Shop.ProductPagerAdapter
+import com.nlhd.appperformance.Domain.Entity.GetUser.User
 import com.nlhd.appperformance.R
 import com.nlhd.appperformance.Utils.Navigation
+import com.nlhd.appperformance.Utils.ResultUI
 import com.nlhd.appperformance.ViewModel.MainViewModel
+import com.nlhd.appperformance.ViewModel.ProfileViewModel
 import com.nlhd.appperformance.databinding.FragmentProfileUpBinding
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.launch
 import kotlin.getValue
 
 // TODO: Rename parameter arguments, choose names that match
@@ -44,6 +50,7 @@ private const val ARG_PARAM2 = "param2"
 class ProfileUpFragment : Fragment() {
 
     private val mainViewModel: MainViewModel by activityViewModels()
+    private val viewModel: ProfileViewModel by viewModels()
     private var _binding: FragmentProfileUpBinding? = null
     private val binding get() = _binding!!
 
@@ -101,6 +108,44 @@ class ProfileUpFragment : Fragment() {
             }
         }.attach()
 
+        lifecycleScope.launch {
+            viewModel.userState.collect { userPreference ->
+                if (userPreference.isLoggedIn && userPreference.token.isNotEmpty()) {
+                    viewModel.getUser(userPreference.token)
+                    Glide.with(requireContext()).load(userPreference.avatarUrl).error(R.drawable.asus).into(binding.ivAvatar)
+                    binding.tvName.text = userPreference.name
+                    binding.tvUsername.text = userPreference.email
+                }
+            }
+        }
+
+        viewModel.state.observe(viewLifecycleOwner) {
+            when (it) {
+                is ResultUI.Error<*> -> {
+                    setText()
+                }
+                ResultUI.Idle -> {}
+                ResultUI.Loading -> {}
+                is ResultUI.Success<*> -> {
+                    setText(it.data as User)
+                }
+            }
+        }
+
+    }
+
+    fun setText() {
+        binding.tvFollowed.text = "-"
+        binding.tvFollower.text = "-"
+        binding.tvLike.text = "-"
+    }
+
+    fun setText(user: User) {
+        binding.tvName.text = user.name
+        binding.tvUsername.text = user.email
+        binding.tvFollowed.text = user.followingsCount.toString()
+        binding.tvFollower.text = user.followersCount.toString()
+        binding.tvLike.text = user.receivedLikesCount.toString()
     }
 
     override fun onResume() {

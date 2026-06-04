@@ -185,7 +185,6 @@ class BottomSheetInputComment(
         ibt_post = view.findViewById<ImageView>(R.id.bt_post)
 
 
-
         viewModel.paddingKeyboard.observe(viewLifecycleOwner) { text->
             if (text > 0) {
                 if (!isIconVisible) {
@@ -210,7 +209,6 @@ class BottomSheetInputComment(
         edtInputComment.setText(text)
         edtInputComment.setOnEditorActionListener { _, actionId, _ ->
             if (actionId == EditorInfo.IME_ACTION_DONE) {
-                onDone()
                 dismiss()
                 true
             } else {
@@ -232,7 +230,43 @@ class BottomSheetInputComment(
         )
 
         val adapter = EmojiAdapter(emojiList) { emoji ->
-            // xử lý khi click
+
+            val cursorPos = edtInputComment.selectionStart
+
+            when (emoji) {
+                R.drawable.u1f602_u1f602 -> {
+                    edtInputComment.text.insert(cursorPos, "😂")
+                    edtInputComment.setSelection(cursorPos + "😂".length)
+                }
+
+                R.drawable.u1f604_u1f601 -> {
+                    edtInputComment.text.insert(cursorPos, "😁")
+                    edtInputComment.setSelection(cursorPos + "😁".length)
+                }
+
+                R.drawable.u1f970_u2764_ufe0f -> {
+                    edtInputComment.text.insert(cursorPos, "🥰")
+                    edtInputComment.setSelection(cursorPos + "🥰".length)
+                }
+                R.drawable.u1f603_u1f633 -> {
+                    edtInputComment.text.insert(cursorPos, "😲")
+                    edtInputComment.setSelection(cursorPos + "😲".length)
+                }
+                R.drawable.u1f603_u1f612 -> {
+                    edtInputComment.text.insert(cursorPos, "😏")
+                    edtInputComment.setSelection(cursorPos + "😏".length)
+                }
+                R.drawable.u1f604_u1f605 -> {
+                    edtInputComment.text.insert(cursorPos, "😅")
+                    edtInputComment.setSelection(cursorPos + "😅".length)
+                }
+                R.drawable.u1f641_u1f622 -> {
+                    edtInputComment.text.insert(cursorPos, "😢")
+                    edtInputComment.setSelection(cursorPos + "😢".length)
+                }
+
+
+            }
         }
 
         rv_emoji.layoutManager =
@@ -249,7 +283,7 @@ class BottomSheetInputComment(
             "😉","😍","😘","😋","😜",
             "😝","🤪","🤗","😇","😌",
             "😎","🤔","😏","😴","😢",
-            "😭","😡","🤯","🥳","🤩"
+            "😭","😡","🤯","🥳","😲"
         )
 
         iv_emoji.setOnClickListener {
@@ -278,7 +312,11 @@ class BottomSheetInputComment(
                 false
             )
             isNestedScrollingEnabled = true
-            this.adapter = IconAdapter(iconList)
+            this.adapter = IconAdapter(iconList) {
+                val cursorPos = edtInputComment.selectionStart
+                edtInputComment.text.insert(cursorPos, it)
+                edtInputComment.setSelection(cursorPos + it.length)
+            }
         }
 
 
@@ -288,6 +326,11 @@ class BottomSheetInputComment(
                 if (isEmpty) R.drawable.bg_round_white_pink
                 else R.drawable.bg_round_pink
             )
+        }
+
+        ibt_post.setOnClickListener {
+            onDone()
+            dismiss()
         }
 
     }
@@ -304,6 +347,12 @@ class BottomSheetInputComment(
     fun hideKeyboard(view: View) {
         val imm = requireContext().getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
         imm.hideSoftInputFromWindow(view.windowToken, 0)
+    }
+
+    override fun onStart() {
+        super.onStart()
+        edtInputComment.setText(text)
+        edtInputComment.setSelection(edtInputComment.text.length)
     }
 
 
