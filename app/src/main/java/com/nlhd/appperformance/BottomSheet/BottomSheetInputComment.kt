@@ -22,10 +22,12 @@ import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.doOnLayout
 import androidx.core.view.updateLayoutParams
+import androidx.core.widget.addTextChangedListener
 import androidx.core.widget.doOnTextChanged
 import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
+import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
@@ -35,6 +37,7 @@ import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import com.google.android.material.shape.CornerFamily
 import com.google.android.material.shape.MaterialShapeDrawable
 import com.google.android.material.shape.ShapeAppearanceModel
+import com.nlhd.appperformance.Adapter.BottomSheet.IconAdapter
 import com.nlhd.appperformance.Adapter.EmojiAdapter
 import com.nlhd.appperformance.Feature.LoginScreen.LoginBottomSheet
 import com.nlhd.appperformance.R
@@ -60,6 +63,13 @@ class BottomSheetInputComment(
     private lateinit var ll_actionInput: LinearLayout
     private val viewModel: MainViewModel by activityViewModels()
     var isKeyboardVisible = false
+    /*
+    Hiển thị icon rv_icon
+    */
+    var isIconVisible = false
+    private lateinit var iv_emoji: ImageView
+    private lateinit var ibt_post: ImageView
+
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -90,12 +100,23 @@ class BottomSheetInputComment(
                     val isKeyboardVisible =
                         insets.isVisible(WindowInsetsCompat.Type.ime())
 
-                    if (!isKeyboardVisible && this.isKeyboardVisible) {
-                        this.isKeyboardVisible = false
-                        dismiss()
+                    if (isKeyboardVisible) {
+                        rv_emoji.visibility = View.VISIBLE
+                        rv_icon.visibility = View.INVISIBLE
+                        rv_icon.updateLayoutParams {
+                            height = viewModel.paddingKeyboard.value ?: 0
+                        }
+                        showKeyboard(edtInputComment)
                     } else {
-                        this.isKeyboardVisible = true
+                        if (this.isKeyboardVisible) {
+                            this.isKeyboardVisible = false
+                            //dismiss()
+                        } else {
+                            this.isKeyboardVisible = true
+                        }
                     }
+
+
                     insets
                 }
             } else {
@@ -125,6 +146,7 @@ class BottomSheetInputComment(
             val behavior = BottomSheetBehavior.from(bottomSheet)
 
             behavior.state = BottomSheetBehavior.STATE_EXPANDED
+            behavior.isDraggable = false
         }
         dialog.apply {
             window?.setSoftInputMode(
@@ -159,12 +181,18 @@ class BottomSheetInputComment(
         rv_emoji = view.findViewById<RecyclerView>(R.id.rv_emoji)
         rv_icon = view.findViewById<RecyclerView>(R.id.rv_icon)
         ll_actionInput = view.findViewById<LinearLayout>(R.id.ll_actionInput)
+        iv_emoji = view.findViewById<ImageView>(R.id.ivEmoji)
+        ibt_post = view.findViewById<ImageView>(R.id.bt_post)
+
 
 
         viewModel.paddingKeyboard.observe(viewLifecycleOwner) { text->
             if (text > 0) {
-                rv_icon.updateLayoutParams {
-                    height = text
+                if (!isIconVisible) {
+                    rv_icon.visibility = View.INVISIBLE
+                    rv_icon.updateLayoutParams {
+                        height = text
+                    }
                 }
             }
         }
@@ -212,6 +240,70 @@ class BottomSheetInputComment(
 
         rv_emoji.adapter = adapter
 
+        /*
+            Icon Bottom Keyboard
+        */
+        val iconList = listOf(
+            "😀","😄","😁","😆","😅",
+            "😂","🤣","😊","🙂","🙃",
+            "😉","😍","😘","😋","😜",
+            "😝","🤪","🤗","😇","😌",
+            "😎","🤔","😏","😴","😢",
+            "😭","😡","🤯","🥳","🤩"
+        )
+
+        iv_emoji.setOnClickListener {
+            isIconVisible = !isIconVisible
+            if (isIconVisible) {
+                rv_emoji.visibility = View.GONE
+                rv_icon.visibility = View.VISIBLE
+                rv_icon.updateLayoutParams {
+                    height = ViewGroup.LayoutParams.WRAP_CONTENT
+                }
+                hideKeyboard(view)
+            } else {
+                rv_emoji.visibility = View.VISIBLE
+                rv_icon.visibility = View.INVISIBLE
+                rv_icon.updateLayoutParams {
+                    height = viewModel.paddingKeyboard.value ?: 0
+                }
+                showKeyboard(edtInputComment)
+            }
+        }
+        rv_icon.apply {
+            layoutManager = GridLayoutManager(
+                requireContext(),
+                5,
+                GridLayoutManager.VERTICAL,
+                false
+            )
+            isNestedScrollingEnabled = true
+            this.adapter = IconAdapter(iconList)
+        }
+
+
+        edtInputComment.addTextChangedListener { text ->
+            val isEmpty = text.isNullOrBlank()
+            ibt_post.setBackgroundResource(
+                if (isEmpty) R.drawable.bg_round_white_pink
+                else R.drawable.bg_round_pink
+            )
+        }
+
+    }
+
+
+    // Hiện bàn phím
+    fun showKeyboard(view: View) {
+        val imm = requireContext().getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+        view.requestFocus()
+        imm.showSoftInput(view, InputMethodManager.SHOW_IMPLICIT)
+    }
+
+    // Ẩn bàn phím
+    fun hideKeyboard(view: View) {
+        val imm = requireContext().getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+        imm.hideSoftInputFromWindow(view.windowToken, 0)
     }
 
 

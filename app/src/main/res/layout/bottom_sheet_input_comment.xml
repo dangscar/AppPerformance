@@ -110,7 +110,7 @@
             android:id="@+id/bt_post"
             android:layout_width="46dp"
             android:layout_height="30dp"
-            android:background="@drawable/bg_round_pink"
+            android:background="@drawable/bg_round_white_pink"
             android:src="@drawable/ic_arrow_forward"
             android:layout_alignParentEnd="true"
             android:layout_centerVertical="true"
@@ -123,71 +123,12 @@
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/rv_icon"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="200dp"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toBottomOf="@id/ll_actionInput"
         android:orientation="horizontal"
         android:layout_marginHorizontal="10dp"
         android:layout_marginVertical="2dp"/>
-
-
-    <!--<RelativeLayout
-        android:id="@+id/ll_actionInput"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        android:gravity="center_vertical"
-        android:layout_marginHorizontal="12dp">
-
-        <ImageButton
-            android:id="@+id/bt_post"
-            android:layout_width="52dp"
-            android:layout_height="36dp"
-            android:background="@drawable/bg_round_pink"
-            android:src="@drawable/ic_arrow_forward"
-            android:layout_alignParentEnd="true"
-            android:layout_centerVertical="true"
-            android:scaleType="center"
-            android:padding="6dp"
-            android:contentDescription="Up"
-            android:elevation="4dp"
-            android:layout_marginEnd="12dp"
-            android:layout_marginTop="12dp"
-            android:layout_marginBottom="12dp"
-            app:tint="@color/white" />
-
-
-        <ImageView
-            android:id="@+id/ivMention"
-            android:layout_width="20dp"
-            android:layout_height="20dp"
-            android:layout_toStartOf="@id/bt_post"
-            android:layout_marginEnd="16dp"
-            android:src="@drawable/ic_tag"
-            android:layout_centerVertical="true"/>
-
-        <ImageView
-            android:id="@+id/ivEmoji"
-            android:layout_width="20dp"
-            android:layout_height="20dp"
-            android:layout_toStartOf="@id/ivMention"
-            android:layout_marginEnd="16dp"
-            android:src="@drawable/ic_emoji"
-            android:layout_centerVertical="true"/>
-
-
-        <ImageView
-            android:id="@+id/ivImage"
-            android:layout_width="20dp"
-            android:layout_height="20dp"
-            android:layout_marginEnd="16dp"
-            android:layout_toStartOf="@+id/ivEmoji"
-            android:src="@drawable/ic_image"
-            android:layout_centerVertical="true"/>
-
-    </RelativeLayout>-->
 
 </androidx.constraintlayout.widget.ConstraintLayout>
