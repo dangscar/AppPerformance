@@ -38,7 +38,8 @@
 
                 <LinearLayout
                     android:layout_width="wrap_content"
-                    android:layout_height="wrap_content">
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="4dp">
                     <TextView
                         android:id="@+id/tvName"
                         android:layout_width="wrap_content"
@@ -47,8 +48,8 @@
                         android:textSize="16sp"
                         android:textStyle="bold"
                         android:textColor="@android:color/black"
-                        android:layout_marginTop="8dp"
-                        android:fontFamily="@font/tiktoksans_bold"/>
+                        android:fontFamily="@font/tiktoksans_bold"
+                        android:includeFontPadding="false"/>
                 </LinearLayout>
 
                 <TextView
@@ -57,8 +58,9 @@
                     android:layout_height="wrap_content"
                     android:text="\@dangkt304"
                     android:textColor="#858181"
-                    android:textSize="14sp"
-                    android:fontFamily="@font/tiktoksans_regular"/>
+                    android:textSize="12sp"
+                    android:fontFamily="@font/tiktoksans_regular"
+                    android:includeFontPadding="false"/>
 
                 <LinearLayout
                     android:layout_width="match_parent"
@@ -220,7 +222,7 @@
             <com.google.android.material.appbar.MaterialToolbar
                 android:id="@+id/topBar"
                 android:layout_width="match_parent"
-                android:layout_height="?attr/actionBarSize"
+                android:layout_height="wrap_content"
                 android:background="@color/white"
                 app:layout_collapseMode="pin"
                 app:contentInsetStart="0dp"

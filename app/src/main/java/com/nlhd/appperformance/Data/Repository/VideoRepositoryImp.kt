@@ -303,14 +303,12 @@ class VideoRepositoryImp(
                 }
             ).flow.cachedIn(appScope)
         }
-        Log.d("AAA", "getVideosProfile: $profileFlow")
         return profileVideos
     }
 
     override fun clearProfileFlow(userId: String, timestamp: Long) {
         val uniqueKey = "${userId}_$timestamp"
         profileFlow.remove(uniqueKey)
-        Log.d("AAA", "clearProfileFlow: $profileFlow")
     }
 
     override suspend fun follow(
@@ -327,6 +325,21 @@ class VideoRepositoryImp(
         } catch (e: Exception) {
             ResultWrapper.Error(e)
         }
+    }
+
+    private var myVideoFlow : Flow<PagingData<Video>>? = null
+    override fun getMyVideos(token: String): Flow<PagingData<Video>> {
+        if (myVideoFlow == null) {
+            myVideoFlow = Pager(
+                config = PagingConfig(
+                    pageSize = 3,
+                    prefetchDistance = 1
+                ),
+                pagingSourceFactory = { GetVideosPagingSource(TYPE_URL.MY_VIDEO,ktor, token)},
+
+                ).flow.cachedIn(appScope)
+        }
+        return myVideoFlow!!
     }
 
 }

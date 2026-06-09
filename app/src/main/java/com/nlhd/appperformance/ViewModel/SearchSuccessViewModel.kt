@@ -71,4 +71,6 @@ class SearchSuccessViewModel @Inject constructor(
             }
         }
     }
+
+    fun myVideos(token: String) = videoUseCase.getMyVideos(token = token)
 }

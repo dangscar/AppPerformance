@@ -2,6 +2,8 @@ package com.nlhd.appperformance.Fragment
 
 import android.content.res.Resources
 import android.graphics.Color
+import android.graphics.ColorMatrix
+import android.graphics.ColorMatrixColorFilter
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
@@ -75,6 +77,17 @@ class ProfileFragment: Fragment(R.layout.fragment_profile) {
 
             insets
         }
+
+        val colorMatrix = ColorMatrix(
+            floatArrayOf(
+                1.1f, 0f, 0f, 0f, 20f,  // Red
+                0f, 1.1f, 0f, 0f, 20f,  // Green
+                0f, 0f, 1.1f, 0f, 20f,  // Blue
+                0f, 0f, 0f, 1.1f, 0f      // Alpha
+            )
+        )
+
+        binding.ivAvatar.colorFilter = ColorMatrixColorFilter(colorMatrix)
 
         profilePagerAdapter = ProfilePagerAdapter(requireActivity())
         binding.viewPager.adapter = profilePagerAdapter
@@ -194,23 +207,32 @@ class ProfileFragment: Fragment(R.layout.fragment_profile) {
 
         binding.tvNameTopBar.alpha = 0f
 
-        binding.appBarLayout.addOnOffsetChangedListener(
-            AppBarLayout.OnOffsetChangedListener { appBarLayout, verticalOffset ->
+        binding.appBarLayout.addOnOffsetChangedListener({ appBarLayout, verticalOffset ->
+            val avatarBottom = binding.ivAvatar.bottom + verticalOffset
 
-                val isCollapsed =
-                    kotlin.math.abs(verticalOffset) >= appBarLayout.totalScrollRange
+            val toolbarHeight = binding.topBar.height
 
-                if (isCollapsed) {
-                    binding.tvNameTopBar.animate()
-                        .alpha(1f)
-                        .setDuration(150)
-                        .start()
-                } else {
-                    binding.tvNameTopBar.animate()
-                        .alpha(0f)
-                        .setDuration(150)
-                        .start()
-                }
+            val shouldShowName = avatarBottom <= toolbarHeight
+
+            binding.tvNameTopBar.animate()
+                .alpha(if (shouldShowName) 1f else 0f)
+                .setDuration(150)
+                .start()
+
+            val ratio = (
+                    kotlin.math.abs(verticalOffset).toFloat() /
+                            binding.topBar.height
+                    ).coerceIn(0f, 1f)
+
+            binding.topBar.setBackgroundColor(
+                Color.argb(
+                    (255 * ratio).toInt(),
+                    255,
+                    255,
+                    255
+                )
+            )
+
             }
         )
 

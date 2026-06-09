@@ -498,6 +498,14 @@ class DetailVideoFragment : Fragment() {
                     }
                 }
             }
+            "my_video" -> {
+                val token = activity?.intent?.getStringExtra("token") ?: ""
+                lifecycleScope.launch {
+                    viewModel.myVideos(token).collectLatest { pagingData ->
+                        adapter.submitData(pagingData)
+                    }
+                }
+            }
             else -> {
                 lifecycleScope.launch {
                     viewModel.videos(keyword, timestamp).collectLatest { pagingData ->

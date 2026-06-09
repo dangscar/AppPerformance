@@ -1,5 +1,7 @@
 package com.nlhd.appperformance.Adapter
 
+import android.graphics.ColorMatrix
+import android.graphics.ColorMatrixColorFilter
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.ViewGroup
@@ -37,6 +39,16 @@ class VideoProfileAdapter(
                 /*this.tvName.text = it.name
                 this.tvDuration.text = it.duration.toString()*/
                 Glide.with(holder.binding.ivThumb).load(video.thumbnailUrl).error(R.drawable.asus).into(holder.binding.ivThumb)
+                val colorMatrix = ColorMatrix(
+                    floatArrayOf(
+                        1f, 0f, 0f, 0f, 20f,  // Red
+                        0f, 1f, 0f, 0f, 20f,  // Green
+                        0f, 0f, 1f, 0f, 20f,  // Blue
+                        0f, 0f, 0f, 1f, 0f      // Alpha
+                    )
+                )
+
+                holder.binding.ivThumb.colorFilter = ColorMatrixColorFilter(colorMatrix)
             }
         }
 

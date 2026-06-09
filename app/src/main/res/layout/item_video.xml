@@ -75,7 +75,7 @@
             <androidx.constraintlayout.widget.ConstraintLayout
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginBottom="16dp">
+                android:layout_marginBottom="8dp">
 
                 <com.google.android.material.imageview.ShapeableImageView
                     android:id="@+id/iv_avatar"
@@ -97,10 +97,10 @@
                     app:layout_constraintEnd_toEndOf="@id/iv_avatar"
                     app:layout_constraintTop_toBottomOf="@id/iv_avatar"
                     android:background="@drawable/bg_add_red_circle"
-                    android:padding="3dp">
+                    android:padding="2dp">
                     <com.google.android.material.imageview.ShapeableImageView
-                        android:layout_width="18dp"
-                        android:layout_height="18dp"
+                        android:layout_width="16dp"
+                        android:layout_height="16dp"
                         android:src="@drawable/ic_add"
                         android:tint="@color/white" />
                 </FrameLayout>
@@ -114,7 +114,7 @@
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
                 android:gravity="center"
-                android:layout_marginBottom="12dp">
+                android:layout_marginBottom="10dp">
 
                 <ImageView
                     android:id="@+id/btnLike"
@@ -130,7 +130,8 @@
                     android:text="12.3K"
                     android:textColor="@android:color/white"
                     android:textSize="12sp"
-                    android:fontFamily="@font/tiktoksans_semibold"/>
+                    android:fontFamily="@font/tiktoksans_semibold"
+                    android:includeFontPadding="false"/>
             </LinearLayout>
 
             <LinearLayout
@@ -138,7 +139,7 @@
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
                 android:gravity="center"
-                android:layout_marginBottom="12dp"
+                android:layout_marginBottom="10dp"
                 android:id="@+id/ll_comment">
 
                 <ImageView
@@ -155,14 +156,15 @@
                     android:text="345"
                     android:textColor="@android:color/white"
                     android:textSize="12sp"
-                    android:fontFamily="@font/tiktoksans_semibold"/>
+                    android:fontFamily="@font/tiktoksans_semibold"
+                    android:includeFontPadding="false"/>
             </LinearLayout>
             <LinearLayout
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
                 android:gravity="center"
-                android:layout_marginBottom="12dp">
+                android:layout_marginBottom="10dp">
 
                 <ImageView
                     android:layout_width="32dp"
@@ -177,7 +179,8 @@
                     android:text="345"
                     android:textColor="@android:color/white"
                     android:textSize="12sp"
-                    android:fontFamily="@font/tiktoksans_semibold"/>
+                    android:fontFamily="@font/tiktoksans_semibold"
+                    android:includeFontPadding="false"/>
             </LinearLayout>
             <LinearLayout
                 android:id="@+id/ll_share"
@@ -185,7 +188,7 @@
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
                 android:gravity="center"
-                android:layout_marginBottom="12dp">
+                android:layout_marginBottom="10dp">
 
                 <ImageView
                     android:layout_width="32dp"
@@ -200,7 +203,8 @@
                     android:text="345"
                     android:textColor="@android:color/white"
                     android:textSize="12sp"
-                    android:fontFamily="@font/tiktoksans_semibold"/>
+                    android:fontFamily="@font/tiktoksans_semibold"
+                    android:includeFontPadding="false"/>
             </LinearLayout>
             <FrameLayout
                 android:layout_width="wrap_content"
@@ -373,11 +377,12 @@
 
         </LinearLayout>
 
-        <LinearLayout
+        <FrameLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:id="@+id/ll_bottomAction"
             android:orientation="vertical"
+            android:background="@color/black"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintBottom_toBottomOf="parent">
@@ -387,7 +392,8 @@
                 android:background="#1F1F1F"
                 android:padding="8dp"
                 android:gravity="center_vertical"
-                android:visibility="gone">
+                android:visibility="visible"
+                android:layout_marginBottom="4dp">
                 <com.google.android.material.imageview.ShapeableImageView
                     android:id="@+id/iv_search"
                     android:layout_width="16dp"
@@ -427,7 +433,7 @@
                 app:scrubber_color="#8E8D8D"
                 app:played_color="#8E8D8D"
                 android:visibility="invisible"/>
-        </LinearLayout>
+        </FrameLayout>
 
 
 

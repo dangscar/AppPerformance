@@ -25,4 +25,5 @@ interface VideoRepository {
     fun getVideosProfile(userId: String, timestamp: Long,token: String): Flow<PagingData<Video>>
     fun clearProfileFlow(userId: String, timestamp: Long)
     suspend fun follow(token: String, userId: String): ResultWrapper<MessageResponse>
+    fun getMyVideos(token: String): Flow<PagingData<Video>>
 }

@@ -30,6 +30,7 @@ class SearchSuccessAdapter(
     ) {
        val video = getItem(position)!!
         Glide.with(holder.ivThumb).load(video.thumbnailUrl).into(holder.ivThumb)
+        Glide.with(holder.ivAvatar).load(video.user.avatarUrl).into(holder.ivAvatar)
         holder.tvTitle.text = video.caption
         holder.tvUser.text = video.user.name
         holder.tvViews.text = video.views.toString()
@@ -67,5 +68,6 @@ class SearchSuccessAdapter(
         val tvUser: TextView = view.findViewById(R.id.tvUser)
         val tvViews: TextView = view.findViewById(R.id.tvViews)
         val cvVideo: CardView = view.findViewById(R.id.cv_video)
+
     }
 }

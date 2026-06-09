@@ -42,7 +42,7 @@ import kotlinx.coroutines.launch
 import kotlin.getValue
 
 @AndroidEntryPoint
-class VideoProfileFragment : Fragment() {
+class MyVideoFragment : Fragment() {
 
     private var _binding: FragmentVideoGridBinding? = null
     private val binding get() = _binding!!
@@ -50,7 +50,6 @@ class VideoProfileFragment : Fragment() {
     private val viewModel: VideoProfileViewModel by viewModels()
 
     private lateinit var adapter: VideoProfileAdapter
-    var idProfile = -1
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -68,7 +67,7 @@ class VideoProfileFragment : Fragment() {
             onClickCard = { position ->
                 val intent = Intent(requireContext(), DetailVideoActivity::class.java)
                 intent.putExtra("position", position)
-                intent.putExtra("type", "profile")
+                intent.putExtra("type", "my_video")
                 intent.putExtra("userId", mainViewModel.idProfile.value.toString())
                 intent.putExtra("timestamp", viewModel.timestamp.value)
                 intent.putExtra("token", viewModel.token.value)
@@ -104,33 +103,11 @@ class VideoProfileFragment : Fragment() {
         viewLifecycleOwner.lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
 
-                combine(
-                    mainViewModel.idProfile.asFlow(),
-                    mainViewModel.navigation.asFlow(),
-                    viewModel.getUser()
-                ) { id, navigation, user ->
-                    Triple(id, navigation, user)
-                }
-                    .filter { (_, navigation,_) ->
-                        navigation == Navigation.User
-                    }
+                viewModel.getUser()
                     .distinctUntilChanged()
-                    .onEach { (id, _,_) ->
-
-                        if (id != idProfile) {
-                            viewModel.clearProfileFlow(
-                                idProfile.toString(),
-                                viewModel.timestamp.value!!
-                            )
-
-                            idProfile = id
-                        }
-                    }
-                    .flatMapLatest { (id, _, user) ->
+                    .flatMapLatest { user ->
                         viewModel.setToken(user.token)
-                        viewModel.videoProfile(
-                            id.toString(),
-                            viewModel.timestamp.value!!,
+                        viewModel.myVideo(
                             user.token
                         )
                     }
@@ -142,12 +119,12 @@ class VideoProfileFragment : Fragment() {
 
 
         //Thiết lập scrollToTop cho recyclerView của video
-        mainViewModel.scrollToTopRecyclerView.observe(viewLifecycleOwner) {
+        /*mainViewModel.scrollToTopRecyclerView.observe(viewLifecycleOwner) {
             if (it) {
                 scrollToTop()
                 mainViewModel.setScrollToTopRecyclerView(false)
             }
-        }
+        }*/
 
         mainViewModel.followState.observe(viewLifecycleOwner) {
             when (it) {
@@ -170,7 +147,7 @@ class VideoProfileFragment : Fragment() {
     }
 
     companion object {
-        fun newInstance(tab: Int) = VideoProfileFragment().apply {
+        fun newInstance(tab: Int) = MyVideoFragment().apply {
             arguments = bundleOf("TAB" to tab)
         }
     }
@@ -178,6 +155,5 @@ class VideoProfileFragment : Fragment() {
     override fun onDestroy() {
         super.onDestroy()
         _binding = null
-        viewModel.clearProfileFlow(mainViewModel.idProfile.value.toString(), viewModel.timestamp.value ?: 0)
     }
 }

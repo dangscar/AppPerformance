@@ -587,11 +587,11 @@ class EditVideoActivity : AppCompatActivity() {
         /*
          * VIDEO EFFECT
          */
-        /*val brightnessEffect = Brightness(0.15f)
+        val brightnessEffect = Brightness(0.1f)
 
         player?.setVideoEffects(
             listOf(brightnessEffect)
-        )*/
+        )
 
         /*
          * MEDIA

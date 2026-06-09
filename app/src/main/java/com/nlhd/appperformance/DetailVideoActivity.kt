@@ -48,19 +48,19 @@ class DetailVideoActivity : AppCompatActivity() {
         viewPager.adapter = adapter
         viewPager.orientation = ViewPager2.ORIENTATION_HORIZONTAL
 
-        onBackPressedDispatcher.addCallback(this, object : OnBackPressedCallback(true) {
+        /*onBackPressedDispatcher.addCallback(this, object : OnBackPressedCallback(true) {
             override fun handleOnBackPressed() {
                 if (viewPager.currentItem > 0) {
                     viewPager.currentItem = 0
                 } else {
-                    /*if (players.isNotEmpty()) {
+                    *//*if (players.isNotEmpty()) {
                         players.values.forEach { player ->
                             player.stop()
                             player.clearMediaItems()
                             player.release()
                         }
                         players.clear()
-                    }*/
+                    }*//*
                     finish()
                     overridePendingTransition(
                         R.anim.slide_in_left,
@@ -68,7 +68,7 @@ class DetailVideoActivity : AppCompatActivity() {
                     )
                 }
             }
-        })
+        })*/
 
 
         viewPager.registerOnPageChangeCallback(object : ViewPager2.OnPageChangeCallback() {

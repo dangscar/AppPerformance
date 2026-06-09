@@ -74,50 +74,54 @@
                 app:lottie_loop="true"
                 android:visibility="gone"/>
 
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:orientation="vertical"
-                android:id="@+id/ll_comment"
-                android:layout_gravity="center"
-                android:gravity="center"
-                android:visibility="gone">
-                <ImageView
-                    android:layout_width="80dp"
-                    android:layout_height="80dp"
-                    android:contentDescription="close"
-                    android:src="@drawable/ic_chat"
-                    app:tint="#DEDEDE"
-                    android:layout_gravity="center"/>
-                <TextView
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:gravity="center"
-                    android:text="Bắt đầu 1 cuộc trò chuyện"
-                    android:textColor="#2C2B2B"
-                    android:textSize="16sp"
-                    android:fontFamily="@font/tiktoksans_semibold"
-                    android:layout_marginVertical="16dp"/>
-                <Button
-                    android:id="@+id/btn_comment"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:text="Bình luận"
-                    android:textColor="@color/black"
-                    android:background="@drawable/bg_button_gray"
-                    android:textAllCaps="false"
-                    android:fontFamily="@font/tiktoksans_semibold"
-                    android:textSize="13sp"
-                    android:layout_gravity="center"
-                    android:elevation="0dp"
-                    android:stateListAnimator="@null"
-                    android:translationZ="0dp"
-                    android:layout_marginHorizontal="48dp"
-                    android:clickable="true"/>
-            </LinearLayout>
-
         </FrameLayout>
 
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:id="@+id/ll_comment"
+        android:layout_gravity="center"
+        android:gravity="center"
+        android:visibility="gone"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent">
+        <ImageView
+            android:layout_width="80dp"
+            android:layout_height="80dp"
+            android:contentDescription="close"
+            android:src="@drawable/ic_chat"
+            app:tint="#DEDEDE"
+            android:layout_gravity="center"/>
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:text="Bắt đầu 1 cuộc trò chuyện"
+            android:textColor="#2C2B2B"
+            android:textSize="16sp"
+            android:fontFamily="@font/tiktoksans_semibold"
+            android:layout_marginVertical="16dp"/>
+        <Button
+            android:id="@+id/btn_comment"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Bình luận"
+            android:textColor="@color/black"
+            android:background="@drawable/bg_button_gray"
+            android:textAllCaps="false"
+            android:fontFamily="@font/tiktoksans_semibold"
+            android:textSize="13sp"
+            android:layout_gravity="center"
+            android:elevation="0dp"
+            android:stateListAnimator="@null"
+            android:translationZ="0dp"
+            android:layout_marginHorizontal="48dp"
+            android:clickable="true"/>
     </LinearLayout>
 
     <LinearLayout

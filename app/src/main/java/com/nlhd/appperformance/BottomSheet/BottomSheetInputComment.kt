@@ -116,7 +116,6 @@ class BottomSheetInputComment(
                         }
                     }
 
-
                     insets
                 }
             } else {
@@ -127,7 +126,11 @@ class BottomSheetInputComment(
                     val keyboardHeight = decorView.height - rect.bottom
 
                     if (keyboardHeight > 200 && keyboardHeight != viewModel.paddingKeyboard.value) {
-                        viewModel.savePaddingKeyboard(keyboardHeight)
+                        Log.d("AAA", "Height: ${decorView.height} - ${rect.bottom} = $keyboardHeight")
+                        if (viewModel.paddingKeyboard.value != 0 && keyboardHeight < viewModel.paddingKeyboard.value!!) {
+                            viewModel.savePaddingKeyboard(keyboardHeight)
+                        }
+
                     }
                 }
             }
@@ -146,6 +149,7 @@ class BottomSheetInputComment(
             val behavior = BottomSheetBehavior.from(bottomSheet)
 
             behavior.state = BottomSheetBehavior.STATE_EXPANDED
+            behavior.isGestureInsetBottomIgnored = true
             behavior.isDraggable = false
         }
         dialog.apply {

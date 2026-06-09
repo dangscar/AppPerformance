@@ -1,6 +1,8 @@
 package com.nlhd.appperformance.Fragment
 
 import android.graphics.Color
+import android.graphics.ColorMatrix
+import android.graphics.ColorMatrixColorFilter
 import android.os.Bundle
 import android.util.Log
 import androidx.fragment.app.Fragment
@@ -72,7 +74,7 @@ class ProfileUpFragment : Fragment() {
                 ?.getInsets(WindowInsetsCompat.Type.systemBars())
 
             insets?.let {
-                binding.appBarLayout2.updateLayoutParams<ViewGroup.MarginLayoutParams> {
+                binding.appBarLayout.updateLayoutParams<ViewGroup.MarginLayoutParams> {
                     topMargin = it.top
                 }
                 binding.viewPager.updateLayoutParams<ViewGroup.MarginLayoutParams> {
@@ -80,6 +82,17 @@ class ProfileUpFragment : Fragment() {
                 }
             }
         }
+
+        val colorMatrix = ColorMatrix(
+            floatArrayOf(
+                1.1f, 0f, 0f, 0f, 20f,  // Red
+                0f, 1.1f, 0f, 0f, 20f,  // Green
+                0f, 0f, 1.1f, 0f, 20f,  // Blue
+                0f, 0f, 0f, 1.1f, 0f      // Alpha
+            )
+        )
+
+        binding.ivAvatar.colorFilter = ColorMatrixColorFilter(colorMatrix)
 
         mainViewModel.setNavigation(Navigation.Profile)
         requireActivity().window.statusBarColor = Color.WHITE
@@ -89,8 +102,8 @@ class ProfileUpFragment : Fragment() {
             override fun getItemCount(): Int = 5
             override fun createFragment(position: Int): Fragment {
                 return when (position) {
-                    0 -> VideoGridFragment()
-                    1 -> FriendFragment()
+                    0 -> MyVideoFragment()
+                    1 -> VideoGridFragment()
                     2 -> FriendFragment()
                     3 -> FriendFragment()
                     else -> FriendFragment()
@@ -118,6 +131,24 @@ class ProfileUpFragment : Fragment() {
                 }
             }
         }
+
+        binding.appBarLayout.addOnOffsetChangedListener({ appBarLayout, verticalOffset ->
+            val ratio = (
+                    kotlin.math.abs(verticalOffset).toFloat() /
+                            binding.topBar.height
+                    ).coerceIn(0f, 1f)
+
+            binding.topBar.setBackgroundColor(
+                Color.argb(
+                    (255 * ratio).toInt(),
+                    255,
+                    255,
+                    255
+                )
+            )
+
+        }
+        )
 
         viewModel.state.observe(viewLifecycleOwner) {
             when (it) {

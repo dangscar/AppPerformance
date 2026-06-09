@@ -4,7 +4,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:gravity="center"
     xmlns:android="http://schemas.android.com/apk/res/android"
-    android:background="@color/black">
+    android:background="@android:color/transparent">
 
     <!--<ProgressBar
         android:id="@+id/progressBar"

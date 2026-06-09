@@ -33,6 +33,10 @@ class GetVideosPagingSource(
             TYPE_URL.FOLLOWING -> {
                 Utils.BASE_URL+"/api/video/videoFollow?page=$page"
             }
+
+            TYPE_URL.MY_VIDEO -> {
+                Utils.BASE_URL+"/api/video/myVideo?page=$page"
+            }
         }
     }
     override fun getRefreshKey(state: PagingState<Int, Video>): Int? {

@@ -3,6 +3,8 @@ package com.nlhd.appperformance.Adapter
 import android.content.Context
 import android.content.Intent
 import android.graphics.Color
+import android.graphics.ColorMatrix
+import android.graphics.ColorMatrixColorFilter
 import android.graphics.PorterDuff
 import android.graphics.Typeface
 import android.media.AudioManager
@@ -197,6 +199,16 @@ class VideoPagerAdapter(
             onClickProfile(video.user.id)
         }
         Glide.with(holder.binding.ivAvatar).load(video.user.avatarUrl).error(R.drawable.asus).into(holder.binding.ivAvatar)
+        val colorMatrix = ColorMatrix(
+            floatArrayOf(
+                1.1f, 0f, 0f, 0f, 20f,  // Red
+                0f, 1.1f, 0f, 0f, 20f,  // Green
+                0f, 0f, 1.1f, 0f, 20f,  // Blue
+                0f, 0f, 0f, 1.1f, 0f      // Alpha
+            )
+        )
+
+        holder.binding.ivAvatar.colorFilter = ColorMatrixColorFilter(colorMatrix)
 
         //Follow
         bindFollow(holder, video)
@@ -267,6 +279,8 @@ class VideoPagerAdapter(
         }
 
         setupTimeBar(holder, players[position]!!)
+
+        holder.binding.txtContent.text = "Tìm kiếm videoId: "+video.id
     }
 
     override fun onBindViewHolder(holder: VideoViewHolder, position: Int, payloads: List<Any?>) {

@@ -16,6 +16,7 @@ import com.nlhd.appperformance.Domain.UseCase.Video.ClearSearchFlow
 import com.nlhd.appperformance.Domain.UseCase.Video.Follow
 import com.nlhd.appperformance.Domain.UseCase.Video.GetComments
 import com.nlhd.appperformance.Domain.UseCase.Video.GetFollowing
+import com.nlhd.appperformance.Domain.UseCase.Video.GetMyVideos
 import com.nlhd.appperformance.Domain.UseCase.Video.GetProfile
 import com.nlhd.appperformance.Domain.UseCase.Video.GetVideoProfile
 import com.nlhd.appperformance.Domain.UseCase.Video.GetVideos
@@ -105,7 +106,8 @@ object AppModule {
             getProfile = GetProfile(repository),
             getVideoProfile = GetVideoProfile(repository),
             clearProfileFlow = ClearProfileFlow(repository),
-            follow = Follow(repository)
+            follow = Follow(repository),
+            getMyVideos = GetMyVideos(repository)
         )
     }
 
