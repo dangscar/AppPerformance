@@ -129,7 +129,7 @@
                     android:id="@+id/txtLike"
                     android:text="12.3K"
                     android:textColor="@android:color/white"
-                    android:textSize="12sp"
+                    android:textSize="11sp"
                     android:fontFamily="@font/tiktoksans_semibold"
                     android:includeFontPadding="false"/>
             </LinearLayout>
@@ -155,7 +155,7 @@
                     android:layout_height="wrap_content"
                     android:text="345"
                     android:textColor="@android:color/white"
-                    android:textSize="12sp"
+                    android:textSize="11sp"
                     android:fontFamily="@font/tiktoksans_semibold"
                     android:includeFontPadding="false"/>
             </LinearLayout>
@@ -178,7 +178,7 @@
                     android:layout_height="wrap_content"
                     android:text="345"
                     android:textColor="@android:color/white"
-                    android:textSize="12sp"
+                    android:textSize="11sp"
                     android:fontFamily="@font/tiktoksans_semibold"
                     android:includeFontPadding="false"/>
             </LinearLayout>
@@ -202,7 +202,7 @@
                     android:layout_height="wrap_content"
                     android:text="345"
                     android:textColor="@android:color/white"
-                    android:textSize="12sp"
+                    android:textSize="11sp"
                     android:fontFamily="@font/tiktoksans_semibold"
                     android:includeFontPadding="false"/>
             </LinearLayout>

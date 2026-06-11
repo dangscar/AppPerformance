@@ -2,6 +2,9 @@ package com.nlhd.appperformance.Adapter
 
 import android.content.Context
 import android.content.Intent
+import android.graphics.ColorMatrix
+import android.graphics.ColorMatrixColorFilter
+import android.graphics.Paint
 import android.media.AudioManager
 import android.media.audiofx.BassBoost
 import android.media.audiofx.Equalizer
@@ -9,6 +12,7 @@ import android.media.audiofx.LoudnessEnhancer
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.MotionEvent
+import android.view.TextureView
 import android.view.View
 import android.view.ViewGroup
 import androidx.interpolator.view.animation.FastOutSlowInInterpolator
@@ -144,6 +148,24 @@ class VideoStorePagerAdapter(
         val video = getItem(position) ?: return
         createPlayer(position)
         holder.binding.playerView.player = players[position]
+        val textureView = holder.binding.playerView.videoSurfaceView as? TextureView
+
+        textureView?.let {
+            val paint = Paint()
+
+            val colorMatrix = ColorMatrix(
+                floatArrayOf(
+                    1f, 0f, 0f, 0f, 25f,
+                    0f, 1f, 0f, 0f, 25f,
+                    0f, 0f, 1f, 0f, 25f,
+                    0f, 0f, 0f, 1f, 0f
+                )
+            )
+
+            paint.colorFilter = ColorMatrixColorFilter(colorMatrix)
+
+            it.setLayerType(View.LAYER_TYPE_HARDWARE, paint)
+        }
 
         Glide.with(holder.binding.ivAvatar).load("").error(R.drawable.asus).into(holder.binding.ivAvatar)
 

@@ -5,6 +5,7 @@ import android.content.Intent
 import android.graphics.Color
 import android.graphics.ColorMatrix
 import android.graphics.ColorMatrixColorFilter
+import android.graphics.Paint
 import android.graphics.PorterDuff
 import android.graphics.Typeface
 import android.media.AudioManager
@@ -28,6 +29,7 @@ import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.SurfaceHolder
 import android.view.SurfaceView
+import android.view.TextureView
 import android.view.View
 import android.view.ViewGroup
 import android.widget.FrameLayout
@@ -193,6 +195,25 @@ class VideoPagerAdapter(
         createPlayer(position)
         val player = players[position] ?: return
         holder.binding.playerView.player = player
+
+        val textureView = holder.binding.playerView.videoSurfaceView as? TextureView
+
+        textureView?.let {
+            val paint = Paint()
+
+            val colorMatrix = ColorMatrix(
+                floatArrayOf(
+                    1f, 0f, 0f, 0f, 25f,
+                    0f, 1f, 0f, 0f, 25f,
+                    0f, 0f, 1f, 0f, 25f,
+                    0f, 0f, 0f, 1f, 0f
+                )
+            )
+
+            paint.colorFilter = ColorMatrixColorFilter(colorMatrix)
+
+            it.setLayerType(View.LAYER_TYPE_HARDWARE, paint)
+        }
 
         //Avatar
         holder.binding.ivAvatar.setOnClickListener {
