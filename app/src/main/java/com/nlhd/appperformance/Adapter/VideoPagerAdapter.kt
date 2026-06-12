@@ -196,7 +196,7 @@ class VideoPagerAdapter(
         val player = players[position] ?: return
         holder.binding.playerView.player = player
 
-        val textureView = holder.binding.playerView.videoSurfaceView as? TextureView
+        /*val textureView = holder.binding.playerView.videoSurfaceView as? TextureView
 
         textureView?.let {
             val paint = Paint()
@@ -213,7 +213,7 @@ class VideoPagerAdapter(
             paint.colorFilter = ColorMatrixColorFilter(colorMatrix)
 
             it.setLayerType(View.LAYER_TYPE_HARDWARE, paint)
-        }
+        }*/
 
         //Avatar
         holder.binding.ivAvatar.setOnClickListener {

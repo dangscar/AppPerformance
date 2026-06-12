@@ -148,7 +148,7 @@ class VideoStorePagerAdapter(
         val video = getItem(position) ?: return
         createPlayer(position)
         holder.binding.playerView.player = players[position]
-        val textureView = holder.binding.playerView.videoSurfaceView as? TextureView
+        /*val textureView = holder.binding.playerView.videoSurfaceView as? TextureView
 
         textureView?.let {
             val paint = Paint()
@@ -165,7 +165,7 @@ class VideoStorePagerAdapter(
             paint.colorFilter = ColorMatrixColorFilter(colorMatrix)
 
             it.setLayerType(View.LAYER_TYPE_HARDWARE, paint)
-        }
+        }*/
 
         Glide.with(holder.binding.ivAvatar).load("").error(R.drawable.asus).into(holder.binding.ivAvatar)
 

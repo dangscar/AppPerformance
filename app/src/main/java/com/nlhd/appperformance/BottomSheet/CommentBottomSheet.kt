@@ -66,6 +66,7 @@ class CommentBottomSheet(
     private val videoId: String = "",
     val onChangeBottomSheet: (Int, Int, Float) -> Unit,
     val onDismiss: () -> Unit,
+    val onShow: () -> Unit,
     private val onChangeComponent: (Component)-> Unit
 ): BottomSheetDialogFragment() {
 
@@ -150,6 +151,7 @@ class CommentBottomSheet(
             )
             scrim?.setOnClickListener {
                 // Click bên ngoài bottomSheet
+                onShow()
                 behavior.state = BottomSheetBehavior.STATE_COLLAPSED
                 dismissNow()
             }
@@ -185,9 +187,9 @@ class CommentBottomSheet(
             behavior.peekHeight = height
             behavior.state = BottomSheetBehavior.STATE_EXPANDED
             behavior.skipCollapsed = true
-            //behavior.isHideable = true
-           /* behavior.significantVelocityThreshold = 50
-            behavior.hideFriction = -1f*/
+            behavior.isHideable = true
+            behavior.significantVelocityThreshold = 50
+            behavior.hideFriction = -1f
         }
         bottomSheetGeneral.doOnNextLayout {
             val width = bottomSheet.measuredWidth
@@ -213,6 +215,7 @@ class CommentBottomSheet(
         }
 
         ivClose.setOnClickListener {
+            onShow()
             behavior.state = BottomSheetBehavior.STATE_COLLAPSED
             dismissNow()
         }
@@ -326,10 +329,19 @@ class CommentBottomSheet(
     }
 
     private var lastSlideOffset = 0f
+    private var previousSlideOffset = 0f
+    private var isDraggingDown = false
+
 
     val bottomSheetCallback = object : BottomSheetBehavior.BottomSheetCallback() {
         override fun onSlide(bottomSheet: View, slideOffset: Float) {
             if (!isOnSlide) isOnSlide = true
+
+            //Bắt sự kiện nếu là như kéo xuống thật thì hiển thị actionBar
+            isDraggingDown = slideOffset < previousSlideOffset
+            previousSlideOffset = slideOffset
+
+
             lastSlideOffset = slideOffset
             val width = bottomSheet.width
             val height = bottomSheet.height
@@ -340,15 +352,28 @@ class CommentBottomSheet(
             when (newState) {
                 BottomSheetBehavior.STATE_EXPANDED -> {
                     if (isOnSlide) isOnSlide = false
+                    Log.d("AAA", "STATE_EXPANDED")
                 }
                 BottomSheetBehavior.STATE_COLLAPSED -> {
                     if (isOnSlide) isOnSlide = false
+                    Log.d("AAA", "STATE_COLLAPSED")
                 }
                 BottomSheetBehavior.STATE_SETTLING -> {
-                    
+                    Log.d("AAA", "STATE_SETTLING")
+                    if (isDraggingDown) {
+                        onShow()
+                    }
                 }
                 BottomSheetBehavior.STATE_DRAGGING -> {
+                    Log.d("AAA", "STATE_DRAGGING")
                 }
+                BottomSheetBehavior.STATE_HIDDEN -> {
+                    Log.d("AAA", "STATE_HIDDEN")
+                }
+                BottomSheetBehavior.STATE_HALF_EXPANDED -> {
+                    Log.d("AAA", "STATE_HALF_EXPANDED")
+                }
+
             }
         }
     }

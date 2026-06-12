@@ -79,6 +79,7 @@ class VideoStoreActivity : AppCompatActivity() {
 
     private var isOnPageSelected = false
     private var statusBarHeight = 0
+    private var isShow = false
     fun Int.dpToPx(): Int {
         return (this * Resources.getSystem().displayMetrics.density).toInt()
     }
@@ -194,13 +195,16 @@ class VideoStoreActivity : AppCompatActivity() {
                     }
 
                     if (offset != -1f) {
-                        toolbar.alpha = 0f
-                        bottomComment.alpha = 0f
-                        holder.binding.apply {
-                            actionColumn.alpha = 0f
-                            bottomInfo.alpha = 0f
-                            llBottomAction.alpha = 0f
+                        if (!isShow) {
+                            toolbar.alpha = 0f
+                            bottomComment.alpha = 0f
+                            holder.binding.apply {
+                                actionColumn.alpha = 0f
+                                bottomInfo.alpha = 0f
+                                llBottomAction.alpha = 0f
+                            }
                         }
+
                         window.navigationBarColor = ContextCompat.getColor(this, R.color.white)
                         window.statusBarColor = Color.BLACK
                     }
@@ -210,6 +214,19 @@ class VideoStoreActivity : AppCompatActivity() {
                 window.navigationBarColor = ContextCompat.getColor(this, R.color.black)
                 window.statusBarColor = Color.TRANSPARENT
 
+                val currentPosition = viewModel.currentPosition.value ?: 0
+                val holder = (viewPager.getChildAt(0) as RecyclerView).findViewHolderForAdapterPosition(currentPosition) as? VideoStorePagerAdapter.VideoViewHolder
+                toolbar.alpha = 1f
+                bottomComment.alpha = 1f
+                holder!!.binding.apply {
+                    actionColumn.alpha = 1f
+                    bottomInfo.alpha = 1f
+                    llBottomAction.alpha = 1f
+                }
+                isShow = false
+            },
+            onShow = {
+                isShow = true
                 val currentPosition = viewModel.currentPosition.value ?: 0
                 val holder = (viewPager.getChildAt(0) as RecyclerView).findViewHolderForAdapterPosition(currentPosition) as? VideoStorePagerAdapter.VideoViewHolder
                 toolbar.alpha = 1f

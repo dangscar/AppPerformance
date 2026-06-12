@@ -93,6 +93,8 @@ class DetailVideoFragment : Fragment() {
     private var videoCurrentId = "-1"
     private var isSuccess = false
 
+    private var isShow = false
+
 
     private lateinit var commentBottomSheet: CommentBottomSheet
 
@@ -284,13 +286,16 @@ class DetailVideoFragment : Fragment() {
                                 holder,
                                 statusBarHeight,
                                 onDoNotShow = {
-                                    toolbar.alpha = 0f
-                                    bottomComment.alpha = 0f
-                                    holder.binding.apply {
-                                        actionColumn.alpha = 0f
-                                        bottomInfo.alpha = 0f
-                                        llBottomAction.alpha = 0f
+                                    if (!isShow) {
+                                        toolbar.alpha = 0f
+                                        bottomComment.alpha = 0f
+                                        holder.binding.apply {
+                                            actionColumn.alpha = 0f
+                                            bottomInfo.alpha = 0f
+                                            llBottomAction.alpha = 0f
+                                        }
                                     }
+
                                     activity?.window?.navigationBarColor = ContextCompat.getColor(requireContext(), R.color.white)
                                     activity?.window?.statusBarColor = Color.BLACK
                                 },
@@ -309,6 +314,18 @@ class DetailVideoFragment : Fragment() {
                             }
                             activity?.window?.navigationBarColor = Color.BLACK
                             activity?.window?.statusBarColor = Color.TRANSPARENT
+                            isShow = false
+                        },
+                        onShow = {
+                            val holder = holder(viewModel.currentPosition.value ?: 0) ?: return@CommentBottomSheet
+                            isShow = true
+                            toolbar.alpha = 1f
+                            bottomComment.alpha = 1f
+                            holder.binding.apply {
+                                actionColumn.alpha = 1f
+                                bottomInfo.alpha = 1f
+                                llBottomAction.alpha = 1f
+                            }
                         },
                         onChangeComponent = {}
                     )

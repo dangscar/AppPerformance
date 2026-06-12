@@ -208,6 +208,9 @@ class FollowingFragment : Fragment() {
                     llBottomAction.alpha = 1f
                 }
             },
+            onShow = {
+
+            },
             onChangeComponent = {}
         )
 

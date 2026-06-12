@@ -119,6 +119,8 @@ class ForYouFragment(
     private var isLock = false
     private var isRefresh = true
 
+    private var isShow = false
+
     fun holder(position: Int) = (binding.viewPager.getChildAt(0) as RecyclerView).findViewHolderForAdapterPosition(position) as? VideoPagerAdapter.VideoViewHolder
     fun player(position: Int) = players[position]
     fun setPlayerView(holder: VideoPagerAdapter.VideoViewHolder, player: ExoPlayer) {
@@ -328,14 +330,20 @@ class ForYouFragment(
                                 holder,
                                 statusBarHeight,
                                 onDoNotShow = {
-                                    ivSearchOverlay.visibility = View.GONE
-                                    mainViewModel.showBarAction(false)
-                                    layoutAlpha(holder, 0f)
+                                    if (!isShow) {
+                                        ivSearchOverlay.visibility = View.GONE
+                                        mainViewModel.showBarAction(false)
+                                        layoutAlpha(holder, 0f)
+                                    }
                                     requireActivity().window.statusBarColor = ContextCompat.getColor(requireContext(), R.color.black)
                                     requireActivity().window.navigationBarColor = ContextCompat.getColor(requireContext(), R.color.white)
+
                                 },
                                 onShowSearchIcon = {
-                                    ivSearchOverlay.visibility = View.VISIBLE
+                                    if (!isShow) {
+                                        ivSearchOverlay.visibility = View.VISIBLE
+                                    }
+
                                 }
                             )
                         },
@@ -354,7 +362,21 @@ class ForYouFragment(
                             layoutAlpha(holder, 1f)
 
                             isClickBottomSheetComment = false
+                            isShow = false
+                        },
+                        onShow = {
+                            //Dismiss bottomSheet
+                            isShow = true
 
+                            ivSearchOverlay.visibility = View.GONE
+
+                            val currentPosition = viewModel.currentPosition.value ?: 0
+                            val holder = holder(currentPosition)
+                            mainViewModel.showBarAction(true)
+                            if (holder == null) return@CommentBottomSheet
+                            layoutAlpha(holder, 1f)
+
+                            isClickBottomSheetComment = false
                         },
                         onChangeComponent = {
                             //Update commentCount
@@ -409,6 +431,10 @@ class ForYouFragment(
                 }
             }
         )
+
+        binding.ivSearchOverlay.setOnClickListener {
+            Log.d("AAA", "Search")
+        }
 
 
         //Nếu đang ở trạng thái nằm dọc
