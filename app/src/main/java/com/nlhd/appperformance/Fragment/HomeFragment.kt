@@ -7,6 +7,7 @@ import android.content.res.Configuration
 import android.content.res.Resources
 import android.graphics.Color
 import android.graphics.Typeface
+import android.graphics.drawable.GradientDrawable
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
@@ -50,6 +51,7 @@ class HomeFragment: Fragment(R.layout.fragment_home) {
     private lateinit var fontSemiBold: Typeface
     private lateinit var iv_search: ImageView
     private lateinit var iv_refresh: ImageView
+    private lateinit var iv_next: ImageView
     private val mainViewModel: MainViewModel by activityViewModels()
 
     private lateinit var homePagerAdapter: HomePagerAdapter
@@ -67,6 +69,7 @@ class HomeFragment: Fragment(R.layout.fragment_home) {
     }
 
     private fun updateTabColor(tabLayout: TabLayout, selectedPos: Int) {
+        val drawable = iv_next.background as GradientDrawable
         for (i in 0 until tabLayout.tabCount) {
             val tab = tabLayout.getTabAt(i) ?: continue
             val tv = tab.customView as? TextView ?: continue
@@ -74,25 +77,50 @@ class HomeFragment: Fragment(R.layout.fragment_home) {
                 tv.setTextColor(Color.BLACK)
                 iv_refresh.imageTintList = ColorStateList.valueOf(Color.BLACK)
                 iv_search.imageTintList = ColorStateList.valueOf(Color.BLACK)
+                iv_next.imageTintList = ColorStateList.valueOf(Color.BLACK)
+                drawable.setStroke(
+                    2.dpToPx(),
+                    Color.BLACK
+                )
             } else if (i == tabLayout.tabCount - 1 && selectedPos != tabLayout.tabCount - 1 && selectedPos != tabLayout.tabCount-3) {
                 tv.setTextColor(Color.BLACK)
                 iv_refresh.imageTintList = ColorStateList.valueOf(Color.BLACK)
                 iv_search.imageTintList = ColorStateList.valueOf(Color.BLACK)
+                iv_next.imageTintList = ColorStateList.valueOf(Color.BLACK)
+                drawable.setStroke(
+                    2.dpToPx(),
+                    Color.BLACK
+                )
             }
             else {
                 tv.setTextColor("#B3FFFFFF".toColorInt())
                 iv_refresh.imageTintList = ColorStateList.valueOf(Color.WHITE)
                 iv_search.imageTintList = ColorStateList.valueOf(Color.WHITE)
+                iv_next.imageTintList = ColorStateList.valueOf(Color.WHITE)
+                drawable.setStroke(
+                    2.dpToPx(),
+                    Color.WHITE
+                )
             }
             if (i == tabLayout.tabCount-3 && (selectedPos == tabLayout.tabCount-3)) {
                 tv.setTextColor(Color.WHITE)
                 iv_refresh.imageTintList = ColorStateList.valueOf(Color.WHITE)
                 iv_search.imageTintList = ColorStateList.valueOf(Color.WHITE)
+                iv_next.imageTintList = ColorStateList.valueOf(Color.WHITE)
+                drawable.setStroke(
+                    2.dpToPx(),
+                    Color.WHITE
+                )
             }
             if (i == tabLayout.tabCount-1 && (selectedPos == tabLayout.tabCount-1)) {
                 tv.setTextColor(Color.WHITE)
                 iv_refresh.imageTintList = ColorStateList.valueOf(Color.WHITE)
                 iv_search.imageTintList = ColorStateList.valueOf(Color.WHITE)
+                iv_next.imageTintList = ColorStateList.valueOf(Color.WHITE)
+                drawable.setStroke(
+                    2.dpToPx(),
+                    Color.WHITE
+                )
             }
 
         }
@@ -114,6 +142,7 @@ class HomeFragment: Fragment(R.layout.fragment_home) {
         fontSemiBold = ResourcesCompat.getFont(requireContext(), R.font.tiktoksans_semibold)!!
         iv_search = view.findViewById(R.id.ivSearch)
         iv_refresh = view.findViewById(R.id.ivRefresh)
+        iv_next = view.findViewById(R.id.ivNext)
 
         // Fix Nested ViewPager2 Scrolling
         val recyclerView = viewPager.getChildAt(0) as RecyclerView
@@ -212,10 +241,7 @@ class HomeFragment: Fragment(R.layout.fragment_home) {
                 val tabStrip = tabLayout.getChildAt(0) as ViewGroup
                 for (i in 0 until tabStrip.childCount) {
                     val tabView = tabStrip.getChildAt(i)
-                    val startPadding = if (i == 0) 22 else 1
-                    val endPadding = if (i == tabStrip.childCount - 1) 22 else 1
                     tabView.minimumWidth = 0
-                    //tabView.setPadding(startPadding, 0, endPadding, 0)
                 }
                 updateTabColor(tabLayout, tab.position)
 
@@ -253,7 +279,7 @@ class HomeFragment: Fragment(R.layout.fragment_home) {
             ) {
                 super.onPageScrolled(position, positionOffset, positionOffsetPixels)
 
-                val blendedColor = when {
+                /*val blendedColor = when {
                     position == 3 && positionOffset > 0.5f -> {
                         updateTabColor(tabLayout, position+1)
                         Color.BLACK
@@ -271,9 +297,42 @@ class HomeFragment: Fragment(R.layout.fragment_home) {
                     else -> {
                         Color.BLACK
                     }
+                }*/
+                val blendColor = when {
+                    position == 4 -> {
+                        updateTabColor(tabLayout, position)
+                        Color.BLACK
+                    }
+                    position == 3 && positionOffset >= 0.5f -> {
+                        updateTabColor(tabLayout, position+1)
+                        Color.BLACK
+                    }
+                    position == 3 && positionOffset < 0.5f -> {
+                        updateTabColor(tabLayout, position)
+                        Color.WHITE
+                    }
+                    position == 2 && positionOffset >= 0.5f -> {
+                        updateTabColor(tabLayout, position+1)
+                        Color.WHITE
+                    }
+                    position == 2 && positionOffset < 0.5f -> {
+                        updateTabColor(tabLayout, position)
+                        Color.BLACK
+                    }
+                    position == 1 && positionOffset >= 0.5f -> {
+                        updateTabColor(tabLayout, position+1)
+                        Color.BLACK
+                    }
+                    position == 1 && positionOffset < 0.5f -> {
+                        updateTabColor(tabLayout, position)
+                        Color.WHITE
+                    }
+                    else -> {
+                        updateTabColor(tabLayout, position)
+                        Color.WHITE
+                    }
                 }
-
-                mainViewModel.setColorBottomNav(blendedColor)
+                mainViewModel.setColorBottomNav(blendColor)
             }
         })
 
@@ -293,6 +352,15 @@ class HomeFragment: Fragment(R.layout.fragment_home) {
             topBar.visibility = if (it && !isLandscape) View.VISIBLE else View.GONE
         }
 
+        tabLayout.viewTreeObserver.addOnScrollChangedListener {
+            checkLastTabVisible()
+        }
+
+        iv_next.setOnClickListener {
+            tabLayout.post {
+                tabLayout.fullScroll(View.FOCUS_RIGHT)
+            }
+        }
 
     }
 
@@ -331,4 +399,45 @@ class HomeFragment: Fragment(R.layout.fragment_home) {
         mainViewModel.setNavigation(Navigation.Home)
     }
 
+    private var isNextVisible = true
+
+    private fun checkLastTabVisible() {
+        val tabStrip = tabLayout.getChildAt(0) as? ViewGroup ?: return
+        val lastTab = tabStrip.getChildAt(tabStrip.childCount - 1) ?: return
+
+        val visible =
+            lastTab.right > tabLayout.scrollX &&
+                    lastTab.left < tabLayout.scrollX + tabLayout.width
+
+        if (visible && isNextVisible) {
+            isNextVisible = false
+
+            iv_next.animate()
+                .alpha(0f)
+                .translationX(20f)
+                .setDuration(100)
+                .withEndAction {
+                    iv_next.visibility = View.GONE
+                }
+                .start()
+
+        } else if (!visible && !isNextVisible) {
+            isNextVisible = true
+
+            iv_next.apply {
+                visibility = View.VISIBLE
+                alpha = 0f
+                translationX = 20f
+            }
+
+            iv_next.animate()
+                .alpha(1f)
+                .translationX(0f)
+                .setDuration(100)
+                .start()
+        }
+    }
+
 }
+
+
