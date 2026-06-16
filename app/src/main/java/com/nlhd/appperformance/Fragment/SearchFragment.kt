@@ -32,9 +32,9 @@ class SearchFragment : Fragment() {
 
     private fun setupRecentSearch() {
         val recentItems = listOf(
-            RecentSearchItem("chao vlog meme"),
-            RecentSearchItem("triệt râu quai nón"),
-            RecentSearchItem("himass bắn giải")
+            RecentSearchItem("aura"),
+            RecentSearchItem("edit"),
+            RecentSearchItem("nội dung hay")
         )
         binding.rvRecentSearch.apply {
             layoutManager = LinearLayoutManager(requireContext())
@@ -44,11 +44,11 @@ class SearchFragment : Fragment() {
 
     private fun setupYouMightLike() {
         val suggestions = listOf(
-            SearchSuggestionItem("cao thủ liên quân official", R.drawable.asus),
-            SearchSuggestionItem("duy nến", R.drawable.asus),
-            SearchSuggestionItem("Meme Sang Vlog", R.drawable.asus, isHighlighted = false),
-            SearchSuggestionItem("Râu Quai Nón", R.drawable.asus, isHighlighted = false),
-            SearchSuggestionItem("vlog một ngày đi học của chao", R.drawable.asus, isHighlighted = false)
+            SearchSuggestionItem("official", R.drawable.asus),
+            SearchSuggestionItem("Dangkt", R.drawable.asus),
+            SearchSuggestionItem("Vlog", R.drawable.asus, isHighlighted = false),
+            SearchSuggestionItem("Hướng dẫn làm video", R.drawable.asus, isHighlighted = false),
+            SearchSuggestionItem("Hài lòng", R.drawable.asus, isHighlighted = false)
         )
         binding.rvYouMightLike.apply {
             layoutManager = LinearLayoutManager(requireContext())
@@ -59,11 +59,11 @@ class SearchFragment : Fragment() {
     private fun setupTrending() {
         val trendingItems = listOf(
             SearchTrendingItem("Doraemon đến Việt Nam", isHot = true),
-            SearchTrendingItem("tiểu tam bóng ma hạnh phúc", isHot = true),
-            SearchTrendingItem("Anh Trai Say Hi Concert Day 9", isHot = true),
-            SearchTrendingItem("Đâu Có Ai Nhìn HIEUTHUHAI"),
+            SearchTrendingItem("phim", isHot = true),
+            SearchTrendingItem("oke ", isHot = true),
+            SearchTrendingItem("đời sống"),
             SearchTrendingItem("bị cáo xét xử"),
-            SearchTrendingItem("Bài Hát Bất Khổ Nguyệt Lân Ỷ Kỳ")
+            SearchTrendingItem("Bài Hát")
         )
         binding.rvTrending.apply {
             layoutManager = LinearLayoutManager(requireContext())

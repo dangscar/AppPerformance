@@ -334,9 +334,10 @@ class ForYouFragment(
                                         ivSearchOverlay.visibility = View.GONE
                                         mainViewModel.showBarAction(false)
                                         layoutAlpha(holder, 0f)
+                                        requireActivity().window.navigationBarColor = ContextCompat.getColor(requireContext(), R.color.white)
                                     }
                                     requireActivity().window.statusBarColor = ContextCompat.getColor(requireContext(), R.color.black)
-                                    requireActivity().window.navigationBarColor = ContextCompat.getColor(requireContext(), R.color.white)
+
 
                                 },
                                 onShowSearchIcon = {
@@ -377,6 +378,7 @@ class ForYouFragment(
                             layoutAlpha(holder, 1f)
 
                             isClickBottomSheetComment = false
+                            requireActivity().window.navigationBarColor = Color.TRANSPARENT
                         },
                         onChangeComponent = {
                             //Update commentCount

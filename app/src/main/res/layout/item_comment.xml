@@ -106,7 +106,8 @@
             android:maxLines="1"
             android:ellipsize="end"
             android:fontFamily="@font/tiktoksans_semibold"
-            android:layout_marginVertical="12dp"/>
+            android:layout_marginVertical="12dp"
+            android:visibility="gone"/>
 
     </LinearLayout>
 

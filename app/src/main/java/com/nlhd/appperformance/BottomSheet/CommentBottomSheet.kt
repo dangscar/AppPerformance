@@ -23,9 +23,11 @@ import android.widget.EditText
 import android.widget.FrameLayout
 import android.widget.ImageView
 import android.widget.LinearLayout
+import android.widget.OverScroller
 import android.widget.TextView
 import androidx.cardview.widget.CardView
 import androidx.core.content.ContextCompat
+import androidx.core.view.doOnLayout
 import androidx.core.view.doOnNextLayout
 import androidx.fragment.app.viewModels
 import androidx.interpolator.view.animation.FastOutLinearInInterpolator
@@ -145,6 +147,14 @@ class CommentBottomSheet(
             behavior.state = BottomSheetBehavior.STATE_EXPANDED
             behavior.addBottomSheetCallback(bottomSheetCallback)
 
+            val field = BottomSheetBehavior::class.java.getDeclaredField("viewDragHelper")
+            field.isAccessible = true
+            val dragHelper = field.get(behavior)
+
+            val animDurationField = dragHelper.javaClass.getDeclaredField("BASE_SETTLE_DURATION")
+            animDurationField.isAccessible = true
+            animDurationField.setInt(dragHelper, 7800)
+
             // Lấy view scrim (vùng tối bên ngoài)
             val scrim = dialog.window?.decorView?.findViewById<View>(
                 com.google.android.material.R.id.touch_outside
@@ -188,8 +198,9 @@ class CommentBottomSheet(
             behavior.state = BottomSheetBehavior.STATE_EXPANDED
             behavior.skipCollapsed = true
             behavior.isHideable = true
-            behavior.significantVelocityThreshold = 50
-            behavior.hideFriction = -1f
+            /*behavior.significantVelocityThreshold = 50
+            behavior.hideFriction = -1f*/
+
         }
         bottomSheetGeneral.doOnNextLayout {
             val width = bottomSheet.measuredWidth
@@ -205,6 +216,35 @@ class CommentBottomSheet(
             }
         }
 
+        view.doOnLayout {
+            try {
+                val bottomSheet = dialog?.findViewById<View>(
+                    com.google.android.material.R.id.design_bottom_sheet
+                ) ?: return@doOnLayout
+
+                val behavior = BottomSheetBehavior.from(bottomSheet)
+
+                val dragHelperField = BottomSheetBehavior::class.java.getDeclaredField("viewDragHelper")
+                dragHelperField.isAccessible = true
+                val dragHelper = dragHelperField.get(behavior) ?: return@doOnLayout
+
+                // Lấy mScroller và replace bằng custom OverScroller
+                val scrollerField = dragHelper.javaClass.getDeclaredField("mScroller")
+                scrollerField.isAccessible = true
+
+                // Custom OverScroller với duration nhân đôi
+                val customScroller = object : OverScroller(requireContext()) {
+                    override fun startScroll(startX: Int, startY: Int, dx: Int, dy: Int, duration: Int) {
+                        super.startScroll(startX, startY, dx, dy, (duration/2.2f).toInt()) // *4 = chậm hơn 4 lần
+                    }
+                }
+
+                scrollerField.set(dragHelper, customScroller)
+
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
+        }
 
         bottomBar.setOnClickListener {
             bottomSheetInputComment()

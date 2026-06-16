@@ -7,9 +7,9 @@ data class Comment(
     val user: User,
     val userId: Int,
     val videoId: Int,
-    val replies: List<Reply>? = listOf(
+    val replies: List<Reply>? = emptyList<Reply>() /*listOf(
         Reply(id = 1, commentId = 1,content = "Reply 1", user = User(id = 1, name = "User 1", avatarUrl = "")),
         Reply(id = 1, commentId = 1,content = "Hay qua, hay quá quá quá, \n jdd", user = User(id = 1, name = "User 1", avatarUrl = ""))
-    ),
+    )*/,
     var isExpanded: Boolean? = false
 )

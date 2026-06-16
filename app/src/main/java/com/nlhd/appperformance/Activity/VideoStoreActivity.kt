@@ -203,9 +203,10 @@ class VideoStoreActivity : AppCompatActivity() {
                                 bottomInfo.alpha = 0f
                                 llBottomAction.alpha = 0f
                             }
+                            window.navigationBarColor = ContextCompat.getColor(this, R.color.white)
                         }
 
-                        window.navigationBarColor = ContextCompat.getColor(this, R.color.white)
+
                         window.statusBarColor = Color.BLACK
                     }
                 }
@@ -236,6 +237,7 @@ class VideoStoreActivity : AppCompatActivity() {
                     bottomInfo.alpha = 1f
                     llBottomAction.alpha = 1f
                 }
+                window.navigationBarColor = Color.TRANSPARENT
             },
             onChangeComponent = {}
         )

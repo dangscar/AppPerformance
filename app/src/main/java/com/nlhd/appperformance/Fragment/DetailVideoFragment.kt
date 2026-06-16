@@ -294,9 +294,10 @@ class DetailVideoFragment : Fragment() {
                                             bottomInfo.alpha = 0f
                                             llBottomAction.alpha = 0f
                                         }
+                                        activity?.window?.navigationBarColor = ContextCompat.getColor(requireContext(), R.color.white)
                                     }
 
-                                    activity?.window?.navigationBarColor = ContextCompat.getColor(requireContext(), R.color.white)
+
                                     activity?.window?.statusBarColor = Color.BLACK
                                 },
                                 onShowSearchIcon = {}
@@ -326,6 +327,7 @@ class DetailVideoFragment : Fragment() {
                                 bottomInfo.alpha = 1f
                                 llBottomAction.alpha = 1f
                             }
+                            requireActivity().window.navigationBarColor = Color.TRANSPARENT
                         },
                         onChangeComponent = {}
                     )
